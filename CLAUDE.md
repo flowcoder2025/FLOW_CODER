@@ -99,6 +99,10 @@ Note: The development server is configured to automatically open in the browser 
 │   └── guidelines/                 # 디자인 시스템 문서
 │       ├── CLAUDE.md               # 📘 디자인 문서화 규칙
 │       └── Guidelines.md           # 디자인 가이드라인 (템플릿)
+├── docs/                           # 프로젝트 문서
+│   ├── CLAUDE.md                   # 📘 문서 관리 가이드
+│   ├── PRD.md                      # 제품 요구사항 문서
+│   └── TASKS.md                    # 구현 Task 목록 (13주 로드맵)
 ├── node_modules/                   # npm 패키지 (git 제외)
 └── build/                          # 빌드 산출물 (git 제외)
 ```
@@ -178,6 +182,23 @@ Note: The development server is configured to automatically open in the browser 
 
 ### 테마 시스템
 `:root`/`.dark` 에 CSS 변수 정의 | `var(--background)`, `var(--primary)` 등 사용 | ❌ 색상 하드코딩 금지
+
+## Task 기반 개발 워크플로우 🔴
+
+특별한 요구사항이 없으면 `docs/TASKS.md` 기준으로 순차 개발 (P0 → P1 → P2)
+
+### 강제 규칙 (각 Task 완료 시 필수)
+
+1. **체크박스 업데이트**: `docs/TASKS.md`의 `[ ]` → `[x]` 표시
+2. **E2E 테스트**: Playwright MCP로 UI 검증 (백엔드만 수정 시 스킵 가능)
+3. **검증 후 Commit**:
+   ```bash
+   npx tsc --noEmit    # 타입 체크
+   npm run build       # 빌드 테스트
+   git commit          # 커밋 (🚨 push 금지)
+   ```
+
+**체크리스트**: ✅ Task 구현 → ✅ 체크박스 [x] → ✅ E2E 테스트 → ✅ 타입/빌드 → ✅ Commit (push 제외)
 
 ## Figma Export Considerations
 
