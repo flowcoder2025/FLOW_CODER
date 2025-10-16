@@ -65,10 +65,10 @@
 ### Week 1: 프로젝트 초기화
 
 #### Task 1.1: Next.js 프로젝트 생성
-- [ ] Next.js 14 프로젝트 생성 (`create-next-app`)
-- [ ] App Router 구조 확인
-- [ ] TypeScript 설정 (`tsconfig.json`)
-- [ ] `.gitignore` 설정
+- [x] Next.js 14 프로젝트 생성 (`create-next-app`)
+- [x] App Router 구조 확인
+- [x] TypeScript 설정 (`tsconfig.json`)
+- [x] `.gitignore` 설정
 
 **명령어:**
 ```bash
@@ -89,10 +89,10 @@ npx create-next-app@latest vibe-coding-community \
 ---
 
 #### Task 1.2: Tailwind CSS 설정
-- [ ] Tailwind CSS v4 설치 확인
-- [ ] 기존 `src/index.css`에서 CSS 변수 이전
-- [ ] `app/globals.css` 생성 및 테마 변수 설정
-- [ ] 다크 모드 설정 (`:root`, `.dark`)
+- [x] Tailwind CSS v4 설치 확인
+- [x] 기존 `src/index.css`에서 CSS 변수 이전
+- [x] `app/globals.css` 생성 및 테마 변수 설정
+- [x] 다크 모드 설정 (`:root`, `.dark`)
 
 **CSS 변수 예시:**
 ```css
@@ -124,9 +124,9 @@ npx create-next-app@latest vibe-coding-community \
 ---
 
 #### Task 1.3: shadcn/ui 설치
-- [ ] shadcn/ui CLI 설치
-- [ ] `components.json` 설정
-- [ ] 기본 컴포넌트 추가 (Button, Card, Badge, Avatar 등)
+- [x] shadcn/ui CLI 설치
+- [x] `components.json` 설정
+- [x] 기본 컴포넌트 추가 (Button, Card, Badge, Avatar 등)
 
 **명령어:**
 ```bash
@@ -141,10 +141,10 @@ npx shadcn-ui@latest add button card badge avatar input textarea
 ---
 
 #### Task 1.4: Prisma 설정
-- [ ] Prisma 설치 (`prisma`, `@prisma/client`)
-- [ ] `prisma/schema.prisma` 초기화
-- [ ] PostgreSQL 연결 설정 (`.env`)
-- [ ] Prisma Client 생성
+- [x] Prisma 설치 (`prisma`, `@prisma/client`)
+- [x] `prisma/schema.prisma` 초기화
+- [x] PostgreSQL 연결 설정 (`.env`)
+- [x] Prisma Client 생성
 
 **명령어:**
 ```bash
@@ -164,9 +164,9 @@ DATABASE_URL="postgresql://user:password@localhost:5432/vibe_coding"
 ---
 
 #### Task 1.5: Git 리포지토리 설정
-- [ ] Git 초기화
-- [ ] `.gitignore` 확인 (`node_modules`, `.env`, `.next` 포함)
-- [ ] 첫 번째 커밋
+- [x] Git 초기화
+- [x] `.gitignore` 확인 (`node_modules`, `.env`, `.next` 포함)
+- [x] 첫 번째 커밋
 
 **명령어:**
 ```bash
