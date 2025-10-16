@@ -1,6 +1,6 @@
 # 바이브코딩 커뮤니티 플랫폼 구현 Task 목록
 
-**문서 버전**: 1.0
+**문서 버전**: 1.1
 **작성일**: 2025-10-15
 **기준 문서**: [PRD.md](./PRD.md)
 **프로젝트**: Vibe Coding Community Platform
@@ -38,14 +38,13 @@
 **새로운 페이지 구조:**
 - 🏠 **홈페이지**: 기존 섹션 유지 + 개선
 - 💬 **커뮤니티**: 레딧 스타일 (자유게시판, 팁, 작품 공유, 이벤트)
-- 🎨 **프로젝트 소개**: 바이브코딩 프로젝트 쇼케이스
 - ❓ **Help me**: Q&A 게시판
 - 📰 **뉴스**: 공식 업데이트 & 튜토리얼
 
 ### 1.2 작업 범위
 
-**총 기간**: 13주 (3개월)
-**Phase**: 4단계 (기반 → 커뮤니티 → 프로젝트/Q&A → 고도화)
+**총 기간**: 12주 (3개월)
+**Phase**: 4단계 (기반 → 커뮤니티 → Q&A/뉴스 → 고도화)
 **우선순위**: P0 (필수) → P1 (중요) → P2 (향후)
 
 ### 1.3 기술 스택 전환
@@ -798,64 +797,11 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-## Phase 3: 프로젝트 & Q&A (3주)
+## Phase 3: Q&A & 뉴스 (2주)
 
-### Week 9: 프로젝트 쇼케이스
+### Week 9: Help me (Q&A)
 
-#### Task 9.1: 프로젝트 목록 페이지
-- [ ] `app/projects/page.tsx`
-- [ ] 프로젝트 카드 그리드 (3열)
-- [ ] 필터: 기술 스택별
-- [ ] 정렬: 인기순, 최신순
-- [ ] 무한 스크롤
-
-**산출물:**
-- `app/projects/page.tsx`
-- `components/ProjectCard.tsx`
-
----
-
-#### Task 9.2: 프로젝트 상세 페이지
-- [ ] `app/projects/[id]/page.tsx`
-- [ ] 큰 썸네일 이미지
-- [ ] 프로젝트 설명 (Rich Text)
-- [ ] 기술 스택 태그
-- [ ] 라이브 데모 링크, GitHub 링크
-- [ ] 스크린샷 갤러리 (Carousel)
-- [ ] 댓글 섹션
-
-**산출물:**
-- `app/projects/[id]/page.tsx`
-
----
-
-#### Task 9.3: 프로젝트 등록 페이지
-- [ ] `app/projects/new/page.tsx`
-- [ ] 제목, 설명 입력
-- [ ] 썸네일 업로드
-- [ ] 기술 스택 선택 (Multi-select)
-- [ ] 라이브 데모 URL, GitHub URL
-- [ ] 추가 이미지 업로드 (최대 5개)
-
-**산출물:**
-- `app/projects/new/page.tsx`
-
----
-
-#### Task 9.4: 좋아요 기능
-- [ ] `app/api/projects/[id]/like/route.ts`
-- [ ] 좋아요 버튼 (`components/LikeButton.tsx`)
-- [ ] Optimistic UI 업데이트
-
-**산출물:**
-- API Route
-- `components/LikeButton.tsx`
-
----
-
-### Week 10: Help me (Q&A)
-
-#### Task 10.1: 질문 목록 페이지
+#### Task 9.1: 질문 목록 페이지
 - [ ] `app/help/page.tsx`
 - [ ] 질문 카드 (투표 수, 답변 수, 채택 여부 표시)
 - [ ] 필터: 답변 없는 질문, 채택된 질문
@@ -867,7 +813,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 10.2: 질문 상세 페이지
+#### Task 9.2: 질문 상세 페이지
 - [ ] `app/help/[questionId]/page.tsx`
 - [ ] 질문 본문 (코드 블록 지원)
 - [ ] 답변 목록 (채택된 답변 상단)
@@ -878,7 +824,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 10.3: 답변 시스템 API
+#### Task 9.3: 답변 시스템 API
 - [ ] `app/api/questions/[id]/answers/route.ts` (GET, POST)
 - [ ] `app/api/questions/[id]/answers/[answerId]/accept/route.ts` (POST)
 
@@ -887,7 +833,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 10.4: 답변 채택 기능
+#### Task 9.4: 답변 채택 기능
 - [ ] 질문 작성자만 채택 가능 (권한 체크)
 - [ ] 채택 버튼 (`components/AcceptAnswerButton.tsx`)
 - [ ] 채택 시 작성자 reputation +10
@@ -897,7 +843,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 10.5: 질문 작성 페이지
+#### Task 9.5: 질문 작성 페이지
 - [ ] `app/help/new/page.tsx`
 - [ ] 제목 (최소 15자, 질문형)
 - [ ] 본문 (코드 블록 지원)
@@ -908,9 +854,9 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-### Week 11: 뉴스
+### Week 10: 뉴스
 
-#### Task 11.1: 뉴스 목록 페이지
+#### Task 10.1: 뉴스 목록 페이지
 - [ ] `app/news/page.tsx`
 - [ ] 타임라인 형식
 - [ ] 카테고리 필터 (업데이트, 이벤트, 튜토리얼, 공지)
@@ -922,7 +868,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 11.2: 뉴스 상세 페이지
+#### Task 10.2: 뉴스 상세 페이지
 - [ ] `app/news/[id]/page.tsx`
 - [ ] 커버 이미지
 - [ ] 본문 (Rich Text)
@@ -933,7 +879,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 11.3: 뉴스 작성 (관리자 전용)
+#### Task 10.3: 뉴스 작성 (관리자 전용)
 - [ ] `app/news/new/page.tsx`
 - [ ] 관리자만 접근 가능 (middleware)
 - [ ] 제목, 본문, 카테고리, 커버 이미지
@@ -945,9 +891,9 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ## Phase 4: 고도화 & 배포 (2주)
 
-### Week 12: 최적화
+### Week 11: 최적화
 
-#### Task 12.1: 성능 최적화
+#### Task 11.1: 성능 최적화
 - [ ] Lighthouse 점수 측정 (목표: 90+)
 - [ ] Image Optimization (Next.js `<Image />` 확인)
 - [ ] 코드 스플리팅 (Dynamic Import)
@@ -958,7 +904,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 12.2: SEO 최적화
+#### Task 11.2: SEO 최적화
 - [ ] 메타 태그 추가 (title, description, keywords)
 - [ ] Open Graph 이미지 설정
 - [ ] Structured Data (JSON-LD)
@@ -971,7 +917,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 12.3: 접근성 (a11y) 테스트
+#### Task 11.3: 접근성 (a11y) 테스트
 - [ ] Axe DevTools 검사
 - [ ] 키보드 네비게이션 테스트
 - [ ] 스크린 리더 테스트
@@ -982,9 +928,9 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-### Week 13: QA & 배포
+### Week 12: QA & 배포
 
-#### Task 13.1: 버그 수정
+#### Task 12.1: 버그 수정
 - [ ] 버그 리스트 작성
 - [ ] 우선순위별 수정
 
@@ -993,7 +939,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 13.2: 모바일 반응형 테스트
+#### Task 12.2: 모바일 반응형 테스트
 - [ ] iPhone, Android 테스트
 - [ ] 태블릿 테스트
 - [ ] 다양한 화면 크기 확인
@@ -1003,7 +949,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 13.3: Vercel 배포
+#### Task 12.3: Vercel 배포
 - [ ] Vercel 계정 연결
 - [ ] GitHub 리포지토리 연결
 - [ ] 환경 변수 설정 (`.env` → Vercel Environment Variables)
@@ -1017,7 +963,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 13.4: 도메인 연결
+#### Task 12.4: 도메인 연결
 - [ ] 도메인 구매 (예: vibecoding.com)
 - [ ] Vercel에 커스텀 도메인 연결
 - [ ] SSL 인증서 자동 설정 확인
@@ -1027,7 +973,7 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 13.5: 모니터링 설정
+#### Task 12.5: 모니터링 설정
 - [ ] Sentry 설치 (에러 트래킹)
 - [ ] Vercel Analytics 활성화
 - [ ] Google Analytics 연동 (선택)
@@ -1055,14 +1001,13 @@ npx @sentry/wizard@latest -i nextjs
 - [ ] 댓글 기능
 - [ ] 투표 시스템
 
-### P1 (중요, 7-11주)
-- [ ] 프로젝트 쇼케이스
+### P1 (중요, 7-10주)
 - [ ] Q&A 시스템 (Help me)
 - [ ] 답변 채택 기능
 - [ ] 검색 기능
 - [ ] 뉴스 페이지
 
-### P2 (향후, 12주+)
+### P2 (향후, 11주+)
 - [ ] 실시간 알림 (WebSocket)
 - [ ] 관리자 대시보드
 - [ ] 고급 검색 (Algolia)
@@ -1078,26 +1023,22 @@ npx @sentry/wizard@latest -i nextjs
     ├─> 게시글 작성 (Week 6)
     ├─> 댓글 작성 (Week 7)
     ├─> 투표 (Week 7)
-    ├─> 프로젝트 등록 (Week 9)
-    └─> 질문 작성 (Week 10)
+    └─> 질문 작성 (Week 9)
 
 Prisma 스키마 (Week 4)
     ├─> 모든 API Routes
     ├─> 게시글 목록 (Week 5)
     ├─> 게시글 상세 (Week 6)
-    ├─> 프로젝트 목록 (Week 9)
-    └─> 질문 목록 (Week 10)
+    └─> 질문 목록 (Week 9)
 
 Tiptap 에디터 (Week 6)
     ├─> 게시글 작성 (Week 6)
-    ├─> 프로젝트 설명 (Week 9)
-    ├─> 질문 작성 (Week 10)
-    └─> 뉴스 작성 (Week 11)
+    ├─> 질문 작성 (Week 9)
+    └─> 뉴스 작성 (Week 10)
 
 이미지 업로드 (Week 6)
     ├─> 게시글 이미지 (Week 6)
-    ├─> 프로젝트 썸네일 (Week 9)
-    └─> 뉴스 커버 이미지 (Week 11)
+    └─> 뉴스 커버 이미지 (Week 10)
 ```
 
 ---
@@ -1124,18 +1065,17 @@ Tiptap 에디터 (Week 6)
 
 ---
 
-### Phase 3: 프로젝트 & Q&A (3주)
-- [ ] Week 9: 프로젝트 쇼케이스 (4개 Task)
-- [ ] Week 10: Help me (Q&A) (5개 Task)
-- [ ] Week 11: 뉴스 (3개 Task)
+### Phase 3: Q&A & 뉴스 (2주)
+- [ ] Week 9: Help me (Q&A) (5개 Task)
+- [ ] Week 10: 뉴스 (3개 Task)
 
-**완료율**: 0/12 Tasks
+**완료율**: 0/8 Tasks
 
 ---
 
 ### Phase 4: 고도화 & 배포 (2주)
-- [ ] Week 12: 최적화 (3개 Task)
-- [ ] Week 13: QA & 배포 (5개 Task)
+- [ ] Week 11: 최적화 (3개 Task)
+- [ ] Week 12: QA & 배포 (5개 Task)
 
 **완료율**: 0/8 Tasks
 
@@ -1143,7 +1083,7 @@ Tiptap 에디터 (Week 6)
 
 ## 전체 진행 상황
 
-**총 Tasks**: 58개
+**총 Tasks**: 54개
 **완료**: 0개
 **진행률**: 0%
 
@@ -1165,6 +1105,7 @@ Tiptap 에디터 (Week 6)
 | 버전 | 날짜 | 변경 사항 |
 |------|------|-----------|
 | 1.0 | 2025-10-15 | 초기 Task 문서 작성 |
+| 1.1 | 2025-10-16 | 프로젝트 쇼케이스 Task 제거, 전체 Task 58→54개로 조정, 기간 13주→12주로 단축 |
 
 ---
 

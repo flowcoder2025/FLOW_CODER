@@ -1,6 +1,6 @@
 # 바이브코딩 커뮤니티 플랫폼 PRD (Product Requirements Document)
 
-**문서 버전**: 1.0
+**문서 버전**: 1.1
 **작성일**: 2025-10-15
 **프로젝트명**: Vibe Coding Community Platform
 
@@ -32,7 +32,6 @@
 
 - 바이브코딩 사용자 간 지식 공유 및 협업 활성화
 - 레딧 스타일의 직관적이고 참여하기 쉬운 커뮤니티 경험 제공
-- 프로젝트 쇼케이스를 통한 포트폴리오 구축 지원
 - Q&A 시스템을 통한 즉각적인 문제 해결 지원
 - 바이브코딩 생태계 관련 최신 정보 전달
 
@@ -48,7 +47,6 @@
 - 월간 활성 사용자(MAU) 목표: 1,000명 (6개월 내)
 - 일평균 게시글: 20개 이상
 - 질문 평균 응답 시간: 24시간 이내
-- 프로젝트 등록: 월 50개 이상
 
 ---
 
@@ -190,10 +188,6 @@ app/
 │       ├── page.tsx        # 카테고리별 게시글 목록
 │       └── [postId]/
 │           └── page.tsx    # 게시글 상세
-├── projects/
-│   ├── page.tsx            # 프로젝트 목록 (/projects)
-│   └── [id]/
-│       └── page.tsx        # 프로젝트 상세
 ├── help/
 │   ├── page.tsx            # 질문 목록 (/help)
 │   └── [questionId]/
@@ -265,8 +259,6 @@ app/
 │   ├── /community/showcase (작품 공유)
 │   ├── /community/events (이벤트 & 공지)
 │   └── /community/[category]/[postId] (게시글 상세)
-├── /projects (프로젝트 소개)
-│   └── /projects/[id] (프로젝트 상세)
 ├── /help (Help me - Q&A)
 │   └── /help/[questionId] (질문 상세)
 ├── /news (바이브코딩 뉴스)
@@ -302,7 +294,7 @@ app/
 |------|------|------|
 | `/community/general` | `app/community/[category]/page.tsx` | 카테고리별 게시글 목록 |
 | `/community/tips/123` | `app/community/[category]/[postId]/page.tsx` | 게시글 상세 |
-| `/projects/456` | `app/projects/[id]/page.tsx` | 프로젝트 상세 |
+| `/help/456` | `app/help/[questionId]/page.tsx` | 질문 상세 |
 
 ### 4.3 네비게이션 구조 (Header)
 
@@ -313,7 +305,6 @@ app/
 - **홈** (`/`)
 - **커뮤니티** (`/community`)
   - 드롭다운: 자유게시판, 팁, 작품 공유, 이벤트
-- **프로젝트** (`/projects`)
 - **Help me** (`/help`)
 - **뉴스** (`/news`)
 - **프로필** (로그인 시, `/profile/[username]`)
@@ -337,17 +328,12 @@ app/
    - 바이브코딩 주요 기술 스택 소개
    - 아이콘 + 설명
 
-3. **Featured Projects**
-   - 인기 프로젝트 3개 카드
-   - 썸네일, 제목, 좋아요 수
-   - "더 보기" 버튼 → `/projects`
-
-4. **Community Preview**
+3. **Community Preview**
    - 최근 인기 게시글 3개
    - 제목, 작성자, 투표 수, 댓글 수
    - "커뮤니티 가기" 버튼 → `/community`
 
-5. **Latest News**
+4. **Latest News**
    - 최신 뉴스 3개 타임라인
    - 제목, 날짜, 카테고리 태그
 
@@ -444,78 +430,11 @@ app/
 - [ ] 임시 저장 (Local Storage)
 - [ ] 게시/취소
 
-### 5.3 프로젝트 소개 (`/projects`)
-
-**목적**: 바이브코딩으로 만든 프로젝트 포트폴리오 쇼케이스
-
-#### 5.3.1 프로젝트 목록
-
-**레이아웃**: 그리드 (3열, 반응형)
-
-**프로젝트 카드:**
-- 썸네일 이미지 (16:9 비율)
-- 제목
-- 간단한 설명 (50자)
-- 기술 스택 태그 (최대 5개)
-- 좋아요 수 ❤️
-- 작성자 (아바타 + username)
-
-**기능:**
-- [ ] 필터: 기술 스택별 (React, Vue, Node.js 등)
-- [ ] 정렬: 인기순, 최신순, 좋아요 순
-- [ ] 검색: 제목, 설명 검색
-- [ ] 무한 스크롤
-
-#### 5.3.2 프로젝트 상세 (`/projects/[id]`)
-
-**레이아웃:**
-
-```
-┌──────────────────────────────────────┐
-│ 큰 썸네일 이미지                      │
-├──────────────────────────────────────┤
-│ 제목                                  │
-│ 작성자 • 날짜 • 조회수 • 좋아요       │
-├──────────────────────────────────────┤
-│ 프로젝트 설명 (Rich Text)             │
-├──────────────────────────────────────┤
-│ 기술 스택: [태그] [태그] [태그]       │
-├──────────────────────────────────────┤
-│ 링크:                                 │
-│ - 🌐 라이브 데모                      │
-│ - 💻 GitHub 리포지토리                │
-├──────────────────────────────────────┤
-│ 스크린샷 갤러리 (캐러셀)              │
-├──────────────────────────────────────┤
-│ 댓글 섹션                             │
-└──────────────────────────────────────┘
-```
-
-**기능:**
-- [ ] 좋아요 (❤️)
-- [ ] 즐겨찾기
-- [ ] 공유
-- [ ] 댓글
-- [ ] 수정/삭제 (작성자)
-
-#### 5.3.3 프로젝트 등록 (`/projects/new`)
-
-**필수 입력:**
-- 제목
-- 설명
-- 썸네일 이미지 (업로드)
-- 기술 스택 (선택)
-
-**선택 입력:**
-- 라이브 데모 URL
-- GitHub 리포지토리 URL
-- 추가 이미지 (최대 5개)
-
-### 5.4 Help me - Q&A (`/help`)
+### 5.3 Help me - Q&A (`/help`)
 
 **목적**: 질문-답변 게시판 (Stack Overflow 스타일)
 
-#### 5.4.1 질문 목록
+#### 5.3.1 질문 목록
 
 **질문 카드:**
 - 투표 수 (좌측)
@@ -530,7 +449,7 @@ app/
 - [ ] 필터: 태그별, 채택된 질문/미채택
 - [ ] 검색
 
-#### 5.4.2 질문 상세 (`/help/[questionId]`)
+#### 5.3.2 질문 상세 (`/help/[questionId]`)
 
 **레이아웃:**
 
@@ -563,7 +482,7 @@ app/
 - [ ] 코드 블록 지원
 - [ ] 수정/삭제
 
-#### 5.4.3 질문 작성 (`/help/new`)
+#### 5.3.3 질문 작성 (`/help/new`)
 
 **필수 입력:**
 - 제목 (최소 15자, "어떻게", "왜" 등 질문형)
@@ -575,11 +494,11 @@ app/
 - 이미지 업로드
 - 링크
 
-### 5.5 바이브코딩 뉴스 (`/news`)
+### 5.4 바이브코딩 뉴스 (`/news`)
 
 **목적**: 공식 뉴스, 업데이트, 튜토리얼 전달
 
-#### 5.5.1 뉴스 목록
+#### 5.4.1 뉴스 목록
 
 **레이아웃**: 타임라인 형식 (Medium 스타일)
 
@@ -601,7 +520,7 @@ app/
 - [ ] 정렬: 최신순 (기본), 인기순
 - [ ] 검색
 
-#### 5.5.2 뉴스 상세 (`/news/[id]`)
+#### 5.4.2 뉴스 상세 (`/news/[id]`)
 
 **레이아웃**: 블로그 포스트 형식
 
@@ -619,7 +538,7 @@ app/
 - [ ] 북마크
 - [ ] 관련 뉴스 추천 (하단)
 
-#### 5.5.3 뉴스 작성 (관리자 전용, `/news/new`)
+#### 5.4.3 뉴스 작성 (관리자 전용, `/news/new`)
 
 **권한**: 관리자만 접근 가능
 
@@ -663,7 +582,6 @@ model User {
 
   posts         Post[]
   comments      Comment[]
-  projects      Project[]
   answers       Answer[]
   votes         Vote[]
 
@@ -762,32 +680,6 @@ model Comment {
 }
 
 // ─────────────────────────────────────
-// Project (프로젝트)
-// ─────────────────────────────────────
-model Project {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  thumbnailUrl String
-
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  techStack   String[]  // ["React", "Next.js", "Tailwind"]
-  projectUrl  String?
-  githubUrl   String?
-  images      String[]  // 추가 이미지 URL 배열
-
-  likesCount  Int      @default(0)
-  viewCount   Int      @default(0)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([authorId])
-}
-
-// ─────────────────────────────────────
 // Answer (답변 - Help me 전용)
 // ─────────────────────────────────────
 model Answer {
@@ -841,7 +733,6 @@ enum VoteType {
 ```
 User (1) ─── (N) Post
 User (1) ─── (N) Comment
-User (1) ─── (N) Project
 User (1) ─── (N) Answer
 User (1) ─── (N) Vote
 
@@ -869,11 +760,6 @@ app/api/
 │       ├── route.ts            # GET (상세), PATCH (수정), DELETE (삭제)
 │       ├── vote/route.ts       # POST (투표)
 │       └── comments/route.ts   # GET (댓글 목록), POST (댓글 작성)
-├── projects/
-│   ├── route.ts                # GET, POST
-│   └── [id]/
-│       ├── route.ts            # GET, PATCH, DELETE
-│       └── like/route.ts       # POST (좋아요)
 ├── questions/
 │   ├── route.ts                # GET, POST
 │   └── [id]/
@@ -1002,33 +888,7 @@ Response:
 }
 ```
 
-#### 7.2.2 프로젝트 API
-
-**GET `/api/projects`** - 프로젝트 목록
-
-Query Params:
-- `tech`: 기술 스택 필터 (optional)
-- `sort`: `popular` | `recent` (default: `popular`)
-- `page`, `limit`
-
-**POST `/api/projects`** - 프로젝트 등록
-
-Authorization: Required
-
-Request Body:
-```json
-{
-  "title": "프로젝트 제목",
-  "description": "설명",
-  "thumbnailUrl": "https://...",
-  "techStack": ["React", "Next.js"],
-  "projectUrl": "https://...",
-  "githubUrl": "https://github.com/...",
-  "images": ["https://...", "https://..."]
-}
-```
-
-#### 7.2.3 질문/답변 API
+#### 7.2.2 질문/답변 API
 
 **POST `/api/questions/[id]/answers`** - 답변 작성
 
@@ -1235,9 +1095,8 @@ export const config = {
 | 홈페이지 (`/`) | **SSG** | 정적 콘텐츠, SEO 중요 |
 | 커뮤니티 목록 | **SSR** | 실시간 업데이트 필요 |
 | 게시글 상세 | **ISR** (revalidate: 60) | SEO + 주기적 업데이트 |
-| 프로젝트 목록 | **SSR** | 필터링 동적 |
-| 프로젝트 상세 | **ISR** (revalidate: 300) | SEO + 덜 자주 변경 |
 | Q&A 목록 | **SSR** | 실시간 |
+| 질문 상세 | **ISR** (revalidate: 60) | SEO + 주기적 업데이트 |
 | 뉴스 목록 | **SSG** + **ISR** (revalidate: 3600) | 1시간마다 재생성 |
 | 뉴스 상세 | **SSG** + **ISR** | SEO 중요 |
 
@@ -1348,23 +1207,16 @@ export const queryClient = new QueryClient({
 - [ ] 검색 결과 페이지
 - [ ] 알림 시스템 (기본)
 
-### Phase 3: 프로젝트 & Q&A (3주)
+### Phase 3: Q&A & 뉴스 (2주)
 
-**Week 9: 프로젝트 쇼케이스**
-- [ ] 프로젝트 목록 페이지
-- [ ] 프로젝트 상세 페이지
-- [ ] 프로젝트 등록 페이지
-- [ ] 기술 스택 필터링
-- [ ] 좋아요 기능
-
-**Week 10: Help me (Q&A)**
+**Week 9: Help me (Q&A)**
 - [ ] 질문 목록 페이지
 - [ ] 질문 상세 페이지
 - [ ] 답변 시스템
 - [ ] 답변 채택 기능
 - [ ] 질문 작성 페이지
 
-**Week 11: 뉴스**
+**Week 10: 뉴스**
 - [ ] 뉴스 목록 페이지
 - [ ] 뉴스 상세 페이지
 - [ ] 뉴스 작성 (관리자 전용)
@@ -1372,14 +1224,14 @@ export const queryClient = new QueryClient({
 
 ### Phase 4: 고도화 & 테스트 (2주)
 
-**Week 12: 최적화**
+**Week 11: 최적화**
 - [ ] 성능 최적화 (Lighthouse 점수 90+)
 - [ ] SEO 메타 태그
 - [ ] Open Graph 이미지
 - [ ] Sitemap 생성
 - [ ] robots.txt
 
-**Week 13: QA & 배포**
+**Week 12: QA & 배포**
 - [ ] 버그 수정
 - [ ] 접근성 테스트 (a11y)
 - [ ] 모바일 반응형 테스트
@@ -1396,9 +1248,9 @@ export const queryClient = new QueryClient({
 - 투표 시스템
 
 **P1 (중요)**:
-- 프로젝트 쇼케이스
 - Q&A 시스템
 - 검색 기능
+- 뉴스 페이지
 
 **P2 (나중에)**:
 - 실시간 알림
@@ -1463,6 +1315,7 @@ ALGOLIA_API_KEY="your-api-key"
 | 버전 | 날짜 | 변경 사항 |
 |------|------|-----------|
 | 1.0 | 2025-10-15 | 초기 PRD 작성 |
+| 1.1 | 2025-10-16 | 프로젝트 페이지 기능 제거, 전체 개발 기간 13주→12주로 조정 |
 
 ---
 
