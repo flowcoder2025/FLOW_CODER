@@ -180,27 +180,27 @@ git commit -m "Initial commit: Next.js 14 프로젝트 초기화"
 ### Week 2: 기존 컴포넌트 이전
 
 #### Task 2.1: UI 컴포넌트 이전
-- [ ] 기존 `src/components/ui/` → `components/ui/` 복사
-- [ ] shadcn/ui와 중복 확인 및 통합
-- [ ] Import 경로 수정 (`@/components/ui/...`)
+- [x] 기존 `src/components/ui/` → `components/ui/` 복사
+- [x] shadcn/ui와 중복 확인 및 통합
+- [x] Import 경로 수정 (`@/components/ui/...`)
 
 **체크리스트:**
-- [ ] `button.tsx`
-- [ ] `card.tsx`
-- [ ] `badge.tsx`
-- [ ] `avatar.tsx`
-- [ ] `input.tsx`
-- [ ] `textarea.tsx`
-- [ ] (45+ 컴포넌트 전체)
+- [x] `button.tsx`
+- [x] `card.tsx`
+- [x] `badge.tsx`
+- [x] `avatar.tsx`
+- [x] `input.tsx`
+- [x] `textarea.tsx`
+- [x] (45+ 컴포넌트 전체)
 
 ---
 
 #### Task 2.2: Header 컴포넌트 이전
-- [ ] `src/components/Header.tsx` → `components/Header.tsx`
-- [ ] `<a href="#...">` → Next.js `<Link href="...">` 변환
-- [ ] 네비게이션 메뉴 업데이트 (홈, 커뮤니티, 프로젝트, Help me, 뉴스)
-- [ ] 모바일 메뉴 토글 유지
-- [ ] Client Component 지시자 추가 (`"use client"`)
+- [x] `src/components/Header.tsx` → `components/Header.tsx`
+- [x] `<a href="#...">` → Next.js `<Link href="...">` 변환
+- [x] 네비게이션 메뉴 업데이트 (홈, 커뮤니티, 프로젝트, Help me, 뉴스)
+- [x] 모바일 메뉴 토글 유지
+- [x] Client Component 지시자 추가 (`"use client"`)
 
 **변경 전:**
 ```tsx
@@ -218,9 +218,9 @@ git commit -m "Initial commit: Next.js 14 프로젝트 초기화"
 ---
 
 #### Task 2.3: Footer 컴포넌트 이전
-- [ ] `src/components/Footer.tsx` → `components/Footer.tsx`
-- [ ] 링크를 Next.js `<Link>`로 변환
-- [ ] 외부 링크는 `<a target="_blank" rel="noopener noreferrer">` 유지
+- [x] `src/components/Footer.tsx` → `components/Footer.tsx`
+- [x] 링크를 Next.js `<Link>`로 변환
+- [x] 외부 링크는 `<a target="_blank" rel="noopener noreferrer">` 유지
 
 **산출물:**
 - `components/Footer.tsx`
@@ -228,11 +228,11 @@ git commit -m "Initial commit: Next.js 14 프로젝트 초기화"
 ---
 
 #### Task 2.4: 루트 레이아웃 구축
-- [ ] `app/layout.tsx` 생성
-- [ ] Header, Footer 포함
-- [ ] HTML lang 설정 (`lang="ko"`)
-- [ ] 메타데이터 설정 (title, description, OG 이미지)
-- [ ] 폰트 최적화 (`next/font`)
+- [x] `app/layout.tsx` 생성
+- [x] Header, Footer 포함
+- [x] HTML lang 설정 (`lang="ko"`)
+- [x] 메타데이터 설정 (title, description, OG 이미지)
+- [x] 폰트 최적화 (`next/font`)
 
 **`app/layout.tsx` 예시:**
 ```tsx
@@ -267,12 +267,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ---
 
 #### Task 2.5: 홈페이지 이전
-- [ ] `app/page.tsx` 생성
-- [ ] Hero 섹션 이전 (`src/components/Hero.tsx` → `components/Hero.tsx`)
-- [ ] TechStack 섹션 이전
-- [ ] Projects 섹션 이전 (Featured Projects로 수정)
-- [ ] Community Preview 섹션 추가
-- [ ] Latest News 섹션 추가
+- [x] `app/page.tsx` 생성
+- [x] Hero 섹션 이전 (`src/components/Hero.tsx` → `components/Hero.tsx`)
+- [x] TechStack 섹션 이전
+- [x] Projects 섹션 이전 (Featured Projects로 수정)
+- [x] Community Preview 섹션 추가
+- [x] Latest News 섹션 추가
 
 **`app/page.tsx` 구조:**
 ```tsx
@@ -306,9 +306,9 @@ export default function HomePage() {
 ---
 
 #### Task 2.6: 다크 모드 통합
-- [ ] `next-themes` 설치
-- [ ] `ThemeProvider` 설정
-- [ ] Header에 다크 모드 토글 버튼 추가
+- [x] `next-themes` 설치
+- [x] `ThemeProvider` 설정
+- [x] Header에 다크 모드 토글 버튼 추가
 
 **명령어:**
 ```bash
