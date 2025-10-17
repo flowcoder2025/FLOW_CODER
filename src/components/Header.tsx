@@ -1,13 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
-import { Code, Menu, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Code, Menu, X, LogOut, User } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
@@ -28,8 +39,42 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
-          <Button variant="outline">로그인</Button>
-          <Button>시작하기</Button>
+          {status === "authenticated" && session?.user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={session.user.image || undefined} alt={session.user.name || "User"} />
+                    <AvatarFallback>{session.user.name?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>내 계정</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={`/profile/${session.user.id}`} className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    프로필
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  로그아웃
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="outline" asChild>
+                <Link href="/auth/signin">로그인</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/auth/signup">시작하기</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -84,8 +129,25 @@ export function Header() {
               뉴스
             </Link>
             <div className="flex flex-col gap-2 mt-4">
-              <Button variant="outline">로그인</Button>
-              <Button>시작하기</Button>
+              {status === "authenticated" && session?.user ? (
+                <>
+                  <Button variant="outline" asChild>
+                    <Link href={`/profile/${session.user.id}`}>프로필</Link>
+                  </Button>
+                  <Button variant="outline" onClick={() => signOut()}>
+                    로그아웃
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" asChild>
+                    <Link href="/auth/signin">로그인</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/auth/signup">시작하기</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>

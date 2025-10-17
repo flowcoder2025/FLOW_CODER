@@ -339,9 +339,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 ### Week 3: 인증 시스템
 
 #### Task 3.1: NextAuth.js 설치 및 설정
-- [ ] NextAuth.js v5 (Auth.js) 설치
-- [ ] `app/api/auth/[...nextauth]/route.ts` 생성
-- [ ] `authOptions` 설정 (session strategy: JWT)
+- [x] NextAuth.js v5 (Auth.js) 설치
+- [x] `app/api/auth/[...nextauth]/route.ts` 생성
+- [x] `authOptions` 설정 (session strategy: JWT)
 
 **명령어:**
 ```bash
@@ -361,9 +361,9 @@ NEXTAUTH_SECRET="generate-random-secret-here"
 ---
 
 #### Task 3.2: OAuth 통합 (GitHub)
-- [ ] GitHub OAuth App 생성 (https://github.com/settings/developers)
-- [ ] `.env`에 `GITHUB_ID`, `GITHUB_SECRET` 추가
-- [ ] `GithubProvider` 설정
+- [x] GitHub OAuth App 생성 (https://github.com/settings/developers)
+- [x] `.env`에 `GITHUB_ID`, `GITHUB_SECRET` 추가
+- [x] `GithubProvider` 설정
 
 **`.env` 추가:**
 ```env
@@ -377,9 +377,9 @@ GITHUB_SECRET="your-github-client-secret"
 ---
 
 #### Task 3.3: OAuth 통합 (Google)
-- [ ] Google Cloud Console에서 OAuth 2.0 클라이언트 생성
-- [ ] `.env`에 `GOOGLE_ID`, `GOOGLE_SECRET` 추가
-- [ ] `GoogleProvider` 설정
+- [x] Google Cloud Console에서 OAuth 2.0 클라이언트 생성
+- [x] `.env`에 `GOOGLE_ID`, `GOOGLE_SECRET` 추가
+- [x] `GoogleProvider` 설정
 
 **산출물:**
 - Google OAuth 연동 완료
@@ -387,10 +387,10 @@ GITHUB_SECRET="your-github-client-secret"
 ---
 
 #### Task 3.4: 로그인/회원가입 페이지
-- [ ] `app/auth/signin/page.tsx` 생성
-- [ ] OAuth 버튼 (GitHub, Google)
+- [x] `app/auth/signin/page.tsx` 생성
+- [x] OAuth 버튼 (GitHub, Google)
 - [ ] 이메일/비밀번호 로그인 폼 (CredentialsProvider)
-- [ ] 회원가입 링크 → `app/auth/signup/page.tsx`
+- [x] 회원가입 링크 → `app/auth/signup/page.tsx`
 
 **산출물:**
 - `app/auth/signin/page.tsx`
@@ -399,10 +399,10 @@ GITHUB_SECRET="your-github-client-secret"
 ---
 
 #### Task 3.5: 세션 관리 & 프로필 페이지
-- [ ] `useSession()` 훅 사용
-- [ ] Header에 사용자 프로필 표시 (로그인 시)
-- [ ] `app/profile/[username]/page.tsx` 생성
-- [ ] 사용자 정보 표시 (username, bio, 작성 게시글 수)
+- [x] `useSession()` 훅 사용
+- [x] Header에 사용자 프로필 표시 (로그인 시)
+- [x] `app/profile/[id]/page.tsx` 생성
+- [x] 사용자 정보 표시 (username, bio, 작성 게시글 수)
 
 **산출물:**
 - `app/profile/[username]/page.tsx`
