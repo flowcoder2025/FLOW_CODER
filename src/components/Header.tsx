@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Code, Menu, X, LogOut, User } from "lucide-react";
+import { Code, Menu, X, LogOut, User, Settings } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -55,6 +55,12 @@ export function Header() {
                   <Link href={`/profile/${session.user.id}`} className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     프로필
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    설정
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -132,6 +138,9 @@ export function Header() {
                 <>
                   <Button variant="outline" asChild>
                     <Link href={`/profile/${session.user.id}`}>프로필</Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/settings">설정</Link>
                   </Button>
                   <Button variant="outline" onClick={() => signOut()}>
                     로그아웃

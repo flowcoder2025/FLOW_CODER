@@ -654,10 +654,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 7.3: 설정 페이지 UI
-- [ ] `app/settings/page.tsx` 생성
-- [ ] 알림 설정 UI
-- [ ] 다크 모드 설정
-- [ ] 언어 설정 (향후 확장)
+- [x] `app/settings/page.tsx` 생성
+- [x] 알림 설정 UI
+- [x] 다크 모드 설정
+- [x] 언어 설정 (향후 확장)
 
 **산출물:**
 - `app/settings/page.tsx`
