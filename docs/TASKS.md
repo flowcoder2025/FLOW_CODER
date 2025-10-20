@@ -643,10 +643,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 7.2: 프로필 편집 폼 UI
-- [ ] `app/profile/edit/page.tsx` 생성
-- [ ] 프로필 이미지 업로드 UI
-- [ ] displayName, bio 편집 폼
-- [ ] localStorage에 저장
+- [x] `app/profile/edit/page.tsx` 생성
+- [x] 프로필 이미지 업로드 UI
+- [x] displayName, bio 편집 폼
+- [x] localStorage에 저장
 
 **산출물:**
 - `app/profile/edit/page.tsx`

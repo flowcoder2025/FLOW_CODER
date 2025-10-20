@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import { mockUsers, mockPosts, mockComments } from '@/lib/mock-data';
 import type { User, PostWithAuthor, CommentWithAuthor } from '@/lib/types';
@@ -44,25 +44,6 @@ function getUserComments(userId: string): CommentWithAuthor[] {
     .filter((c) => c !== null) as CommentWithAuthor[];
 }
 
-/** Reputation 배지 색상 결정 */
-function getReputationBadge(reputation: number) {
-  if (reputation >= 500) {
-    return {
-      label: '골드',
-      className: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
-    };
-  }
-  if (reputation >= 100) {
-    return {
-      label: '실버',
-      className: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
-    };
-  }
-  return {
-    label: '브론즈',
-    className: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-  };
-}
 
 interface ProfilePageProps {
   params: Promise<{
@@ -82,49 +63,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const userPosts = getUserPosts(user.id);
   const userComments = getUserComments(user.id);
-  const reputationBadge = getReputationBadge(user.reputation);
+  // Mock: 현재 로그인한 사용자 (실제로는 useSession으로 가져옴)
+  const currentUsername = 'admin';
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
       <div className="max-w-4xl mx-auto">
         {/* 프로필 헤더 */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              {/* 아바타 */}
-              <img
-                src={user.avatarUrl}
-                alt={user.displayName || user.username}
-                className="w-24 h-24 rounded-full object-cover"
-              />
-
-              {/* 사용자 정보 */}
-              <div className="flex-1">
-                {/* 이름 */}
-                <h1 className="text-3xl font-bold mb-1">
-                  {user.displayName || user.username}
-                </h1>
-
-                {/* Username */}
-                <p className="text-muted-foreground mb-3">@{user.username}</p>
-
-                {/* Bio */}
-                {user.bio && (
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    {user.bio}
-                  </p>
-                )}
-
-                {/* Reputation 배지 */}
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className={reputationBadge.className}>
-                    {reputationBadge.label} · {user.reputation}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ProfileHeader user={user} currentUsername={currentUsername} />
 
         {/* 통계 카드 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
