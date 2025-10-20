@@ -1,7 +1,8 @@
 # 바이브코딩 커뮤니티 플랫폼 구현 Task 목록
 
-**문서 버전**: 1.1
+**문서 버전**: 1.2
 **작성일**: 2025-10-15
+**최종 수정**: 2025-10-20
 **기준 문서**: [PRD.md](./PRD.md)
 **프로젝트**: Vibe Coding Community Platform
 
@@ -44,7 +45,8 @@
 ### 1.2 작업 범위
 
 **총 기간**: 12주 (3개월)
-**Phase**: 4단계 (기반 → 커뮤니티 → Q&A/뉴스 → 고도화)
+**Phase**: 4단계 (기반 → UI 우선 → 기능 완성 → DB 통합 & 배포)
+**개발 전략**: UI 우선 개발 (Mock 데이터 → PostgreSQL 통합)
 **우선순위**: P0 (필수) → P1 (중요) → P2 (향후)
 
 ### 1.3 기술 스택 전환
@@ -60,7 +62,7 @@
 
 ---
 
-## Phase 1: 기반 구축 (4주)
+## Phase 1: 기반 구축 (3주)
 
 ### Week 1: 프로젝트 초기화
 
@@ -409,266 +411,119 @@ GITHUB_SECRET="your-github-client-secret"
 
 ---
 
-### Week 4: 데이터 모델 & API 기초
+### Week 4: Mock 데이터 & 커뮤니티 UI
 
-#### Task 4.1: Prisma 스키마 정의
-- [ ] `prisma/schema.prisma`에 모델 정의
-  - [ ] User
-  - [ ] Category
-  - [ ] Post
-  - [ ] Comment
-  - [ ] Project
-  - [ ] Answer
-  - [ ] Vote
-- [ ] 관계 설정 (1:N, self-referencing)
+**참고**: Week 4부터는 Mock 데이터를 사용하여 UI 우선 개발을 진행합니다.
 
-**Prisma 스키마 예시:**
-```prisma
-model User {
-  id          String   @id @default(cuid())
-  username    String   @unique
-  email       String   @unique
-  displayName String?
-  avatarUrl   String?
-  reputation  Int      @default(0)
-  role        Role     @default(USER)
+#### Task 4.1: TypeScript 인터페이스 정의
+- [x] `lib/types.ts` 생성
+- [x] 모든 데이터 모델 인터페이스 정의 (User, Category, Post, Comment, Answer, Vote)
+- [x] 타입 안정성 확보
 
-  posts       Post[]
-  comments    Comment[]
-  projects    Project[]
-  votes       Vote[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-enum Role {
-  USER
-  MODERATOR
-  ADMIN
-}
-
-model Post {
-  id         String   @id @default(cuid())
-  title      String
-  content    String   @db.Text
-  authorId   String
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-  upvotes    Int      @default(0)
-  downvotes  Int      @default(0)
-  tags       String[]
-  comments   Comment[]
-  votes      Vote[]
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-// ... (전체 스키마는 PRD.md 참고)
-```
-
-**산출물:**
-- `prisma/schema.prisma`
-
----
-
-#### Task 4.2: 마이그레이션 실행
-- [ ] `npx prisma migrate dev --name init`
-- [ ] 데이터베이스 테이블 생성 확인
-- [ ] Prisma Client 생성 (`npx prisma generate`)
-
-**산출물:**
-- `prisma/migrations/` 디렉토리
-
----
-
-#### Task 4.3: Prisma Client 설정
-- [ ] `lib/prisma.ts` 생성 (싱글톤 패턴)
-
-**`lib/prisma.ts` 예시:**
+**`lib/types.ts` 예시:**
 ```typescript
-import { PrismaClient } from '@prisma/client'
+export interface User {
+  id: string
+  username: string
+  email: string
+  displayName?: string
+  avatarUrl?: string
+  reputation: number
+  role: 'USER' | 'MODERATOR' | 'ADMIN'
+  createdAt: string
+}
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
-
-export const prisma = globalForPrisma.prisma || new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+export interface Post {
+  id: string
+  title: string
+  content: string
+  authorId: string
+  categoryId: string
+  upvotes: number
+  downvotes: number
+  tags: string[]
+  createdAt: string
+}
+// ... (전체 인터페이스는 PRD.md 참고)
 ```
 
 **산출물:**
-- `lib/prisma.ts`
+- `lib/types.ts`
 
 ---
 
-#### Task 4.4: 기본 API Routes 구조 생성
-- [ ] `app/api/posts/route.ts` (GET, POST)
-- [ ] `app/api/posts/[id]/route.ts` (GET, PATCH, DELETE)
-
-**`app/api/posts/route.ts` 예시:**
-```typescript
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-
-export async function GET(request: NextRequest) {
-  const posts = await prisma.post.findMany({
-    include: { author: true, category: true },
-    orderBy: { createdAt: 'desc' },
-  })
-  return NextResponse.json({ posts })
-}
-
-export async function POST(request: NextRequest) {
-  const body = await request.json()
-  const post = await prisma.post.create({
-    data: body,
-  })
-  return NextResponse.json({ post }, { status: 201 })
-}
-```
+#### Task 4.2: Mock 데이터 생성
+- [x] `lib/mock-data.ts` 생성
+- [x] Mock users (10명)
+- [x] Mock categories (4개: 자유게시판, 팁, 작품 공유, 이벤트)
+- [x] Mock posts (50개)
+- [x] Mock comments (100개)
 
 **산출물:**
-- `app/api/posts/route.ts`
-- `app/api/posts/[id]/route.ts`
+- `lib/mock-data.ts`
 
 ---
 
-#### Task 4.5: 인증 미들웨어 설정
-- [ ] `middleware.ts` 생성
-- [ ] 보호된 경로 설정 (`/community/new`, `/projects/new` 등)
-
-**`middleware.ts` 예시:**
-```typescript
-import { withAuth } from "next-auth/middleware"
-
-export default withAuth({
-  callbacks: {
-    authorized: ({ token, req }) => {
-      if (req.nextUrl.pathname.startsWith("/admin")) {
-        return token?.role === "ADMIN"
-      }
-      if (req.nextUrl.pathname.includes("/new")) {
-        return !!token
-      }
-      return true
-    },
-  },
-})
-
-export const config = {
-  matcher: ["/community/new", "/projects/new", "/help/new", "/admin/:path*"],
-}
-```
-
-**산출물:**
-- `middleware.ts`
-
----
-
-## Phase 2: 커뮤니티 기능 (4주)
-
-### Week 5: 커뮤니티 목록
-
-#### Task 5.1: 카테고리 시드 데이터 생성
-- [ ] `prisma/seed.ts` 생성
-- [ ] 4개 카테고리 삽입 (자유게시판, 팁, 작품 공유, 이벤트)
-
-**`prisma/seed.ts` 예시:**
-```typescript
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
-async function main() {
-  await prisma.category.createMany({
-    data: [
-      { name: '자유게시판', slug: 'general', icon: '💬' },
-      { name: '팁 & 노하우', slug: 'tips', icon: '💡' },
-      { name: '작품 공유', slug: 'showcase', icon: '🎨' },
-      { name: '이벤트 & 공지', slug: 'events', icon: '📢' },
-    ],
-  })
-}
-
-main()
-```
-
-**명령어:**
-```bash
-npx prisma db seed
-```
-
-**산출물:**
-- `prisma/seed.ts`
-
----
-
-#### Task 5.2: 커뮤니티 메인 페이지
-- [ ] `app/community/page.tsx` 생성
-- [ ] 4개 카테고리 카드 표시
-- [ ] 각 카테고리 클릭 시 → `/community/[category]`
+#### Task 4.3: 커뮤니티 메인 페이지
+- [x] `app/community/page.tsx` 생성
+- [x] 4개 카테고리 카드 표시
+- [x] Mock 데이터로 렌더링
+- [x] 각 카테고리 클릭 → `/community/[category]`
 
 **산출물:**
 - `app/community/page.tsx`
 
 ---
 
-#### Task 5.3: 게시글 목록 페이지
+#### Task 4.4: 게시글 목록 페이지 UI
 - [ ] `app/community/[category]/page.tsx` 생성
-- [ ] 게시글 목록 조회 (SSR)
-- [ ] 게시글 카드 컴포넌트 (`components/PostCard.tsx`)
-- [ ] 정렬 필터 (인기순, 최신순, 댓글 많은 순)
-- [ ] 페이지네이션 또는 무한 스크롤
-
-**PostCard 구조:**
-```
-┌─────────────────────────────────┐
-│ [⬆ 42]  제목                    │
-│ [⬇ 3 ]  본문 미리보기...        │
-│          @username • 2시간 전    │
-│          💬 15  👁 123  #react   │
-└─────────────────────────────────┘
-```
+- [ ] Mock 데이터로 게시글 목록 표시
+- [ ] 정렬 필터 UI (인기순, 최신순)
+- [ ] 페이지네이션 UI
 
 **산출물:**
 - `app/community/[category]/page.tsx`
+
+---
+
+#### Task 4.5: 게시글 카드 컴포넌트
+- [ ] `components/PostCard.tsx` 생성
+- [ ] 투표 버튼 UI
+- [ ] 제목, 본문 미리보기
+- [ ] 작성자, 시간, 조회수, 댓글 수 표시
+- [ ] 태그 표시
+
+**산출물:**
 - `components/PostCard.tsx`
 
 ---
 
-#### Task 5.4: 필터링 & 검색
-- [ ] URL Query Params로 필터 관리 (`?sort=popular&tag=react`)
-- [ ] 태그 필터링
-- [ ] 검색 기능 (제목, 본문 검색)
+## Phase 2: UI 우선 구현 (4주)
 
-**산출물:**
-- 검색 바 컴포넌트 (`components/SearchBar.tsx`)
+**참고**: Phase 2에서는 Mock 데이터를 사용하여 모든 페이지 UI를 완성합니다.
 
----
+### Week 5: 게시글 상세 & 작성 UI
 
-### Week 6: 게시글 상세 & 작성
-
-#### Task 6.1: 게시글 상세 페이지
+#### Task 5.1: 게시글 상세 페이지 UI
 - [ ] `app/community/[category]/[postId]/page.tsx` 생성
-- [ ] 게시글 조회 (ISR, revalidate: 60)
-- [ ] 투표 버튼 (Upvote/Downvote)
-- [ ] 댓글 섹션 표시
+- [ ] Mock 데이터로 게시글 상세 표시
+- [ ] 투표 버튼 UI
+- [ ] 댓글 섹션 UI
+- [ ] 작성자 정보 표시
 
 **산출물:**
 - `app/community/[category]/[postId]/page.tsx`
 
 ---
 
-#### Task 6.2: Tiptap 에디터 통합
+#### Task 5.2: Tiptap 에디터 통합
 - [ ] Tiptap 설치 (`@tiptap/react`, `@tiptap/starter-kit`)
 - [ ] 에디터 컴포넌트 생성 (`components/Editor.tsx`)
-- [ ] 기능: 굵게, 기울임, 코드 블록, 링크, 이미지 업로드
+- [ ] 기능: 굵게, 기울임, 코드 블록, 링크
 
 **명령어:**
 ```bash
-npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
+npm install @tiptap/react @tiptap/starter-kit
 ```
 
 **산출물:**
@@ -676,55 +531,24 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 6.3: 게시글 작성 페이지
+#### Task 5.3: 게시글 작성 페이지 UI
 - [ ] `app/community/new/page.tsx` 생성
 - [ ] 카테고리 선택 드롭다운
-- [ ] 제목 입력 (`Input`)
-- [ ] 본문 입력 (Tiptap 에디터)
-- [ ] 태그 입력 (자동완성)
-- [ ] 이미지 업로드 (Cloudinary)
-- [ ] 제출 → POST `/api/posts`
+- [ ] 제목 입력
+- [ ] 본문 입력 (Tiptap)
+- [ ] 태그 입력
+- [ ] Mock 데이터에 저장 (localStorage)
 
 **산출물:**
 - `app/community/new/page.tsx`
 
 ---
 
-#### Task 6.4: 이미지 업로드 (Cloudinary)
-- [ ] Cloudinary 계정 생성
-- [ ] `.env`에 `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` 추가
-- [ ] `lib/cloudinary.ts` 업로드 유틸리티 함수
-- [ ] 에디터에 이미지 업로드 버튼 추가
-
-**산출물:**
-- `lib/cloudinary.ts`
-
----
-
-#### Task 6.5: 임시 저장 (Local Storage)
-- [ ] 게시글 작성 중 Local Storage에 자동 저장
-- [ ] 페이지 새로고침 시 복원
-
-**산출물:**
-- `hooks/useAutoSave.ts`
-
----
-
-### Week 7: 댓글 & 투표
-
-#### Task 7.1: 댓글 CRUD API
-- [ ] `app/api/posts/[id]/comments/route.ts` (GET, POST)
-- [ ] `app/api/comments/[id]/route.ts` (PATCH, DELETE)
-
-**산출물:**
-- API Routes
-
----
-
-#### Task 7.2: 댓글 UI 컴포넌트
+#### Task 5.4: 댓글 UI 컴포넌트
 - [ ] `components/CommentList.tsx`
 - [ ] `components/CommentItem.tsx`
-- [ ] 댓글 스레드 (대댓글 지원, 최대 깊이 5)
+- [ ] 댓글 스레드 UI (대댓글 지원)
+- [ ] 댓글 작성 폼 UI
 
 **산출물:**
 - `components/CommentList.tsx`
@@ -732,80 +556,24 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 7.3: 댓글 작성 폼
-- [ ] `components/CommentForm.tsx`
-- [ ] Textarea 입력
-- [ ] 제출 → POST `/api/posts/[id]/comments`
-- [ ] Optimistic UI 업데이트
-
-**산출물:**
-- `components/CommentForm.tsx`
-
----
-
-#### Task 7.4: 투표 시스템 API
-- [ ] `app/api/posts/[id]/vote/route.ts` (POST)
-- [ ] Vote 모델 조회 및 업데이트
-- [ ] Upvote/Downvote 토글
-
-**산출물:**
-- `app/api/posts/[id]/vote/route.ts`
-
----
-
-#### Task 7.5: 투표 UI (Optimistic Updates)
+#### Task 5.5: 투표 버튼 UI
 - [ ] `components/VoteButtons.tsx`
 - [ ] ⬆ Upvote 버튼
 - [ ] ⬇ Downvote 버튼
-- [ ] React Query Optimistic Updates
+- [ ] 클라이언트 상태 관리
 
 **산출물:**
 - `components/VoteButtons.tsx`
 
 ---
 
-### Week 8: 검색 & 알림
+### Week 6: Q&A & 뉴스 UI
 
-#### Task 8.1: 검색 API
-- [ ] `app/api/search/route.ts`
-- [ ] PostgreSQL Full-Text Search 사용
-- [ ] 제목, 본문, 태그 검색
-
-**산출물:**
-- `app/api/search/route.ts`
-
----
-
-#### Task 8.2: 검색 결과 페이지
-- [ ] `app/search/page.tsx`
-- [ ] 검색어 Query Param (`?q=react`)
-- [ ] 게시글, 프로젝트, 질문 통합 검색
-
-**산출물:**
-- `app/search/page.tsx`
-
----
-
-#### Task 8.3: 기본 알림 시스템
-- [ ] `app/api/notifications/route.ts`
-- [ ] Notification 모델 (Prisma)
-- [ ] 댓글 알림, 답변 채택 알림
-
-**산출물:**
-- Notification 모델
-- API Routes
-
----
-
-## Phase 3: Q&A & 뉴스 (2주)
-
-### Week 9: Help me (Q&A)
-
-#### Task 9.1: 질문 목록 페이지
-- [ ] `app/help/page.tsx`
-- [ ] 질문 카드 (투표 수, 답변 수, 채택 여부 표시)
-- [ ] 필터: 답변 없는 질문, 채택된 질문
-- [ ] 정렬: 최신순, 투표 많은 순
+#### Task 6.1: Q&A 목록 페이지 UI
+- [ ] `app/help/page.tsx` 생성
+- [ ] 질문 카드 컴포넌트 (`components/QuestionCard.tsx`)
+- [ ] Mock 데이터로 질문 목록 표시
+- [ ] 필터 UI (답변 없는 질문, 채택된 질문)
 
 **산출물:**
 - `app/help/page.tsx`
@@ -813,54 +581,34 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 9.2: 질문 상세 페이지
-- [ ] `app/help/[questionId]/page.tsx`
-- [ ] 질문 본문 (코드 블록 지원)
-- [ ] 답변 목록 (채택된 답변 상단)
-- [ ] 답변 투표
+#### Task 6.2: 질문 상세 페이지 UI
+- [ ] `app/help/[questionId]/page.tsx` 생성
+- [ ] 질문 본문 표시
+- [ ] 답변 목록 UI
+- [ ] 답변 채택 버튼 UI
 
 **산출물:**
 - `app/help/[questionId]/page.tsx`
 
 ---
 
-#### Task 9.3: 답변 시스템 API
-- [ ] `app/api/questions/[id]/answers/route.ts` (GET, POST)
-- [ ] `app/api/questions/[id]/answers/[answerId]/accept/route.ts` (POST)
+#### Task 6.3: 답변 섹션 UI
+- [ ] `components/AnswerList.tsx`
+- [ ] `components/AnswerItem.tsx`
+- [ ] 답변 작성 폼 UI
+- [ ] 채택된 답변 강조 표시
 
 **산출물:**
-- API Routes
+- `components/AnswerList.tsx`
+- `components/AnswerItem.tsx`
 
 ---
 
-#### Task 9.4: 답변 채택 기능
-- [ ] 질문 작성자만 채택 가능 (권한 체크)
-- [ ] 채택 버튼 (`components/AcceptAnswerButton.tsx`)
-- [ ] 채택 시 작성자 reputation +10
-
-**산출물:**
-- `components/AcceptAnswerButton.tsx`
-
----
-
-#### Task 9.5: 질문 작성 페이지
-- [ ] `app/help/new/page.tsx`
-- [ ] 제목 (최소 15자, 질문형)
-- [ ] 본문 (코드 블록 지원)
-- [ ] 태그 (최소 1개, 최대 5개)
-
-**산출물:**
-- `app/help/new/page.tsx`
-
----
-
-### Week 10: 뉴스
-
-#### Task 10.1: 뉴스 목록 페이지
-- [ ] `app/news/page.tsx`
-- [ ] 타임라인 형식
-- [ ] 카테고리 필터 (업데이트, 이벤트, 튜토리얼, 공지)
-- [ ] 정렬: 최신순, 인기순
+#### Task 6.4: 뉴스 목록 페이지 UI
+- [ ] `app/news/page.tsx` 생성
+- [ ] 뉴스 카드 컴포넌트 (`components/NewsCard.tsx`)
+- [ ] Mock 데이터로 뉴스 목록 표시
+- [ ] 카테고리 필터 UI
 
 **산출물:**
 - `app/news/page.tsx`
@@ -868,46 +616,334 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 10.2: 뉴스 상세 페이지
-- [ ] `app/news/[id]/page.tsx`
-- [ ] 커버 이미지
-- [ ] 본문 (Rich Text)
-- [ ] 관련 뉴스 추천
+#### Task 6.5: 뉴스 상세 페이지 UI
+- [ ] `app/news/[id]/page.tsx` 생성
+- [ ] 커버 이미지 표시
+- [ ] 본문 Rich Text 렌더링
+- [ ] 관련 뉴스 추천 UI
 
 **산출물:**
 - `app/news/[id]/page.tsx`
 
 ---
 
-#### Task 10.3: 뉴스 작성 (관리자 전용)
-- [ ] `app/news/new/page.tsx`
-- [ ] 관리자만 접근 가능 (middleware)
-- [ ] 제목, 본문, 카테고리, 커버 이미지
+### Week 7: 프로필 & 설정 UI
+
+#### Task 7.1: 사용자 프로필 페이지 UI
+- [ ] `app/profile/[username]/page.tsx` 개선
+- [ ] 사용자 정보 표시 (아바타, bio, reputation)
+- [ ] 작성한 게시글 목록
+- [ ] 작성한 댓글 목록
+- [ ] Mock 데이터 활용
 
 **산출물:**
-- `app/news/new/page.tsx`
+- `app/profile/[username]/page.tsx` (개선)
 
 ---
 
-## Phase 4: 고도화 & 배포 (2주)
+#### Task 7.2: 프로필 편집 폼 UI
+- [ ] `app/profile/edit/page.tsx` 생성
+- [ ] 프로필 이미지 업로드 UI
+- [ ] displayName, bio 편집 폼
+- [ ] localStorage에 저장
 
-### Week 11: 최적화
+**산출물:**
+- `app/profile/edit/page.tsx`
 
-#### Task 11.1: 성능 최적화
+---
+
+#### Task 7.3: 설정 페이지 UI
+- [ ] `app/settings/page.tsx` 생성
+- [ ] 알림 설정 UI
+- [ ] 다크 모드 설정
+- [ ] 언어 설정 (향후 확장)
+
+**산출물:**
+- `app/settings/page.tsx`
+
+---
+
+#### Task 7.4: 알림 UI (기본)
+- [ ] `components/NotificationBell.tsx`
+- [ ] 알림 목록 드롭다운 UI
+- [ ] Mock 알림 데이터
+- [ ] 읽음/안 읽음 표시
+
+**산출물:**
+- `components/NotificationBell.tsx`
+
+---
+
+#### Task 7.5: 검색 & 필터링 UI 개선
+- [ ] 전역 검색 바 개선
+- [ ] 필터 드롭다운 UI
+- [ ] 정렬 옵션 UI
+- [ ] 태그 필터 UI
+
+**산출물:**
+- `components/SearchBar.tsx` (개선)
+- `components/FilterBar.tsx`
+
+---
+
+## Phase 3: 기능 완성 (3주)
+
+**참고**: Phase 3에서는 클라이언트 상태 관리와 localStorage를 활용하여 기능을 구현합니다.
+
+### Week 8: 클라이언트 상태 관리
+
+#### Task 8.1: 상태 관리 설정
+- [ ] Zustand 또는 React Context 설치
+- [ ] 전역 상태 스토어 생성 (`lib/store.ts`)
+- [ ] 사용자 상태, 게시글 상태, 댓글 상태 관리
+
+**명령어:**
+```bash
+npm install zustand  # 또는 React Context 사용
+```
+
+**산출물:**
+- `lib/store.ts`
+
+---
+
+#### Task 8.2: 게시글 CRUD (localStorage)
+- [ ] 게시글 생성 (localStorage에 저장)
+- [ ] 게시글 수정
+- [ ] 게시글 삭제
+- [ ] Mock 데이터와 병합하여 표시
+
+**산출물:**
+- `lib/localStorage.ts` (유틸리티 함수)
+
+---
+
+#### Task 8.3: 댓글 CRUD (localStorage)
+- [ ] 댓글 작성 (localStorage)
+- [ ] 대댓글 작성
+- [ ] 댓글 수정/삭제
+- [ ] Optimistic UI 업데이트
+
+**산출물:**
+- 댓글 관련 상태 관리 로직
+
+---
+
+#### Task 8.4: 투표 시스템 (클라이언트 상태)
+- [ ] Upvote/Downvote 클라이언트 로직
+- [ ] localStorage에 투표 기록 저장
+- [ ] 투표 카운트 실시간 업데이트
+
+**산출물:**
+- 투표 관련 상태 관리 로직
+
+---
+
+#### Task 8.5: 임시 저장 기능
+- [ ] 게시글 작성 중 자동 저장 (Local Storage)
+- [ ] 페이지 새로고침 시 복원
+- [ ] `hooks/useAutoSave.ts` 훅
+
+**산출물:**
+- `hooks/useAutoSave.ts`
+
+---
+
+### Week 9: 검색 & 필터링
+
+#### Task 9.1: 클라이언트 사이드 검색
+- [ ] 검색 결과 페이지 (`app/search/page.tsx`)
+- [ ] 제목, 본문, 태그 검색 (클라이언트)
+- [ ] Mock + localStorage 데이터 통합 검색
+- [ ] 검색어 하이라이트
+
+**산출물:**
+- `app/search/page.tsx`
+- `lib/search.ts` (검색 로직)
+
+---
+
+#### Task 9.2: 게시글 필터링
+- [ ] 태그별 필터링
+- [ ] 카테고리별 필터링
+- [ ] 정렬 옵션 (인기순, 최신순, 댓글 많은 순)
+- [ ] URL Query Params 동기화
+
+**산출물:**
+- 필터링 로직 개선
+
+---
+
+#### Task 9.3: Q&A 필터링
+- [ ] 답변 없는 질문 필터
+- [ ] 채택된 질문 필터
+- [ ] 태그별 필터
+- [ ] 투표 순 정렬
+
+**산출물:**
+- Q&A 필터 로직
+
+---
+
+#### Task 9.4: 검색 성능 최적화
+- [ ] Debounce 적용
+- [ ] 검색 결과 캐싱
+- [ ] 무한 스크롤 또는 페이지네이션
+
+**산출물:**
+- `hooks/useDebounce.ts`
+- 검색 성능 개선
+
+---
+
+#### Task 9.5: 고급 필터 UI
+- [ ] 복합 필터 (태그 + 기간)
+- [ ] 필터 저장 기능 (localStorage)
+- [ ] 필터 초기화 버튼
+
+**산출물:**
+- `components/AdvancedFilter.tsx`
+
+---
+
+### Week 10: 최적화 & 테스트
+
+#### Task 10.1: 컴포넌트 성능 최적화
+- [ ] React.memo 적용 (PostCard, CommentItem 등)
+- [ ] useMemo, useCallback 최적화
+- [ ] 불필요한 리렌더링 제거
+- [ ] React DevTools Profiler 분석
+
+**산출물:**
+- 성능 최적화 보고서
+
+---
+
+#### Task 10.2: 이미지 최적화
+- [ ] Next.js Image 컴포넌트 적용 확인
+- [ ] Lazy Loading 적용
+- [ ] 이미지 압축
+- [ ] Placeholder blur 이미지
+
+**산출물:**
+- 이미지 최적화 완료
+
+---
+
+#### Task 10.3: 코드 분할 & 번들 최적화
+- [ ] Dynamic Import 적용
+- [ ] Route-based Code Splitting
+- [ ] 번들 분석 (webpack-bundle-analyzer)
+- [ ] 불필요한 의존성 제거
+
+**산출물:**
+- 번들 크기 최적화
+
+---
+
+#### Task 10.4: E2E 테스트 (Playwright)
+- [ ] 주요 사용자 플로우 테스트
+  - [ ] 회원가입/로그인
+  - [ ] 게시글 작성/읽기
+  - [ ] 댓글 작성
+  - [ ] 투표
+- [ ] 테스트 자동화
+
+**산출물:**
+- `e2e/` 테스트 스크립트
+
+---
+
+#### Task 10.5: 접근성 검증
+- [ ] Lighthouse a11y 점수 확인
+- [ ] ARIA 레이블 추가
+- [ ] 키보드 네비게이션 테스트
+- [ ] 스크린 리더 호환성
+
+**산출물:**
+- a11y 개선 보고서
+
+---
+
+## Phase 4: 데이터베이스 통합 & 배포 (2주)
+
+### Week 11: PostgreSQL 통합
+
+#### Task 11.1: PostgreSQL 스키마 구현
+- [ ] `database/schema.sql` 생성
+- [ ] CREATE TABLE 문 작성 (Users, Posts, Comments, Categories, Answers, Votes)
+- [ ] 인덱스 생성
+- [ ] FOREIGN KEY 제약조건 설정
+
+**산출물:**
+- `database/schema.sql`
+
+---
+
+#### Task 11.2: pg 라이브러리 설정
+- [ ] `pg` 패키지 설치
+- [ ] `lib/db.ts` 데이터베이스 연결 파일 생성
+- [ ] 커넥션 풀 설정
+- [ ] `.env`에 DATABASE_URL 추가
+
+**명령어:**
+```bash
+npm install pg @types/pg
+```
+
+**산출물:**
+- `lib/db.ts`
+
+---
+
+#### Task 11.3: API Routes 구현 (CRUD)
+- [ ] `app/api/posts/route.ts` (GET, POST)
+- [ ] `app/api/posts/[id]/route.ts` (GET, PATCH, DELETE)
+- [ ] `app/api/posts/[id]/comments/route.ts`
+- [ ] Prepared Statements 사용 (SQL injection 방지)
+
+**산출물:**
+- API Routes
+
+---
+
+#### Task 11.4: Mock API → Real API 전환
+- [ ] 클라이언트 코드 수정 (fetch API 엔드포인트 변경)
+- [ ] localStorage → PostgreSQL 데이터 마이그레이션
+- [ ] 기존 Mock 데이터 삭제 또는 백업
+
+**산출물:**
+- API 통합 완료
+
+---
+
+#### Task 11.5: 데이터 마이그레이션
+- [ ] Mock 데이터 → PostgreSQL 이동
+- [ ] 카테고리 데이터 삽입
+- [ ] 테스트 사용자 생성
+- [ ] 데이터 검증
+
+**산출물:**
+- 데이터 마이그레이션 완료
+
+---
+
+### Week 12: 최종 배포
+
+#### Task 12.1: 성능 최적화
 - [ ] Lighthouse 점수 측정 (목표: 90+)
-- [ ] Image Optimization (Next.js `<Image />` 확인)
-- [ ] 코드 스플리팅 (Dynamic Import)
-- [ ] 폰트 최적화 (`next/font`)
+- [ ] 코드 분할 확인
+- [ ] 이미지 최적화 확인
+- [ ] 번들 크기 최적화
 
 **산출물:**
 - Lighthouse 리포트
 
 ---
 
-#### Task 11.2: SEO 최적화
-- [ ] 메타 태그 추가 (title, description, keywords)
+#### Task 12.2: SEO 최적화
+- [ ] 메타 태그 추가 (title, description)
 - [ ] Open Graph 이미지 설정
-- [ ] Structured Data (JSON-LD)
 - [ ] `robots.txt` 생성
 - [ ] `sitemap.xml` 생성
 
@@ -917,10 +953,9 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-#### Task 11.3: 접근성 (a11y) 테스트
-- [ ] Axe DevTools 검사
+#### Task 12.3: 접근성 테스트
+- [ ] Lighthouse a11y 점수 확인
 - [ ] 키보드 네비게이션 테스트
-- [ ] 스크린 리더 테스트
 - [ ] ARIA 레이블 추가
 
 **산출물:**
@@ -928,55 +963,22 @@ npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-image
 
 ---
 
-### Week 12: QA & 배포
-
-#### Task 12.1: 버그 수정
-- [ ] 버그 리스트 작성
-- [ ] 우선순위별 수정
-
-**산출물:**
-- 버그 트래킹 문서
-
----
-
-#### Task 12.2: 모바일 반응형 테스트
-- [ ] iPhone, Android 테스트
-- [ ] 태블릿 테스트
-- [ ] 다양한 화면 크기 확인
-
-**산출물:**
-- 테스트 리포트
-
----
-
-#### Task 12.3: Vercel 배포
+#### Task 12.4: Vercel 배포
 - [ ] Vercel 계정 연결
 - [ ] GitHub 리포지토리 연결
-- [ ] 환경 변수 설정 (`.env` → Vercel Environment Variables)
+- [ ] 환경 변수 설정 (DATABASE_URL, NEXTAUTH_SECRET 등)
 - [ ] 배포 실행
-
-**배포 URL:**
-- https://vibe-coding-community.vercel.app
 
 **산출물:**
 - 프로덕션 URL
 
 ---
 
-#### Task 12.4: 도메인 연결
-- [ ] 도메인 구매 (예: vibecoding.com)
-- [ ] Vercel에 커스텀 도메인 연결
-- [ ] SSL 인증서 자동 설정 확인
-
-**산출물:**
-- 커스텀 도메인 연결 완료
-
----
-
-#### Task 12.5: 모니터링 설정
+#### Task 12.5: 모니터링 & QA
 - [ ] Sentry 설치 (에러 트래킹)
 - [ ] Vercel Analytics 활성화
-- [ ] Google Analytics 연동 (선택)
+- [ ] 최종 버그 수정
+- [ ] 모바일 반응형 테스트
 
 **명령어:**
 ```bash
@@ -985,34 +987,40 @@ npx @sentry/wizard@latest -i nextjs
 ```
 
 **산출물:**
-- Sentry 대시보드
-- Vercel Analytics
+- 모니터링 설정 완료
+- QA 통과
 
 ---
 
 ## 우선순위 매트릭스
 
-### P0 (필수, 0-6주)
+### P0 (필수, Week 1-7)
 - [x] Next.js 프로젝트 초기화
 - [x] 기존 컴포넌트 이전
 - [x] 인증 시스템 (NextAuth.js)
-- [x] Prisma 스키마 정의
-- [ ] 커뮤니티 게시글 CRUD
-- [ ] 댓글 기능
-- [ ] 투표 시스템
+- [ ] TypeScript 인터페이스 & Mock 데이터
+- [ ] 모든 페이지 UI 구현 (커뮤니티, Q&A, 뉴스, 프로필)
+- [ ] 기본 컴포넌트 (PostCard, CommentList, VoteButtons 등)
 
-### P1 (중요, 7-10주)
-- [ ] Q&A 시스템 (Help me)
-- [ ] 답변 채택 기능
-- [ ] 검색 기능
-- [ ] 뉴스 페이지
+### P1 (중요, Week 8-10)
+- [ ] 클라이언트 상태 관리
+- [ ] localStorage 기반 CRUD
+- [ ] 검색 & 필터링
+- [ ] 성능 최적화
+- [ ] E2E 테스트
 
-### P2 (향후, 11주+)
+### P2 (DB 통합, Week 11-12)
+- [ ] PostgreSQL 스키마 구현
+- [ ] API Routes 구현
+- [ ] Mock → Real API 전환
+- [ ] 배포 & 모니터링
+
+### P3 (향후 고도화)
 - [ ] 실시간 알림 (WebSocket)
 - [ ] 관리자 대시보드
-- [ ] 고급 검색 (Algolia)
+- [ ] 이미지 업로드 (Cloudinary)
 - [ ] 메시지 시스템 (DM)
-- [ ] 프로필 커스터마이징
+- [ ] ORM 도입 검토 (Prisma/Drizzle)
 
 ---
 
@@ -1020,72 +1028,76 @@ npx @sentry/wizard@latest -i nextjs
 
 ```
 인증 시스템 (Week 3)
-    ├─> 게시글 작성 (Week 6)
-    ├─> 댓글 작성 (Week 7)
-    ├─> 투표 (Week 7)
-    └─> 질문 작성 (Week 9)
+    ├─> 모든 로그인 필요 페이지
+    ├─> 프로필 페이지 (Week 7)
+    └─> 게시글/댓글 작성 (Week 5-6)
 
-Prisma 스키마 (Week 4)
-    ├─> 모든 API Routes
-    ├─> 게시글 목록 (Week 5)
-    ├─> 게시글 상세 (Week 6)
-    └─> 질문 목록 (Week 9)
+TypeScript 인터페이스 & Mock 데이터 (Week 4)
+    ├─> 모든 페이지 UI (Week 4-7)
+    ├─> 클라이언트 상태 관리 (Week 8)
+    └─> localStorage 로직 (Week 8)
 
-Tiptap 에디터 (Week 6)
-    ├─> 게시글 작성 (Week 6)
-    ├─> 질문 작성 (Week 9)
-    └─> 뉴스 작성 (Week 10)
+Tiptap 에디터 (Week 5)
+    ├─> 게시글 작성 (Week 5)
+    ├─> 댓글 작성 (Week 5)
+    └─> Q&A 작성 (Week 6)
 
-이미지 업로드 (Week 6)
-    ├─> 게시글 이미지 (Week 6)
-    └─> 뉴스 커버 이미지 (Week 10)
+클라이언트 상태 관리 (Week 8)
+    ├─> CRUD 기능 (Week 8)
+    ├─> 검색 & 필터링 (Week 9)
+    └─> Real API 전환 (Week 11)
+
+PostgreSQL 스키마 (Week 11)
+    ├─> API Routes (Week 11)
+    ├─> Mock → Real 전환 (Week 11)
+    └─> 배포 (Week 12)
 ```
 
 ---
 
 ## 진행 상황 체크리스트
 
-### Phase 1: 기반 구축 (4주)
-- [ ] Week 1: 프로젝트 초기화 (5개 Task)
-- [ ] Week 2: 기존 컴포넌트 이전 (6개 Task)
-- [ ] Week 3: 인증 시스템 (5개 Task)
-- [ ] Week 4: 데이터 모델 & API 기초 (5개 Task)
+### Phase 1: 기반 구축 (3주)
+- [x] Week 1: 프로젝트 초기화 (5개 Task) - 대부분 완료
+- [x] Week 2: 기존 컴포넌트 이전 (6개 Task) - 완료
+- [x] Week 3: 인증 시스템 (5개 Task) - 대부분 완료
+- [ ] Week 4: Mock 데이터 & 커뮤니티 UI (5개 Task)
 
-**완료율**: 0/21 Tasks
-
----
-
-### Phase 2: 커뮤니티 기능 (4주)
-- [ ] Week 5: 커뮤니티 목록 (4개 Task)
-- [ ] Week 6: 게시글 상세 & 작성 (5개 Task)
-- [ ] Week 7: 댓글 & 투표 (5개 Task)
-- [ ] Week 8: 검색 & 알림 (3개 Task)
-
-**완료율**: 0/17 Tasks
+**완료율**: 16/21 Tasks (76%)
 
 ---
 
-### Phase 3: Q&A & 뉴스 (2주)
-- [ ] Week 9: Help me (Q&A) (5개 Task)
-- [ ] Week 10: 뉴스 (3개 Task)
+### Phase 2: UI 우선 구현 (4주)
+- [ ] Week 5: 게시글 상세 & 작성 UI (5개 Task)
+- [ ] Week 6: Q&A & 뉴스 UI (5개 Task)
+- [ ] Week 7: 프로필 & 설정 UI (5개 Task)
 
-**완료율**: 0/8 Tasks
+**완료율**: 0/15 Tasks
 
 ---
 
-### Phase 4: 고도화 & 배포 (2주)
-- [ ] Week 11: 최적화 (3개 Task)
-- [ ] Week 12: QA & 배포 (5개 Task)
+### Phase 3: 기능 완성 (3주)
+- [ ] Week 8: 클라이언트 상태 관리 (5개 Task)
+- [ ] Week 9: 검색 & 필터링 (5개 Task)
+- [ ] Week 10: 최적화 & 테스트 (5개 Task)
 
-**완료율**: 0/8 Tasks
+**완료율**: 0/15 Tasks
+
+---
+
+### Phase 4: 데이터베이스 통합 & 배포 (2주)
+- [ ] Week 11: PostgreSQL 통합 (5개 Task)
+- [ ] Week 12: 최종 배포 (5개 Task)
+
+**완료율**: 0/10 Tasks
 
 ---
 
 ## 전체 진행 상황
 
-**총 Tasks**: 54개
-**완료**: 0개
-**진행률**: 0%
+**총 Tasks**: 61개 (재구성 후)
+**완료**: 16개
+**진행률**: 26%
 
 ---
 
@@ -1106,6 +1118,7 @@ Tiptap 에디터 (Week 6)
 |------|------|-----------|
 | 1.0 | 2025-10-15 | 초기 Task 문서 작성 |
 | 1.1 | 2025-10-16 | 프로젝트 쇼케이스 Task 제거, 전체 Task 58→54개로 조정, 기간 13주→12주로 단축 |
+| 1.2 | 2025-10-20 | **UI 우선 개발 전략으로 전면 재구성**<br>- Phase 재구성: 기반(3주) → UI 우선(4주) → 기능 완성(3주) → DB 통합(2주)<br>- Week 4: Prisma Task 제거 → Mock 데이터 & 커뮤니티 UI Task<br>- Week 5-7: 모든 페이지 UI 구현 (Mock 데이터 기반)<br>- Week 8-10: 클라이언트 상태 관리 & 기능 완성<br>- Week 11-12: PostgreSQL 통합 & 배포<br>- 총 Task: 54개 → 61개 (UI 중심으로 재분류) |
 
 ---
 
