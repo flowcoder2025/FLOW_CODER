@@ -532,12 +532,12 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 5.3: 게시글 작성 페이지 UI
-- [ ] `app/community/new/page.tsx` 생성
-- [ ] 카테고리 선택 드롭다운
-- [ ] 제목 입력
-- [ ] 본문 입력 (Tiptap)
-- [ ] 태그 입력
-- [ ] Mock 데이터에 저장 (localStorage)
+- [x] `app/community/new/page.tsx` 생성
+- [x] 카테고리 선택 드롭다운
+- [x] 제목 입력
+- [x] 본문 입력 (Tiptap)
+- [x] 태그 입력
+- [x] Mock 데이터에 저장 (localStorage)
 
 **산출물:**
 - `app/community/new/page.tsx`
