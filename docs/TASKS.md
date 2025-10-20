@@ -505,11 +505,11 @@ export interface Post {
 ### Week 5: 게시글 상세 & 작성 UI
 
 #### Task 5.1: 게시글 상세 페이지 UI
-- [ ] `app/community/[category]/[postId]/page.tsx` 생성
-- [ ] Mock 데이터로 게시글 상세 표시
-- [ ] 투표 버튼 UI
-- [ ] 댓글 섹션 UI
-- [ ] 작성자 정보 표시
+- [x] `app/community/[category]/[postId]/page.tsx` 생성
+- [x] Mock 데이터로 게시글 상세 표시
+- [x] 투표 버튼 UI
+- [x] 댓글 섹션 UI
+- [x] 작성자 정보 표시
 
 **산출물:**
 - `app/community/[category]/[postId]/page.tsx`
