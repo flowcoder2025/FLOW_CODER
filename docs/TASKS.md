@@ -582,10 +582,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 6.2: 질문 상세 페이지 UI
-- [ ] `app/help/[questionId]/page.tsx` 생성
-- [ ] 질문 본문 표시
-- [ ] 답변 목록 UI
-- [ ] 답변 채택 버튼 UI
+- [x] `app/help/[questionId]/page.tsx` 생성
+- [x] 질문 본문 표시
+- [x] 답변 목록 UI
+- [x] 답변 채택 버튼 UI
 
 **산출물:**
 - `app/help/[questionId]/page.tsx`

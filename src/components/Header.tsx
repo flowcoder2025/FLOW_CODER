@@ -32,7 +32,6 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/" className="hover:text-primary transition-colors">홈</Link>
           <Link href="/community" className="hover:text-primary transition-colors">커뮤니티</Link>
-          <Link href="/projects" className="hover:text-primary transition-colors">프로젝트</Link>
           <Link href="/help" className="hover:text-primary transition-colors">Help me</Link>
           <Link href="/news" className="hover:text-primary transition-colors">뉴스</Link>
         </nav>
