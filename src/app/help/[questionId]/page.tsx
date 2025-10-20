@@ -1,15 +1,17 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronRight, MessageSquare, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { VoteButtons } from '@/components/VoteButtons';
 import { AnswerCard } from '@/components/AnswerCard';
 import { getPostById, getAnswersByQuestionId } from '@/lib/mock-data';
+import type { AnswerWithAuthor } from '@/lib/types';
 
 /**
  * 질문 상세 페이지
@@ -35,15 +37,61 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
     notFound();
   }
 
-  // 답변 조회 및 정렬 (채택된 답변이 먼저)
-  const allAnswers = getAnswersByQuestionId(questionId);
-  const sortedAnswers = [...allAnswers].sort((a, b) => {
+  // 답변 조회 및 상태 관리
+  const initialAnswers = getAnswersByQuestionId(questionId);
+  const [answers, setAnswers] = useState<AnswerWithAuthor[]>(initialAnswers);
+  const [answerContent, setAnswerContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  // 답변 정렬 (채택된 답변이 먼저)
+  const sortedAnswers = [...answers].sort((a, b) => {
     if (a.isAccepted && !b.isAccepted) return -1;
     if (!a.isAccepted && b.isAccepted) return 1;
     return 0;
   });
 
-  const acceptedAnswer = allAnswers.find((a) => a.isAccepted);
+  const acceptedAnswer = answers.find((a) => a.isAccepted);
+
+  // 답변 제출 핸들러
+  const handleSubmitAnswer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // 폼 검증
+    if (answerContent.trim().length < 10) {
+      setError('답변은 최소 10자 이상 입력해주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // 새 답변 생성 (더미 데이터)
+    const newAnswer: AnswerWithAuthor = {
+      id: `answer_${Date.now()}`,
+      questionId: questionId,
+      authorId: 'current_user',
+      content: answerContent.trim(),
+      upvotes: 0,
+      isAccepted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      author: {
+        id: 'current_user',
+        username: 'anonymous',
+        displayName: '익명 사용자',
+        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous',
+        reputation: 0,
+      },
+    };
+
+    // 답변 목록에 추가
+    setTimeout(() => {
+      setAnswers([newAnswer, ...answers]);
+      setAnswerContent('');
+      setIsSubmitting(false);
+    }, 500);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -82,7 +130,7 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
                     ✓ 해결됨
                   </Badge>
                 )}
-                {!acceptedAnswer && allAnswers.length === 0 && (
+                {!acceptedAnswer && answers.length === 0 && (
                   <Badge variant="secondary" className="text-xs">
                     답변 대기 중
                   </Badge>
@@ -161,7 +209,7 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <MessageSquare className="h-6 w-6" />
-            {allAnswers.length}개의 답변
+            {answers.length}개의 답변
           </h2>
         </div>
 
@@ -183,18 +231,27 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
         )}
       </div>
 
-      {/* 답변 작성 폼 (간단한 버전) */}
+      {/* 답변 작성 폼 */}
       <Card>
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold mb-4">답변 작성</h3>
-          <textarea
-            className="w-full min-h-[150px] p-3 border rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-primary"
-            placeholder="답변을 입력하세요..."
-            disabled
-          />
-          <div className="flex justify-end mt-4">
-            <Button disabled>답변 제출 (곧 지원 예정)</Button>
-          </div>
+          <form onSubmit={handleSubmitAnswer}>
+            <Textarea
+              value={answerContent}
+              onChange={(e) => setAnswerContent(e.target.value)}
+              placeholder="답변을 입력하세요... (최소 10자 이상)"
+              className="min-h-[150px] resize-y"
+              disabled={isSubmitting}
+            />
+            {error && (
+              <p className="text-sm text-destructive mt-2">{error}</p>
+            )}
+            <div className="flex justify-end mt-4">
+              <Button type="submit" disabled={isSubmitting || answerContent.trim().length < 10}>
+                {isSubmitting ? '제출 중...' : '답변 제출'}
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

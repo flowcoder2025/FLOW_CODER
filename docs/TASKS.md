@@ -593,10 +593,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 6.3: 답변 섹션 UI
-- [ ] `components/AnswerList.tsx`
-- [ ] `components/AnswerItem.tsx`
-- [ ] 답변 작성 폼 UI
-- [ ] 채택된 답변 강조 표시
+- [x] `components/AnswerList.tsx`
+- [x] `components/AnswerItem.tsx`
+- [x] 답변 작성 폼 UI
+- [x] 채택된 답변 강조 표시
 
 **산출물:**
 - `components/AnswerList.tsx`
