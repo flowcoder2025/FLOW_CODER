@@ -1,19 +1,95 @@
+'use client';
+
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, TrendingUp } from 'lucide-react';
-import { mockCategories, getPostsByCategory, getRecentPosts } from '@/lib/mock-data';
+import { MessageSquare } from 'lucide-react';
+import { SearchBar } from '@/components/SearchBar';
+import { FilterBar } from '@/components/FilterBar';
+import { mockCategories, getPostsByCategory, mockPosts } from '@/lib/mock-data';
+import type { PostSortOption, PostFilterOptions, PostWithAuthor } from '@/lib/types';
 
 /**
  * 커뮤니티 메인 페이지
  *
- * 4개 카테고리 카드 표시 및 최근 인기 게시글 미리보기
+ * 기능:
+ * - 카테고리 카드 표시
+ * - 검색 바 (SearchBar)
+ * - 필터 바 (FilterBar): 카테고리, 타입, 정렬, 태그
+ * - 필터링된 게시글 목록 표시
  */
 export default function CommunityPage() {
-  const recentPosts = getRecentPosts(5);
+  // 검색 & 필터 상태
+  const [keyword, setKeyword] = useState('');
+  const [filters, setFilters] = useState<PostFilterOptions>({});
+  const [sortBy, setSortBy] = useState<PostSortOption>('recent');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // 필터링 & 정렬 로직
+  const filteredPosts = useMemo(() => {
+    let posts: PostWithAuthor[] = mockPosts;
+
+    // 검색어 필터링
+    if (keyword) {
+      posts = posts.filter(
+        (post) =>
+          post.title.toLowerCase().includes(keyword.toLowerCase()) ||
+          post.content.toLowerCase().includes(keyword.toLowerCase())
+      );
+    }
+
+    // 카테고리 필터링
+    if (filters.categoryId) {
+      posts = posts.filter((post) => post.categoryId === filters.categoryId);
+    }
+
+    // 게시글 타입 필터링
+    if (filters.postType) {
+      posts = posts.filter((post) => post.postType === filters.postType);
+    }
+
+    // 태그 필터링
+    if (selectedTags.length > 0) {
+      posts = posts.filter((post) =>
+        selectedTags.every((tag) => post.tags.includes(tag))
+      );
+    }
+
+    // 정렬
+    posts.sort((a, b) => {
+      switch (sortBy) {
+        case 'popular':
+          return b.upvotes - b.downvotes - (a.upvotes - a.downvotes);
+        case 'recent':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'comments':
+          return b.commentCount - a.commentCount;
+        case 'views':
+          return b.viewCount - a.viewCount;
+        default:
+          return 0;
+      }
+    });
+
+    return posts;
+  }, [keyword, filters, selectedTags, sortBy]);
+
+  // 필터 초기화
+  const handleReset = () => {
+    setKeyword('');
+    setFilters({});
+    setSortBy('recent');
+    setSelectedTags([]);
+  };
+
+  // 태그 제거
+  const handleTagRemove = (tag: string) => {
+    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mt-16">
       {/* 페이지 헤더 */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">커뮤니티</h1>
@@ -23,10 +99,10 @@ export default function CommunityPage() {
       </div>
 
       {/* 카테고리 그리드 */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {mockCategories.map((category) => {
           const categoryPosts = getPostsByCategory(category.id);
-          const recentPost = categoryPosts[0]; // 가장 최근 게시글
+          const recentPost = categoryPosts[0];
 
           return (
             <Link
@@ -66,15 +142,36 @@ export default function CommunityPage() {
         })}
       </div>
 
-      {/* 최근 인기 게시글 섹션 */}
-      <div className="mt-12">
-        <div className="flex items-center gap-2 mb-6">
-          <TrendingUp className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold">최근 인기 게시글</h2>
-        </div>
+      {/* 검색 & 필터 섹션 */}
+      <div className="space-y-4 mb-8">
+        <SearchBar
+          onSearch={setKeyword}
+          placeholder="게시글 검색..."
+          liveSearch
+        />
+        <FilterBar
+          filters={filters}
+          sortBy={sortBy}
+          selectedTags={selectedTags}
+          onFilterChange={setFilters}
+          onSortChange={setSortBy}
+          onTagRemove={handleTagRemove}
+          onReset={handleReset}
+        />
+      </div>
 
-        <div className="space-y-4">
-          {recentPosts.map((post) => (
+      {/* 게시글 목록 */}
+      <div className="space-y-4">
+        {filteredPosts.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">
+                검색 결과가 없습니다. 다른 검색어나 필터를 시도해보세요.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredPosts.map((post) => (
             <Link
               key={post.id}
               href={`/community/${post.category.slug}/${post.id}`}
@@ -94,10 +191,7 @@ export default function CommunityPage() {
                     {/* 게시글 정보 */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge
-                          variant="outline"
-                          className={`bg-${post.category.color}-50 text-${post.category.color}-700 border-${post.category.color}-200`}
-                        >
+                        <Badge variant="outline">
                           {post.category.icon} {post.category.name}
                         </Badge>
                         {post.isPinned && (
@@ -120,7 +214,13 @@ export default function CommunityPage() {
                             <Badge
                               key={tag}
                               variant="secondary"
-                              className="text-xs"
+                              className="text-xs cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (!selectedTags.includes(tag)) {
+                                  setSelectedTags((prev) => [...prev, tag]);
+                                }
+                              }}
                             >
                               #{tag}
                             </Badge>
@@ -151,8 +251,8 @@ export default function CommunityPage() {
                 </CardContent>
               </Card>
             </Link>
-          ))}
-        </div>
+          ))
+        )}
       </div>
     </div>
   );

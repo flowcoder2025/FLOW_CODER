@@ -676,10 +676,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 7.5: 검색 & 필터링 UI 개선
-- [ ] 전역 검색 바 개선
-- [ ] 필터 드롭다운 UI
-- [ ] 정렬 옵션 UI
-- [ ] 태그 필터 UI
+- [x] 전역 검색 바 개선
+- [x] 필터 드롭다운 UI
+- [x] 정렬 옵션 UI
+- [x] 태그 필터 UI
 
 **산출물:**
 - `components/SearchBar.tsx` (개선)
