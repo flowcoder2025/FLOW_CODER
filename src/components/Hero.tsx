@@ -6,7 +6,7 @@ import { Play, Github, ArrowRight } from "lucide-react";
 
 export function Hero() {
   return (
-    <section id="home" className="pt-20 pb-16 min-h-screen flex items-center">
+    <section id="home" className="pb-16 min-h-screen flex items-center">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
