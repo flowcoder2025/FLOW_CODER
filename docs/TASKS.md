@@ -630,14 +630,15 @@ npm install @tiptap/react @tiptap/starter-kit
 ### Week 7: 프로필 & 설정 UI
 
 #### Task 7.1: 사용자 프로필 페이지 UI
-- [ ] `app/profile/[username]/page.tsx` 개선
-- [ ] 사용자 정보 표시 (아바타, bio, reputation)
-- [ ] 작성한 게시글 목록
-- [ ] 작성한 댓글 목록
-- [ ] Mock 데이터 활용
+- [x] `app/profile/[username]/page.tsx` 개선
+- [x] 사용자 정보 표시 (아바타, bio, reputation)
+- [x] 작성한 게시글 목록
+- [x] 작성한 댓글 목록
+- [x] Mock 데이터 활용
 
 **산출물:**
 - `app/profile/[username]/page.tsx` (개선)
+- `components/ProfileTabs.tsx` (새 파일)
 
 ---
 

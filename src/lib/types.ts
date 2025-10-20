@@ -173,6 +173,8 @@ export interface CommentWithAuthor extends Comment {
   author: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'reputation'>;
   /** 대댓글 목록 (재귀 구조) */
   replies?: CommentWithAuthor[];
+  /** 댓글이 달린 포스트 (프로필 페이지용) */
+  post?: PostWithAuthor;
 }
 
 /**
