@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowUp, ArrowDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { VoteButtons } from '@/components/VoteButtons';
 import type { CommentWithAuthor } from '@/lib/types';
 
 /**
@@ -34,7 +34,6 @@ export function CommentItem({
   maxDepth = 5,
 }: CommentItemProps) {
   const replies = getReplies(comment.id);
-  const score = comment.upvotes - comment.downvotes;
 
   return (
     <div className={depth > 0 ? 'ml-8 mt-4' : ''}>
@@ -80,25 +79,13 @@ export function CommentItem({
 
           {/* 투표 & 답글 버튼 */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                <ArrowUp className="h-3 w-3" />
-              </Button>
-              <span
-                className={`text-sm font-medium ${
-                  score > 0
-                    ? 'text-primary'
-                    : score < 0
-                      ? 'text-destructive'
-                      : ''
-                }`}
-              >
-                {score}
-              </span>
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                <ArrowDown className="h-3 w-3" />
-              </Button>
-            </div>
+            <VoteButtons
+              upvotes={comment.upvotes}
+              downvotes={comment.downvotes}
+              orientation="horizontal"
+              size="sm"
+              voteId={`comment_${comment.id}`}
+            />
 
             <Button variant="ghost" size="sm" className="h-7 text-xs">
               답글

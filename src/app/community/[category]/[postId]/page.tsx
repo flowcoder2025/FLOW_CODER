@@ -3,10 +3,11 @@
 import { use } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowUp, ArrowDown, MessageSquare, Eye, ChevronRight } from 'lucide-react';
+import { MessageSquare, Eye, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CommentList } from '@/components/CommentList';
+import { VoteButtons } from '@/components/VoteButtons';
 import { getPostById, getCommentsByPostId } from '@/lib/mock-data';
 
 /**
@@ -35,7 +36,6 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
 
   // 댓글 조회
   const allComments = getCommentsByPostId(postId);
-  const score = post.upvotes - post.downvotes;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -64,29 +64,13 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
         <CardContent className="p-6">
           <div className="flex items-start gap-6">
             {/* 좌측: 투표 섹션 */}
-            <div className="flex flex-col items-center gap-2 min-w-[50px]">
-              <button
-                className="p-2 rounded hover:bg-accent transition-colors"
-                aria-label="추천"
-                type="button"
-              >
-                <ArrowUp className="h-6 w-6 text-muted-foreground hover:text-primary" />
-              </button>
-              <span
-                className={`text-2xl font-bold ${
-                  score > 0 ? 'text-primary' : score < 0 ? 'text-destructive' : ''
-                }`}
-              >
-                {score}
-              </span>
-              <button
-                className="p-2 rounded hover:bg-accent transition-colors"
-                aria-label="비추천"
-                type="button"
-              >
-                <ArrowDown className="h-6 w-6 text-muted-foreground hover:text-destructive" />
-              </button>
-            </div>
+            <VoteButtons
+              upvotes={post.upvotes}
+              downvotes={post.downvotes}
+              orientation="vertical"
+              size="lg"
+              voteId={`post_${post.id}`}
+            />
 
             {/* 우측: 콘텐츠 섹션 */}
             <div className="flex-1 min-w-0">

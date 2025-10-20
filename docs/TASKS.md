@@ -557,10 +557,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 5.5: 투표 버튼 UI
-- [ ] `components/VoteButtons.tsx`
-- [ ] ⬆ Upvote 버튼
-- [ ] ⬇ Downvote 버튼
-- [ ] 클라이언트 상태 관리
+- [x] `components/VoteButtons.tsx`
+- [x] ⬆ Upvote 버튼
+- [x] ⬇ Downvote 버튼
+- [x] 클라이언트 상태 관리
 
 **산출물:**
 - `components/VoteButtons.tsx`
