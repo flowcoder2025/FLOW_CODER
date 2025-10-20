@@ -1,7 +1,8 @@
 # 바이브코딩 커뮤니티 플랫폼 PRD (Product Requirements Document)
 
-**문서 버전**: 1.1
+**문서 버전**: 1.2
 **작성일**: 2025-10-15
+**최종 수정**: 2025-10-20
 **프로젝트명**: Vibe Coding Community Platform
 
 ---
@@ -71,9 +72,14 @@
 | 기술 | 버전 | 용도 |
 |------|------|------|
 | **Next.js API Routes** | 14+ | 백엔드 API |
-| **Prisma** | 5+ | ORM |
 | **PostgreSQL** | 15+ | 관계형 데이터베이스 |
+| **pg** | 8+ | PostgreSQL Node.js 클라이언트 |
 | **NextAuth.js** | v5 (Auth.js) | 인증 시스템 |
+
+**데이터베이스 전략:**
+- **Phase 1-3 (Week 1-10)**: Mock 데이터 사용 (TypeScript 인터페이스 기반)
+- **Phase 4 (Week 11-12)**: PostgreSQL 직접 연결 (pg 라이브러리 사용)
+- **고도화 단계**: ORM 도입 재검토 (Prisma 또는 Drizzle)
 
 ### 2.3 상태 관리 & 데이터 Fetching
 
@@ -203,23 +209,27 @@ app/
     └── ...
 ```
 
-#### Phase 4: 백엔드 통합 (2주)
+#### Phase 4: 데이터베이스 통합 (2주)
 
-1. **Prisma 설정**
+**참고**: Phase 1-3에서는 Mock 데이터로 UI를 먼저 구현하고, Phase 4에서 PostgreSQL을 연결합니다.
+
+1. **PostgreSQL 설정**
    ```bash
-   npm install prisma @prisma/client
-   npx prisma init
+   npm install pg
    ```
 
-2. **데이터베이스 스키마 정의** (`prisma/schema.prisma`)
+2. **데이터베이스 스키마 구현** (`database/schema.sql`)
+   - CREATE TABLE 문 실행
+   - 인덱스 생성
 
-3. **NextAuth.js 설정**
-   - GitHub, Google OAuth 연동
-   - JWT 세션 관리
+3. **데이터베이스 연결 설정** (`lib/db.ts`)
+   - pg 라이브러리 설정
+   - 커넥션 풀 관리
 
 4. **API Routes 구현**
    - CRUD 엔드포인트
-   - 인증 미들웨어
+   - Prepared Statements 사용 (SQL injection 방지)
+   - Mock API → Real API 전환
 
 #### Phase 5: 기능 구현 (4주)
 
@@ -552,183 +562,211 @@ app/
 
 ## 6. 데이터 모델
 
-### 6.1 Prisma 스키마
+### 6.1 TypeScript 인터페이스 (Phase 1-3)
 
-```prisma
-// prisma/schema.prisma
+**Phase 1-3에서는 Mock 데이터를 사용하여 UI 우선 개발을 진행합니다.**
 
-generator client {
-  provider = "prisma-client-js"
+```typescript
+// lib/types.ts
+
+export interface User {
+  id: string
+  username: string
+  email: string
+  password?: string  // OAuth 사용자는 null
+  displayName?: string
+  avatarUrl?: string
+  bio?: string
+  reputation: number
+  role: 'USER' | 'MODERATOR' | 'ADMIN'
+  createdAt: string
+  updatedAt: string
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+export interface Category {
+  id: string
+  name: string        // "자유게시판"
+  slug: string        // "general"
+  description?: string
+  icon?: string
+  color?: string
+  postCount: number
+  createdAt: string
 }
 
-// ─────────────────────────────────────
-// User (사용자)
-// ─────────────────────────────────────
-model User {
-  id            String    @id @default(cuid())
-  username      String    @unique
-  email         String    @unique
-  password      String?   // OAuth 사용자는 null
-  displayName   String?
-  avatarUrl     String?
-  bio           String?
-  reputation    Int       @default(0)  // 평판 점수
-  role          Role      @default(USER)
-
-  posts         Post[]
-  comments      Comment[]
-  answers       Answer[]
-  votes         Vote[]
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+export interface Post {
+  id: string
+  title: string
+  content: string
+  postType: 'DISCUSSION' | 'QUESTION' | 'SHOWCASE' | 'NEWS'
+  authorId: string
+  categoryId: string
+  upvotes: number
+  downvotes: number
+  viewCount: number
+  isPinned: boolean
+  isLocked: boolean
+  tags: string[]
+  createdAt: string
+  updatedAt: string
 }
 
-enum Role {
-  USER
-  MODERATOR
-  ADMIN
+export interface Comment {
+  id: string
+  content: string
+  authorId: string
+  postId: string
+  parentId?: string  // 대댓글용
+  upvotes: number
+  downvotes: number
+  createdAt: string
+  updatedAt: string
 }
 
-// ─────────────────────────────────────
-// Category (카테고리)
-// ─────────────────────────────────────
-model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique  // "자유게시판"
-  slug        String   @unique  // "general"
-  description String?
-  icon        String?
-  color       String?  // 테마 색상
-  postCount   Int      @default(0)
-
-  posts       Post[]
-
-  createdAt   DateTime @default(now())
+export interface Answer {
+  id: string
+  content: string
+  questionId: string  // Post의 id
+  authorId: string
+  isAccepted: boolean
+  upvotes: number
+  createdAt: string
+  updatedAt: string
 }
 
-// ─────────────────────────────────────
-// Post (게시글)
-// ─────────────────────────────────────
-model Post {
-  id          String   @id @default(cuid())
-  title       String
-  content     String   @db.Text
-  postType    PostType @default(DISCUSSION)
-
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-
-  upvotes     Int      @default(0)
-  downvotes   Int      @default(0)
-  viewCount   Int      @default(0)
-  isPinned    Boolean  @default(false)
-  isLocked    Boolean  @default(false)
-
-  tags        String[]
-
-  comments    Comment[]
-  votes       Vote[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([categoryId])
-  @@index([authorId])
-}
-
-enum PostType {
-  DISCUSSION  // 일반 토론
-  QUESTION    // 질문 (Help me)
-  SHOWCASE    // 작품 공유
-  NEWS        // 뉴스
-}
-
-// ─────────────────────────────────────
-// Comment (댓글)
-// ─────────────────────────────────────
-model Comment {
-  id              String    @id @default(cuid())
-  content         String    @db.Text
-
-  authorId        String
-  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  postId          String
-  post            Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  parentId        String?   // 대댓글용
-  parent          Comment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
-  replies         Comment[] @relation("CommentThread")
-
-  upvotes         Int       @default(0)
-  downvotes       Int       @default(0)
-
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  @@index([postId])
-  @@index([authorId])
-}
-
-// ─────────────────────────────────────
-// Answer (답변 - Help me 전용)
-// ─────────────────────────────────────
-model Answer {
-  id          String   @id @default(cuid())
-  content     String   @db.Text
-
-  questionId  String   // Post의 id (postType이 QUESTION인 경우)
-
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  isAccepted  Boolean  @default(false)  // 채택 여부
-  upvotes     Int      @default(0)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([questionId])
-  @@index([authorId])
-}
-
-// ─────────────────────────────────────
-// Vote (투표)
-// ─────────────────────────────────────
-model Vote {
-  id        String   @id @default(cuid())
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  postId    String?
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  voteType  VoteType
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, postId])
-  @@index([userId])
-  @@index([postId])
-}
-
-enum VoteType {
-  UP
-  DOWN
+export interface Vote {
+  id: string
+  userId: string
+  postId?: string
+  voteType: 'UP' | 'DOWN'
+  createdAt: string
 }
 ```
 
-### 6.2 데이터베이스 관계 다이어그램
+### 6.2 PostgreSQL 스키마 (Phase 4)
+
+**Phase 4 (Week 11-12)에서 PostgreSQL 데이터베이스를 구축합니다.**
+
+```sql
+-- database/schema.sql
+
+-- ─────────────────────────────────────
+-- User (사용자)
+-- ─────────────────────────────────────
+CREATE TYPE user_role AS ENUM ('USER', 'MODERATOR', 'ADMIN');
+
+CREATE TABLE users (
+  id VARCHAR(30) PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255),  -- OAuth 사용자는 NULL
+  display_name VARCHAR(100),
+  avatar_url TEXT,
+  bio TEXT,
+  reputation INTEGER DEFAULT 0,
+  role user_role DEFAULT 'USER',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_email ON users(email);
+
+-- ─────────────────────────────────────
+-- Category (카테고리)
+-- ─────────────────────────────────────
+CREATE TABLE categories (
+  id VARCHAR(30) PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  slug VARCHAR(50) UNIQUE NOT NULL,
+  description TEXT,
+  icon VARCHAR(10),
+  color VARCHAR(20),
+  post_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────
+-- Post (게시글)
+-- ─────────────────────────────────────
+CREATE TYPE post_type AS ENUM ('DISCUSSION', 'QUESTION', 'SHOWCASE', 'NEWS');
+
+CREATE TABLE posts (
+  id VARCHAR(30) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  post_type post_type DEFAULT 'DISCUSSION',
+  author_id VARCHAR(30) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  category_id VARCHAR(30) NOT NULL REFERENCES categories(id),
+  upvotes INTEGER DEFAULT 0,
+  downvotes INTEGER DEFAULT 0,
+  view_count INTEGER DEFAULT 0,
+  is_pinned BOOLEAN DEFAULT FALSE,
+  is_locked BOOLEAN DEFAULT FALSE,
+  tags TEXT[],
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_posts_category ON posts(category_id);
+CREATE INDEX idx_posts_author ON posts(author_id);
+CREATE INDEX idx_posts_created ON posts(created_at DESC);
+
+-- ─────────────────────────────────────
+-- Comment (댓글)
+-- ─────────────────────────────────────
+CREATE TABLE comments (
+  id VARCHAR(30) PRIMARY KEY,
+  content TEXT NOT NULL,
+  author_id VARCHAR(30) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  post_id VARCHAR(30) NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  parent_id VARCHAR(30) REFERENCES comments(id) ON DELETE CASCADE,
+  upvotes INTEGER DEFAULT 0,
+  downvotes INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_comments_post ON comments(post_id);
+CREATE INDEX idx_comments_author ON comments(author_id);
+CREATE INDEX idx_comments_parent ON comments(parent_id);
+
+-- ─────────────────────────────────────
+-- Answer (답변 - Help me 전용)
+-- ─────────────────────────────────────
+CREATE TABLE answers (
+  id VARCHAR(30) PRIMARY KEY,
+  content TEXT NOT NULL,
+  question_id VARCHAR(30) NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  author_id VARCHAR(30) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  is_accepted BOOLEAN DEFAULT FALSE,
+  upvotes INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_answers_question ON answers(question_id);
+CREATE INDEX idx_answers_author ON answers(author_id);
+
+-- ─────────────────────────────────────
+-- Vote (투표)
+-- ─────────────────────────────────────
+CREATE TYPE vote_type AS ENUM ('UP', 'DOWN');
+
+CREATE TABLE votes (
+  id VARCHAR(30) PRIMARY KEY,
+  user_id VARCHAR(30) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  post_id VARCHAR(30) REFERENCES posts(id) ON DELETE CASCADE,
+  vote_type vote_type NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, post_id)
+);
+
+CREATE INDEX idx_votes_user ON votes(user_id);
+CREATE INDEX idx_votes_post ON votes(post_id);
+```
+
+### 6.3 데이터베이스 관계 다이어그램
 
 ```
 User (1) ─── (N) Post
@@ -1150,91 +1188,95 @@ export const queryClient = new QueryClient({
 
 ## 11. 개발 로드맵
 
-### Phase 1: 기반 구축 (4주)
+### Phase 1: 기반 구축 (3주)
 
 **Week 1: 프로젝트 초기화**
-- [ ] Next.js 14 프로젝트 생성
-- [ ] Tailwind CSS + shadcn/ui 설정
-- [ ] TypeScript 설정
-- [ ] Prisma 설정 (PostgreSQL 연결)
-- [ ] NextAuth.js 설정 (GitHub OAuth)
+- [x] Next.js 14 프로젝트 생성
+- [x] Tailwind CSS + shadcn/ui 설정
+- [x] TypeScript 설정
+- [ ] TypeScript 인터페이스 정의 (`lib/types.ts`)
+- [ ] Mock 데이터 생성 (`lib/mock-data.ts`)
 - [ ] Git 리포지토리 설정
 
 **Week 2: 기존 컴포넌트 이전**
-- [ ] UI 컴포넌트 이전 (45개)
-- [ ] Header, Footer 이전 및 수정
-- [ ] 레이아웃 시스템 구축 (`app/layout.tsx`)
-- [ ] 홈페이지 이전 (`app/page.tsx`)
-- [ ] 다크 모드 통합
+- [x] UI 컴포넌트 이전 (45개)
+- [x] Header, Footer 이전 및 수정
+- [x] 레이아웃 시스템 구축 (`app/layout.tsx`)
+- [x] 홈페이지 이전 (`app/page.tsx`)
+- [x] 다크 모드 통합
 
 **Week 3: 인증 시스템**
-- [ ] 로그인/회원가입 페이지
-- [ ] OAuth 통합 (GitHub, Google)
-- [ ] 로컬 인증 (이메일/비밀번호)
-- [ ] 세션 관리
-- [ ] 프로필 페이지
+- [x] NextAuth.js 설정 (GitHub, Google OAuth)
+- [x] 로그인/회원가입 페이지
+- [ ] 세션 관리 (클라이언트 상태)
+- [x] 프로필 페이지 (Mock 데이터)
 
-**Week 4: 데이터 모델 & API 기초**
-- [ ] Prisma 스키마 완성
-- [ ] 마이그레이션 실행
-- [ ] API Routes 구조 생성
-- [ ] 기본 CRUD API 구현 (Posts)
+### Phase 2: UI 우선 구현 (4주)
 
-### Phase 2: 커뮤니티 기능 (4주)
+**참고**: Phase 2에서는 Mock 데이터를 사용하여 모든 페이지 UI를 완성합니다.
 
-**Week 5: 커뮤니티 목록**
-- [ ] 카테고리 시스템 구축
+**Week 4: 커뮤니티 레이아웃**
+- [ ] 커뮤니티 메인 페이지 (`/community`)
+- [ ] 카테고리 네비게이션 UI
 - [ ] 게시글 목록 페이지 (`/community/[category]`)
 - [ ] 게시글 카드 컴포넌트
-- [ ] 정렬/필터링 기능
-- [ ] 페이지네이션
+- [ ] Mock 데이터로 렌더링 테스트
 
-**Week 6: 게시글 상세 & 작성**
-- [ ] 게시글 상세 페이지
+**Week 5: 게시글 상세 & 작성 UI**
+- [ ] 게시글 상세 페이지 UI
 - [ ] Tiptap 에디터 통합
-- [ ] 게시글 작성 페이지
-- [ ] 이미지 업로드 (Cloudinary)
-- [ ] 태그 시스템
+- [ ] 게시글 작성 페이지 UI
+- [ ] 댓글 UI 컴포넌트
+- [ ] 투표 버튼 UI
 
-**Week 7: 댓글 & 투표**
-- [ ] 댓글 CRUD
-- [ ] 댓글 스레드 (대댓글)
-- [ ] 투표 시스템 (Upvote/Downvote)
-- [ ] 실시간 투표 수 업데이트 (Optimistic UI)
+**Week 6: Q&A & 뉴스 UI**
+- [ ] Q&A 목록 페이지 (`/help`)
+- [ ] 질문 상세 페이지 UI
+- [ ] 답변 섹션 UI
+- [ ] 뉴스 목록 페이지 (`/news`)
+- [ ] 뉴스 상세 페이지 UI
 
-**Week 8: 검색 & 알림**
-- [ ] 검색 기능 (제목, 본문, 태그)
+**Week 7: 프로필 & 설정 UI**
+- [ ] 사용자 프로필 페이지
+- [ ] 프로필 편집 폼
+- [ ] 설정 페이지
+- [ ] 알림 UI (기본)
+
+### Phase 3: 기능 완성 (3주)
+
+**참고**: Phase 3에서는 클라이언트 상태 관리와 localStorage를 활용하여 기능을 구현합니다.
+
+**Week 8: 클라이언트 상태 관리**
+- [ ] React Context/Zustand 설정
+- [ ] 게시글 CRUD (localStorage)
+- [ ] 댓글 CRUD (localStorage)
+- [ ] 투표 시스템 (클라이언트 상태)
+
+**Week 9: 검색 & 필터링**
+- [ ] 클라이언트 사이드 검색 기능
+- [ ] 게시글 필터링 (태그, 정렬)
 - [ ] 검색 결과 페이지
-- [ ] 알림 시스템 (기본)
+- [ ] Q&A 필터링
 
-### Phase 3: Q&A & 뉴스 (2주)
+**Week 10: 최적화 & 테스트**
+- [ ] 컴포넌트 성능 최적화
+- [ ] React.memo, useMemo 적용
+- [ ] 이미지 최적화
+- [ ] E2E 테스트 (Playwright)
 
-**Week 9: Help me (Q&A)**
-- [ ] 질문 목록 페이지
-- [ ] 질문 상세 페이지
-- [ ] 답변 시스템
-- [ ] 답변 채택 기능
-- [ ] 질문 작성 페이지
+### Phase 4: 데이터베이스 통합 & 배포 (2주)
 
-**Week 10: 뉴스**
-- [ ] 뉴스 목록 페이지
-- [ ] 뉴스 상세 페이지
-- [ ] 뉴스 작성 (관리자 전용)
-- [ ] 카테고리 필터
+**Week 11: PostgreSQL 통합**
+- [ ] PostgreSQL 스키마 구현 (`database/schema.sql`)
+- [ ] pg 라이브러리 설정 (`lib/db.ts`)
+- [ ] API Routes 구현 (CRUD)
+- [ ] Mock API → Real API 전환
+- [ ] 데이터 마이그레이션
 
-### Phase 4: 고도화 & 테스트 (2주)
-
-**Week 11: 최적화**
-- [ ] 성능 최적화 (Lighthouse 점수 90+)
+**Week 12: 최종 배포**
+- [ ] 성능 최적화 (Lighthouse 90+)
 - [ ] SEO 메타 태그
-- [ ] Open Graph 이미지
-- [ ] Sitemap 생성
-- [ ] robots.txt
-
-**Week 12: QA & 배포**
-- [ ] 버그 수정
 - [ ] 접근성 테스트 (a11y)
-- [ ] 모바일 반응형 테스트
 - [ ] Vercel 배포
 - [ ] 도메인 연결
 - [ ] 모니터링 설정 (Sentry)
@@ -1316,6 +1358,7 @@ ALGOLIA_API_KEY="your-api-key"
 |------|------|-----------|
 | 1.0 | 2025-10-15 | 초기 PRD 작성 |
 | 1.1 | 2025-10-16 | 프로젝트 페이지 기능 제거, 전체 개발 기간 13주→12주로 조정 |
+| 1.2 | 2025-10-20 | **DB 전략 변경**: Prisma 제거, UI 우선 개발 전략 수립<br>- Backend 스택: Prisma → PostgreSQL + pg 직접 사용<br>- 데이터 모델: TypeScript 인터페이스 + PostgreSQL DDL<br>- 개발 로드맵: Phase 재구성 (UI 우선, DB는 Week 11-12에 통합) |
 
 ---
 

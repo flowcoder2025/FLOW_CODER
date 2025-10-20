@@ -517,9 +517,9 @@ export interface Post {
 ---
 
 #### Task 5.2: Tiptap 에디터 통합
-- [ ] Tiptap 설치 (`@tiptap/react`, `@tiptap/starter-kit`)
-- [ ] 에디터 컴포넌트 생성 (`components/Editor.tsx`)
-- [ ] 기능: 굵게, 기울임, 코드 블록, 링크
+- [x] Tiptap 설치 (`@tiptap/react`, `@tiptap/starter-kit`)
+- [x] 에디터 컴포넌트 생성 (`components/Editor.tsx`)
+- [x] 기능: 굵게, 기울임, 코드 블록, 링크
 
 **명령어:**
 ```bash
