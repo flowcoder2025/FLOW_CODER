@@ -476,10 +476,10 @@ export interface Post {
 ---
 
 #### Task 4.4: 게시글 목록 페이지 UI
-- [ ] `app/community/[category]/page.tsx` 생성
-- [ ] Mock 데이터로 게시글 목록 표시
-- [ ] 정렬 필터 UI (인기순, 최신순)
-- [ ] 페이지네이션 UI
+- [x] `app/community/[category]/page.tsx` 생성
+- [x] Mock 데이터로 게시글 목록 표시
+- [x] 정렬 필터 UI (인기순, 최신순)
+- [x] 페이지네이션 UI
 
 **산출물:**
 - `app/community/[category]/page.tsx`
@@ -487,11 +487,11 @@ export interface Post {
 ---
 
 #### Task 4.5: 게시글 카드 컴포넌트
-- [ ] `components/PostCard.tsx` 생성
-- [ ] 투표 버튼 UI
-- [ ] 제목, 본문 미리보기
-- [ ] 작성자, 시간, 조회수, 댓글 수 표시
-- [ ] 태그 표시
+- [x] `components/PostCard.tsx` 생성
+- [x] 투표 버튼 UI
+- [x] 제목, 본문 미리보기
+- [x] 작성자, 시간, 조회수, 댓글 수 표시
+- [x] 태그 표시
 
 **산출물:**
 - `components/PostCard.tsx`
