@@ -15,6 +15,8 @@ import type {
   PostWithAuthor,
   Comment,
   CommentWithAuthor,
+  Answer,
+  AnswerWithAuthor,
 } from './types';
 
 // ─────────────────────────────────────────────────────────────────
@@ -581,4 +583,100 @@ export function getRecentPosts(limit: number = 10): PostWithAuthor[] {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
     .slice(0, limit);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Mock Answers (Q&A용 답변 데이터)
+// ─────────────────────────────────────────────────────────────────
+
+const answerTexts = [
+  '이 문제는 useState의 비동기 특성 때문에 발생합니다.\n\n```javascript\nsetState(prev => prev + 1)\n```\n\n이렇게 함수형 업데이트를 사용하면 해결됩니다!',
+  'Next.js 공식 문서를 확인해보시면 도움이 될 것 같습니다.\n\nhttps://nextjs.org/docs\n\n저도 같은 문제를 겪었는데 이 방법으로 해결했어요.',
+  '제네릭은 재사용 가능한 컴포넌트를 만들 때 유용합니다.\n\n타입을 파라미터처럼 전달해서 다양한 타입에 대응할 수 있습니다.',
+  'CORS 에러는 서버 설정 문제입니다.\n\nNext.js API Routes에서 헤더를 추가해주세요:\n\n```javascript\nres.setHeader("Access-Control-Allow-Origin", "*")\n```',
+  'Grid는 2차원 레이아웃, Flexbox는 1차원 레이아웃에 적합합니다.\n\n복잡한 레이아웃은 Grid를, 간단한 정렬은 Flexbox를 추천합니다.',
+  'React Query 사용법은 공식 문서가 잘 되어 있습니다.\n\n```javascript\nconst { data, isLoading } = useQuery("key", fetchFunction)\n```\n\n이렇게 시작하면 됩니다!',
+  'Git Flow 브랜치 전략을 추천드립니다.\n\nmain, develop, feature/* 구조로 관리하면 좋습니다.',
+  'PostgreSQL 연결 문제는 환경변수를 확인해보세요.\n\nDATABASE_URL이 제대로 설정되었는지 확인이 필요합니다.',
+  'Vercel 배포 시 환경변수를 추가하셨나요?\n\nSettings > Environment Variables에서 설정해야 합니다.',
+  'useMemo와 useCallback을 사용하면 리렌더링을 최적화할 수 있습니다.\n\n하지만 모든 곳에 사용하는 것보다 성능 문제가 있을 때 적용하는 게 좋습니다.',
+];
+
+// QUESTION 게시글 (mock_post_31 ~ mock_post_40)
+const questionPostIds = Array.from({ length: 10 }, (_, i) => `mock_post_${31 + i}`);
+
+const rawMockAnswers: Answer[] = [];
+let answerIndex = 0;
+
+// 각 질문에 답변 추가 (0~3개)
+questionPostIds.forEach((questionId) => {
+  const answerCount = randomInt(0, 3);
+
+  for (let i = 0; i < answerCount; i++) {
+    const authorId = randomPick(mockUsers.map((u) => u.id));
+    const createdAt = randomDate(15);
+
+    const answer: Answer = {
+      id: `mock_answer_${answerIndex + 1}`,
+      content: randomPick(answerTexts),
+      questionId,
+      authorId,
+      // 첫 번째 답변을 50% 확률로 채택
+      isAccepted: i === 0 && Math.random() < 0.5,
+      upvotes: randomInt(0, 20),
+      createdAt,
+      updatedAt: createdAt,
+    };
+
+    rawMockAnswers.push(answer);
+    answerIndex++;
+  }
+});
+
+// AnswerWithAuthor로 변환
+export const mockAnswers: AnswerWithAuthor[] = rawMockAnswers.map((answer) => {
+  const author = mockUsers.find((u) => u.id === answer.authorId)!;
+
+  return {
+    ...answer,
+    author: {
+      id: author.id,
+      username: author.username,
+      displayName: author.displayName,
+      avatarUrl: author.avatarUrl,
+      reputation: author.reputation,
+    },
+  };
+});
+
+// ─────────────────────────────────────────────────────────────────
+// Q&A 유틸리티 함수
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * 질문(QUESTION 타입) 게시글 조회
+ */
+export function getQuestions(): PostWithAuthor[] {
+  return mockPosts.filter((p) => p.postType === 'QUESTION');
+}
+
+/**
+ * 특정 질문의 답변 조회
+ */
+export function getAnswersByQuestionId(questionId: string): AnswerWithAuthor[] {
+  return mockAnswers.filter((a) => a.questionId === questionId);
+}
+
+/**
+ * 질문의 답변 개수 조회
+ */
+export function getAnswerCount(questionId: string): number {
+  return mockAnswers.filter((a) => a.questionId === questionId).length;
+}
+
+/**
+ * 질문이 채택된 답변을 가지고 있는지 확인
+ */
+export function hasAcceptedAnswer(questionId: string): boolean {
+  return mockAnswers.some((a) => a.questionId === questionId && a.isAccepted);
 }

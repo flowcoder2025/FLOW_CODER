@@ -570,10 +570,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ### Week 6: Q&A & 뉴스 UI
 
 #### Task 6.1: Q&A 목록 페이지 UI
-- [ ] `app/help/page.tsx` 생성
-- [ ] 질문 카드 컴포넌트 (`components/QuestionCard.tsx`)
-- [ ] Mock 데이터로 질문 목록 표시
-- [ ] 필터 UI (답변 없는 질문, 채택된 질문)
+- [x] `app/help/page.tsx` 생성
+- [x] 질문 카드 컴포넌트 (`components/QuestionCard.tsx`)
+- [x] Mock 데이터로 질문 목록 표시
+- [x] 필터 UI (답변 없는 질문, 채택된 질문)
 
 **산출물:**
 - `app/help/page.tsx`
