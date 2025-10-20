@@ -17,6 +17,7 @@ import type {
   CommentWithAuthor,
   Answer,
   AnswerWithAuthor,
+  Notification,
 } from './types';
 
 // ─────────────────────────────────────────────────────────────────
@@ -782,4 +783,90 @@ export function getAnswerCount(questionId: string): number {
  */
 export function hasAcceptedAnswer(questionId: string): boolean {
   return mockAnswers.some((a) => a.questionId === questionId && a.isAccepted);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 알림 데이터 (Task 7.4)
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * Mock 알림 데이터
+ */
+export const mockNotifications: Notification[] = [
+  {
+    id: 'notif_1',
+    type: 'COMMENT',
+    title: '새로운 댓글',
+    message: 'user1님이 "React 18 새로운 기능" 게시글에 댓글을 남겼습니다.',
+    read: false,
+    createdAt: randomDate(0), // 오늘
+    link: '/community/general/post_1',
+    actor: {
+      username: 'user1',
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1',
+    },
+  },
+  {
+    id: 'notif_2',
+    type: 'ANSWER',
+    title: '새로운 답변',
+    message: 'moderator1님이 "TypeScript 타입 에러 해결법" 질문에 답변했습니다.',
+    read: false,
+    createdAt: randomDate(1), // 1일 전
+    link: '/help/question_1',
+    actor: {
+      username: 'moderator1',
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=moderator1',
+    },
+  },
+  {
+    id: 'notif_3',
+    type: 'LIKE',
+    title: '좋아요',
+    message: 'user2님이 회원님의 댓글을 좋아합니다.',
+    read: true,
+    createdAt: randomDate(2), // 2일 전
+    link: '/community/tips/post_2',
+    actor: {
+      username: 'user2',
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user2',
+    },
+  },
+  {
+    id: 'notif_4',
+    type: 'MENTION',
+    title: '멘션',
+    message: 'user3님이 댓글에서 회원님을 언급했습니다.',
+    read: true,
+    createdAt: randomDate(3), // 3일 전
+    link: '/community/showcase/post_3',
+    actor: {
+      username: 'user3',
+      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user3',
+    },
+  },
+  {
+    id: 'notif_5',
+    type: 'SYSTEM',
+    title: '시스템 알림',
+    message: '새로운 업데이트가 있습니다. 확인해보세요!',
+    read: true,
+    createdAt: randomDate(7), // 7일 전
+    link: '/news/news_post_1',
+  },
+];
+
+/**
+ * 사용자의 모든 알림 조회
+ */
+export function getUserNotifications(userId: string): Notification[] {
+  // Mock: 모든 알림 반환 (실제로는 userId로 필터링)
+  return mockNotifications;
+}
+
+/**
+ * 읽지 않은 알림 개수 조회
+ */
+export function getUnreadNotificationCount(userId: string): number {
+  return mockNotifications.filter((n) => !n.read).length;
 }

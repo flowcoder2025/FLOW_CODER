@@ -299,3 +299,31 @@ export interface SearchQuery {
   page?: number;
   limit?: number;
 }
+
+// ─────────────────────────────────────────────────────────────────
+// 알림 타입 (Task 7.4)
+// ─────────────────────────────────────────────────────────────────
+
+/** 알림 타입 */
+export type NotificationType = 'COMMENT' | 'ANSWER' | 'LIKE' | 'MENTION' | 'SYSTEM';
+
+/**
+ * 알림
+ *
+ * 사용자 활동에 따른 알림 (댓글, 답변, 좋아요, 멘션 등)
+ */
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string; // ISO 8601 format
+  /** 클릭 시 이동할 링크 */
+  link?: string;
+  /** 알림을 발생시킨 사용자 (시스템 알림의 경우 undefined) */
+  actor?: {
+    username: string;
+    avatarUrl?: string;
+  };
+}

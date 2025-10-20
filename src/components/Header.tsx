@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationBell } from "./NotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
@@ -38,6 +39,7 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
+          {status === "authenticated" && session?.user && <NotificationBell />}
           {status === "authenticated" && session?.user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -85,6 +87,7 @@ export function Header() {
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-2">
           <ThemeToggle />
+          {status === "authenticated" && session?.user && <NotificationBell />}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="메뉴 토글"

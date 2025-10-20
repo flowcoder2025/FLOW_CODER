@@ -665,10 +665,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 7.4: 알림 UI (기본)
-- [ ] `components/NotificationBell.tsx`
-- [ ] 알림 목록 드롭다운 UI
-- [ ] Mock 알림 데이터
-- [ ] 읽음/안 읽음 표시
+- [x] `components/NotificationBell.tsx`
+- [x] 알림 목록 드롭다운 UI
+- [x] Mock 알림 데이터
+- [x] 읽음/안 읽음 표시
 
 **산출물:**
 - `components/NotificationBell.tsx`
