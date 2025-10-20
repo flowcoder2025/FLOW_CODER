@@ -226,6 +226,47 @@ export const mockCategories: Category[] = [
     postCount: 0,
     createdAt: '2024-01-01T00:00:00.000Z',
   },
+  // NEWS 전용 카테고리
+  {
+    id: 'news_announcements',
+    name: '공지사항',
+    slug: 'announcements',
+    description: '바이브코딩의 공식 공지사항입니다.',
+    icon: '📣',
+    color: 'blue',
+    postCount: 0,
+    createdAt: '2024-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'news_events',
+    name: '이벤트',
+    slug: 'news-events',
+    description: '진행 중인 이벤트와 프로모션 소식입니다.',
+    icon: '🎉',
+    color: 'green',
+    postCount: 0,
+    createdAt: '2024-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'news_updates',
+    name: '업데이트',
+    slug: 'updates',
+    description: '플랫폼 업데이트 및 기능 개선 소식입니다.',
+    icon: '🔄',
+    color: 'purple',
+    postCount: 0,
+    createdAt: '2024-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'news_releases',
+    name: '릴리즈 노트',
+    slug: 'releases',
+    description: '새로운 버전의 릴리즈 내역입니다.',
+    icon: '🚀',
+    color: 'orange',
+    postCount: 0,
+    createdAt: '2024-01-01T00:00:00.000Z',
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────
@@ -381,19 +422,81 @@ for (let i = 0; i < 8; i++) {
   postIndex++;
 }
 
-// NEWS posts (2개, admin만)
-for (let i = 0; i < 2; i++) {
-  rawMockPosts.push(
-    createMockPost(
-      `mock_post_${postIndex + 1}`,
-      postIndex,
-      'mock_category_4',
-      'mock_user_1', // admin
-      'NEWS'
-    )
+// NEWS posts (8개, admin/moderator)
+const newsData = [
+  {
+    categoryId: 'news_announcements',
+    authorId: 'mock_user_1', // admin
+    coverImage: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80',
+    title: '[공지] 바이브코딩 커뮤니티 정식 오픈!',
+    content: '안녕하세요, 바이브코딩 커뮤니티가 정식으로 오픈되었습니다! 🎉\n\n이곳에서 자유롭게 질문하고, 프로젝트를 공유하고, 함께 성장해요.\n\n커뮤니티 가이드라인을 꼭 확인해주세요.',
+  },
+  {
+    categoryId: 'news_events',
+    authorId: 'mock_user_1',
+    coverImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
+    title: '[이벤트] 첫 프로젝트 공유 이벤트',
+    content: '여러분의 첫 프로젝트를 공유하고 피드백을 받아보세요!\n\n참여 방법:\n1. 작품 공유 게시판에 프로젝트 업로드\n2. #첫프로젝트 태그 추가\n3. 프로젝트 설명 및 기술 스택 작성\n\n선정된 분들께는 특별한 배지를 드립니다!',
+  },
+  {
+    categoryId: 'news_updates',
+    authorId: 'mock_user_2', // moderator
+    coverImage: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    title: '[업데이트] 다크 모드 지원 시작',
+    content: '바이브코딩 플랫폼에서 다크 모드를 지원합니다!\n\n우측 상단 테마 토글 버튼으로 간편하게 전환하세요.\n\n개발자 여러분의 눈 건강을 위해 준비했습니다 🌙',
+  },
+  {
+    categoryId: 'news_releases',
+    authorId: 'mock_user_1',
+    coverImage: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
+    title: '[릴리즈] v1.0.0 - 커뮤니티 플랫폼 런칭',
+    content: '# v1.0.0 릴리즈 노트\n\n## 주요 기능\n- 커뮤니티 게시판 (자유게시판, 팁, 작품 공유)\n- Q&A 시스템 (Help me)\n- 뉴스 & 공지사항\n- 사용자 프로필\n\n## 기술 스택\n- Next.js 15\n- React 19\n- TypeScript\n- Tailwind CSS',
+  },
+  {
+    categoryId: 'news_announcements',
+    authorId: 'mock_user_1',
+    coverImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
+    title: '[공지] 커뮤니티 이용 가이드라인',
+    content: '바이브코딩 커뮤니티 가이드라인을 안내드립니다.\n\n## 존중과 배려\n- 모든 질문은 소중합니다\n- 초보자를 환대합니다\n- 다양한 의견을 존중합니다\n\n## 금지 사항\n- 욕설 및 비방\n- 스팸 및 광고\n- 저작권 침해\n\n함께 성장하는 커뮤니티를 만들어요!',
+  },
+  {
+    categoryId: 'news_events',
+    authorId: 'mock_user_2',
+    coverImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80',
+    title: '[이벤트] 주간 코딩 챌린지 시작!',
+    content: '매주 새로운 코딩 챌린지를 공개합니다!\n\n참여 방법:\n1. 매주 월요일 챌린지 공개\n2. 금요일까지 솔루션 제출\n3. 주말에 피드백 및 우수작 선정\n\n첫 번째 챌린지는 "Todo 리스트 만들기"입니다!',
+  },
+  {
+    categoryId: 'news_updates',
+    authorId: 'mock_user_1',
+    coverImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+    title: '[업데이트] 코드 하이라이팅 기능 개선',
+    content: '게시글에서 코드 하이라이팅이 더욱 강화되었습니다!\n\n지원 언어:\n- JavaScript/TypeScript\n- Python\n- Java\n- C/C++\n- Go\n- Rust\n- 그 외 20+ 언어\n\n마크다운 코드 블록에 언어를 지정하면 자동으로 하이라이팅됩니다.',
+  },
+  {
+    categoryId: 'news_releases',
+    authorId: 'mock_user_2',
+    coverImage: 'https://images.unsplash.com/photo-1555421689-3f034debb7a6?w=800&q=80',
+    title: '[릴리즈] v1.1.0 - 알림 시스템 추가',
+    content: '# v1.1.0 릴리즈 노트\n\n## 새 기능\n- 실시간 알림 시스템\n- 댓글 및 답변 알림\n- 좋아요 및 투표 알림\n- 멘션(@) 알림\n\n## 개선 사항\n- 검색 성능 향상\n- 모바일 UI 최적화\n- 로딩 속도 개선',
+  },
+];
+
+newsData.forEach((news, i) => {
+  const post = createMockPost(
+    `news_post_${i + 1}`,
+    postIndex,
+    news.categoryId,
+    news.authorId,
+    'NEWS'
   );
+  post.title = news.title;
+  post.content = news.content;
+  post.coverImageUrl = news.coverImage;
+  post.isPinned = i < 2; // 첫 2개는 고정
+  rawMockPosts.push(post);
   postIndex++;
-}
+});
 
 // PostWithAuthor로 변환
 export const mockPosts: PostWithAuthor[] = rawMockPosts.map((post) => {

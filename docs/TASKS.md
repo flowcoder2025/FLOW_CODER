@@ -605,10 +605,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 6.4: 뉴스 목록 페이지 UI
-- [ ] `app/news/page.tsx` 생성
-- [ ] 뉴스 카드 컴포넌트 (`components/NewsCard.tsx`)
-- [ ] Mock 데이터로 뉴스 목록 표시
-- [ ] 카테고리 필터 UI
+- [x] `app/news/page.tsx` 생성
+- [x] 뉴스 카드 컴포넌트 (`components/NewsCard.tsx`)
+- [x] Mock 데이터로 뉴스 목록 표시
+- [x] 카테고리 필터 UI
 
 **산출물:**
 - `app/news/page.tsx`

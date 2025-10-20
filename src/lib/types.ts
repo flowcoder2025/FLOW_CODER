@@ -87,6 +87,8 @@ export interface Post {
   isLocked: boolean;
   /** 태그 목록 (최대 5개) */
   tags: string[];
+  /** 커버 이미지 URL (NEWS 타입 게시글용) */
+  coverImageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
