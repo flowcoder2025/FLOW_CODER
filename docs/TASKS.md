@@ -545,10 +545,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 5.4: 댓글 UI 컴포넌트
-- [ ] `components/CommentList.tsx`
-- [ ] `components/CommentItem.tsx`
-- [ ] 댓글 스레드 UI (대댓글 지원)
-- [ ] 댓글 작성 폼 UI
+- [x] `components/CommentList.tsx`
+- [x] `components/CommentItem.tsx`
+- [x] 댓글 스레드 UI (대댓글 지원)
+- [x] 댓글 작성 폼 UI
 
 **산출물:**
 - `components/CommentList.tsx`

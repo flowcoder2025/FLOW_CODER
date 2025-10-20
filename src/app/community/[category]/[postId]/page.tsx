@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { ArrowUp, ArrowDown, MessageSquare, Eye, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { CommentList } from '@/components/CommentList';
 import { getPostById, getCommentsByPostId } from '@/lib/mock-data';
-import type { CommentWithAuthor } from '@/lib/types';
 
 /**
  * 게시글 상세 페이지
@@ -34,15 +33,8 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     notFound();
   }
 
-  // 댓글 조회 및 계층 구조 생성
+  // 댓글 조회
   const allComments = getCommentsByPostId(postId);
-  const topLevelComments = allComments.filter((c) => !c.parentId);
-
-  // 대댓글 찾기 헬퍼
-  const getReplies = (parentId: string): CommentWithAuthor[] => {
-    return allComments.filter((c) => c.parentId === parentId);
-  };
-
   const score = post.upvotes - post.downvotes;
 
   return (
@@ -191,109 +183,7 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
       </Card>
 
       {/* 댓글 섹션 */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4">
-          댓글 {post.commentCount}개
-        </h2>
-
-        {allComments.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {topLevelComments.map((comment) => (
-              <CommentThread key={comment.id} comment={comment} getReplies={getReplies} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/**
- * 댓글 스레드 컴포넌트 (재귀)
- */
-interface CommentThreadProps {
-  comment: CommentWithAuthor;
-  getReplies: (parentId: string) => CommentWithAuthor[];
-  depth?: number;
-}
-
-function CommentThread({ comment, getReplies, depth = 0 }: CommentThreadProps) {
-  const replies = getReplies(comment.id);
-  const score = comment.upvotes - comment.downvotes;
-  const maxDepth = 5; // 최대 중첩 깊이
-
-  return (
-    <div className={depth > 0 ? 'ml-8 mt-4' : ''}>
-      <Card className={depth > 0 ? 'border-l-4 border-l-muted' : ''}>
-        <CardContent className="p-4">
-          {/* 작성자 & 메타 정보 */}
-          <div className="flex items-center gap-3 mb-3">
-            <Link
-              href={`/profile/${comment.author.username}`}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <img
-                src={comment.author.avatarUrl}
-                alt={comment.author.displayName || comment.author.username}
-                className="w-6 h-6 rounded-full"
-              />
-              <span className="font-medium text-sm">
-                {comment.author.displayName || comment.author.username}
-              </span>
-              {comment.author.reputation > 100 && (
-                <span className="text-xs text-muted-foreground">({comment.author.reputation})</span>
-              )}
-            </Link>
-
-            <span className="text-muted-foreground/50 text-sm">•</span>
-
-            <time className="text-sm text-muted-foreground" dateTime={comment.createdAt}>
-              {new Date(comment.createdAt).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </time>
-          </div>
-
-          {/* 댓글 내용 */}
-          <p className="text-sm mb-3 whitespace-pre-wrap">{comment.content}</p>
-
-          {/* 투표 & 답글 버튼 */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                <ArrowUp className="h-3 w-3" />
-              </Button>
-              <span className={`text-sm font-medium ${score > 0 ? 'text-primary' : score < 0 ? 'text-destructive' : ''}`}>
-                {score}
-              </span>
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                <ArrowDown className="h-3 w-3" />
-              </Button>
-            </div>
-
-            <Button variant="ghost" size="sm" className="h-7 text-xs">
-              답글
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 대댓글 (재귀) */}
-      {replies.length > 0 && depth < maxDepth && (
-        <div className="mt-2">
-          {replies.map((reply) => (
-            <CommentThread key={reply.id} comment={reply} getReplies={getReplies} depth={depth + 1} />
-          ))}
-        </div>
-      )}
+      <CommentList comments={allComments} commentCount={post.commentCount} />
     </div>
   );
 }
