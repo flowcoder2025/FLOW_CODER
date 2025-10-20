@@ -617,10 +617,10 @@ npm install @tiptap/react @tiptap/starter-kit
 ---
 
 #### Task 6.5: 뉴스 상세 페이지 UI
-- [ ] `app/news/[id]/page.tsx` 생성
-- [ ] 커버 이미지 표시
-- [ ] 본문 Rich Text 렌더링
-- [ ] 관련 뉴스 추천 UI
+- [x] `app/news/[id]/page.tsx` 생성
+- [x] 커버 이미지 표시
+- [x] 본문 Rich Text 렌더링
+- [x] 관련 뉴스 추천 UI
 
 **산출물:**
 - `app/news/[id]/page.tsx`
