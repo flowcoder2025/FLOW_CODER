@@ -42,9 +42,9 @@ export default function NewsPage() {
     <div className="container mx-auto px-4 py-8">
       {/* 헤더 섹션 */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">뉴스 & 공지</h1>
+        <h1 className="text-4xl font-bold mb-2">뉴스</h1>
         <p className="text-muted-foreground">
-          바이브코딩의 최신 소식과 공지사항을 확인하세요
+          바이브코딩의 최신 소식을 확인하세요
         </p>
       </div>
 
