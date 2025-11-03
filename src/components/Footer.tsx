@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="bg-background border-t">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -138,14 +138,41 @@ export function Footer() {
               </li>
             </ul>
           </div>
+
+          {/* Legal */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold">법률 및 정책</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/terms" className="hover:text-primary transition-colors">
+                  이용약관
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms/privacy" className="hover:text-primary transition-colors">
+                  개인정보처리방침
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms/community" className="hover:text-primary transition-colors">
+                  커뮤니티 가이드라인
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="hover:text-primary transition-colors">
+                  쿠키 정책
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 Vibe Coding. All rights reserved.
+            © 2025 Vibe Coding. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="/privacy" className="hover:text-primary transition-colors">
+            <Link href="/terms/privacy" className="hover:text-primary transition-colors">
               개인정보처리방침
             </Link>
             <Link href="/terms" className="hover:text-primary transition-colors">
