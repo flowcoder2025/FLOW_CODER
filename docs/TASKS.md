@@ -1196,26 +1196,39 @@ const menuItems = [
 ---
 
 **Task 11.6.2: Admin Dashboard**
-- [ ] `app/admin/page.tsx` (대시보드)
-- [ ] `components/admin/StatsCard.tsx`
-  - 총 사용자, 게시글, 댓글, DAU 표시
+- [x] `app/admin/page.tsx` (대시보드)
+- [x] `components/admin/StatsCard.tsx`
+  - 총 사용자, 게시글, 댓글, 오늘의 신규 가입자 표시
   - 아이콘 + 숫자 카드 UI
 - [ ] `components/admin/RecentActivity.tsx`
-  - 최근 게시글/댓글 타임라인
-- [ ] `app/api/admin/stats/route.ts`
+  - 최근 게시글/댓글 타임라인 (향후 추가 예정)
+- [x] `app/api/admin/stats/route.ts`
   - Prisma 병렬 쿼리 (성능 최적화)
   - `requireModerator()` 권한 체크
-  - DAU 계산 (최근 24시간 활성 사용자)
+  - 오늘의 신규 가입자 계산 (최근 24시간 가입 사용자)
 
 **통계 항목:**
 - 총 사용자 수
 - 총 게시글 수
 - 총 댓글 수
-- 일일 활성 사용자 (DAU)
+- 오늘의 신규 가입자 (최근 24시간)
 
 **산출물:**
-- Admin Dashboard 페이지
-- 통계 API Route
+- ✅ `app/admin/page.tsx` (87줄)
+  - requireAdmin() 권한 체크
+  - 4개 통계 카드 그리드 레이아웃 (2x2)
+  - Prisma 병렬 쿼리로 성능 최적화
+  - Server Component 패턴
+- ✅ `components/admin/StatsCard.tsx` (60줄)
+  - shadcn/ui Card 기반 재사용 가능한 통계 카드
+  - lucide-react 아이콘 지원
+  - 숫자 천단위 구분 포맷팅
+  - 선택적 증감 표시 (trend prop)
+- ✅ `app/api/admin/stats/route.ts` (74줄)
+  - requireModerator() 권한 체크
+  - Prisma 병렬 쿼리 (Promise.all)
+  - 4개 통계 항목 API 응답
+  - 권한 에러 처리 (401/403)
 
 ---
 
