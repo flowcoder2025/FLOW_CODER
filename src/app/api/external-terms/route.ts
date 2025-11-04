@@ -1,11 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireModerator, requireAdmin } from '@/lib/admin-middleware';
 
-// GET /api/external-terms - 외부 약관 목록 조회
+/**
+ * GET /api/external-terms - 외부 약관 목록 조회
+ *
+ * Query Parameters:
+ * - published: 'true' (일반 사용자용, 발행된 약관만) | undefined (관리자용, 모든 약관)
+ *
+ * 권한:
+ * - published=true: 권한 체크 없음 (공개 API)
+ * - published=undefined: requireModerator() (관리자 전용)
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const publishedOnly = searchParams.get('published') === 'true';
+
+    // 관리자용 (모든 약관 조회) - 모더레이터 이상 권한 필요
+    if (!publishedOnly) {
+      try {
+        await requireModerator();
+      } catch (error: any) {
+        return NextResponse.json(
+          { success: false, error: error.message },
+          { status: error.message?.includes('Unauthorized') ? 401 : 403 }
+        );
+      }
+    }
 
     const terms = await prisma.externalTerms.findMany({
       where: publishedOnly ? { published: true } : undefined,
@@ -31,9 +53,23 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/external-terms - 새 외부 약관 생성
+/**
+ * POST /api/external-terms - 새 외부 약관 생성 (관리자 전용)
+ *
+ * 권한: requireAdmin()
+ */
 export async function POST(request: NextRequest) {
   try {
+    // 관리자 권한 확인
+    try {
+      await requireAdmin();
+    } catch (error: any) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
+      );
+    }
+
     const body = await request.json();
     const { slug, title, description, content, published } = body;
 

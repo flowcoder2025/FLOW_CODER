@@ -1,16 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireModerator, requireAdmin } from '@/lib/admin-middleware';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-// GET /api/external-terms/[id] - 단일 외부 약관 조회
+/**
+ * GET /api/external-terms/[id] - 단일 외부 약관 조회 (관리자 전용)
+ *
+ * 권한: requireModerator() (모더레이터 이상)
+ */
 export async function GET(
   request: NextRequest,
   context: RouteContext
 ) {
   try {
+    // 모더레이터 이상 권한 확인
+    try {
+      await requireModerator();
+    } catch (error: any) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
+      );
+    }
+
     const { id } = await context.params;
 
     const terms = await prisma.externalTerms.findUnique({
@@ -34,12 +49,26 @@ export async function GET(
   }
 }
 
-// PUT /api/external-terms/[id] - 외부 약관 수정
+/**
+ * PUT /api/external-terms/[id] - 외부 약관 수정 (관리자 전용)
+ *
+ * 권한: requireAdmin()
+ */
 export async function PUT(
   request: NextRequest,
   context: RouteContext
 ) {
   try {
+    // 관리자 권한 확인
+    try {
+      await requireAdmin();
+    } catch (error: any) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
+      );
+    }
+
     const { id } = await context.params;
     const body = await request.json();
     const { slug, title, description, content, published } = body;
@@ -92,12 +121,26 @@ export async function PUT(
   }
 }
 
-// DELETE /api/external-terms/[id] - 외부 약관 삭제
+/**
+ * DELETE /api/external-terms/[id] - 외부 약관 삭제 (관리자 전용)
+ *
+ * 권한: requireAdmin()
+ */
 export async function DELETE(
   request: NextRequest,
   context: RouteContext
 ) {
   try {
+    // 관리자 권한 확인
+    try {
+      await requireAdmin();
+    } catch (error: any) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
+      );
+    }
+
     const { id } = await context.params;
 
     // 약관 존재 확인

@@ -1295,40 +1295,53 @@ if (role === 'ADMIN') {
 ---
 
 **Task 11.6.4: 약관 관리 통합 (기존 페이지 권한 보호)**
-- [ ] 기존 약관 API Routes 권한 추가
-  - `app/api/admin/terms/route.ts`
-    - GET: `requireModerator()`
+- [x] 기존 약관 API Routes 권한 추가
+  - `app/api/external-terms/route.ts`
+    - GET: `requireModerator()` (관리자용, published 파라미터 없을 때)
     - POST: `requireAdmin()`
-  - `app/api/admin/terms/[id]/route.ts`
+  - `app/api/external-terms/[id]/route.ts`
     - GET: `requireModerator()`
-    - PATCH: `requireAdmin()`
+    - PUT: `requireAdmin()`
     - DELETE: `requireAdmin()`
-- [ ] 기존 페이지 검증
-  - `app/admin/terms/*` 페이지들이 Admin Layout 자동 적용 확인
-  - AdminSidebar에서 약관 관리 메뉴 접근 테스트
-- [ ] UI 개선 (선택적)
+- [x] 기존 페이지 검증
+  - `app/admin/external-terms/*` 페이지들이 Admin Layout 자동 적용 확인 ✅
+  - Next.js 중첩 레이아웃 시스템으로 자동 적용
+  - AdminSidebar에서 약관 관리 메뉴 접근 가능
+- [ ] UI 개선 (선택적, 향후 작업)
   - shadcn/ui Table 컴포넌트 적용
   - 발행 상태 Badge 추가
   - 검색/필터 기능 추가
 
-**권한 체크 예시:**
+**권한 체크 적용:**
 ```typescript
-// app/api/admin/terms/route.ts
+// app/api/external-terms/route.ts
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  await requireModerator(session?.user?.id)  // 모더레이터 이상
-  // ...
+  const publishedOnly = searchParams.get('published') === 'true';
+  if (!publishedOnly) {
+    await requireModerator();  // 관리자용 (모든 약관)
+  }
+  // published=true는 공개 API (권한 체크 없음)
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  await requireAdmin(session?.user?.id)  // 관리자 전용
+  await requireAdmin();  // 관리자 전용
   // ...
 }
 ```
 
 **산출물:**
-- 약관 관리 API Routes (권한 보호)
+- ✅ `app/api/external-terms/route.ts` (120줄)
+  - GET: 조건부 권한 체크 (published 파라미터 기준)
+  - POST: requireAdmin() 권한 체크
+  - 권한 에러 처리 (401/403)
+- ✅ `app/api/external-terms/[id]/route.ts` (168줄)
+  - GET: requireModerator() 권한 체크
+  - PUT: requireAdmin() 권한 체크
+  - DELETE: requireAdmin() 권한 체크
+  - 권한 에러 처리 (401/403)
+- ✅ Admin Layout 자동 적용 확인
+  - `/app/admin/external-terms/*` 페이지들
+  - Next.js 중첩 레이아웃으로 자동 권한 보호
 - Admin 시스템 통합 완료
 
 ---
