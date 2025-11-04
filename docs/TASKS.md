@@ -1233,19 +1233,19 @@ const menuItems = [
 ---
 
 **Task 11.6.3: 사용자 관리 (역할 변경 + Zanzibar 권한 부여)**
-- [ ] `app/admin/users/page.tsx`
+- [x] `app/admin/users/page.tsx`
   - 사용자 목록 테이블 (shadcn/ui Table)
-  - 검색 기능 (username, email)
+  - 검색 기능 (username, email, displayName)
   - 역할 필터 (USER, MODERATOR, ADMIN)
   - 페이지네이션
-- [ ] `components/admin/UserRoleDialog.tsx`
+- [x] `components/admin/UserRoleDialog.tsx`
   - 역할 변경 다이얼로그
   - 드롭다운 (USER/MODERATOR/ADMIN)
   - 확인 후 API 호출
-- [ ] `app/api/admin/users/route.ts` (GET)
+- [x] `app/api/admin/users/route.ts` (GET)
   - 사용자 목록 조회 (검색, 필터, 페이지네이션)
   - `requireAdmin()` 권한 체크
-- [ ] `app/api/admin/users/[id]/role/route.ts` (POST)
+- [x] `app/api/admin/users/[id]/role/route.ts` (POST)
   - 역할 변경 로직
   - Zanzibar 권한 자동 부여:
     - ADMIN → `grantSystemAdmin(userId)`
@@ -1268,8 +1268,29 @@ if (role === 'ADMIN') {
 ```
 
 **산출물:**
-- 사용자 관리 페이지
-- 역할 변경 API (Zanzibar 통합)
+- ✅ `app/api/admin/users/route.ts` (109줄)
+  - requireAdmin() 권한 체크
+  - 검색 필터 (username, email, displayName)
+  - 역할 필터 (USER/MODERATOR/ADMIN)
+  - 페이지네이션 (default 20개)
+  - 사용자 통계 포함 (_count: posts, comments)
+- ✅ `app/api/admin/users/[id]/role/route.ts` (122줄)
+  - requireAdmin() 권한 체크
+  - 역할 변경 로직 (USER 모델 업데이트)
+  - Zanzibar 권한 자동 부여/제거
+  - 동일 역할 중복 변경 방지
+- ✅ `components/admin/UserRoleDialog.tsx` (154줄)
+  - shadcn/ui Dialog + Select 기반
+  - 역할 변경 API 호출
+  - 에러 메시지 표시
+  - 로딩 상태 관리
+- ✅ `app/admin/users/page.tsx` (264줄)
+  - shadcn/ui Table 기반 사용자 목록
+  - 실시간 검색 (500ms 디바운스)
+  - 역할 필터 드롭다운
+  - 페이지네이션 (이전/다음)
+  - 역할별 Badge 색상 구분
+  - Client Component (useEffect 데이터 로딩)
 
 ---
 
