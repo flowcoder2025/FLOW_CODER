@@ -5,6 +5,9 @@ import remarkGfm from 'remark-gfm';
 import { Separator } from '@/components/ui/separator';
 import { FileText, Calendar } from 'lucide-react';
 
+// 빌드 시 pre-render 건너뛰기 (DB 연결 없이도 빌드 가능)
+export const dynamic = 'force-dynamic';
+
 type PageProps = {
   params: Promise<{ slug: string }>;
 };

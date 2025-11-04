@@ -57,7 +57,7 @@ export async function check(
   };
 
   const parentRelations = Object.entries(inheritanceMap)
-    .filter(([_, children]) => children.includes(relation))
+    .filter(([, children]) => children.includes(relation))
     .map(([parent]) => parent as Relation);
 
   if (parentRelations.length > 0) {
@@ -142,9 +142,9 @@ export async function grant(
         subjectId,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 이미 존재하는 경우 무시 (unique constraint)
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return null;
     }
     throw error;

@@ -694,9 +694,9 @@ npm install @tiptap/react @tiptap/starter-kit
 ### Week 8: 클라이언트 상태 관리
 
 #### Task 8.1: 상태 관리 설정
-- [ ] Zustand 또는 React Context 설치
-- [ ] 전역 상태 스토어 생성 (`lib/store.ts`)
-- [ ] 사용자 상태, 게시글 상태, 댓글 상태 관리
+- [x] Zustand 또는 React Context 설치
+- [x] 전역 상태 스토어 생성 (`lib/store.ts`)
+- [x] 사용자 상태, 게시글 상태, 댓글 상태 관리
 
 **명령어:**
 ```bash
@@ -709,41 +709,41 @@ npm install zustand  # 또는 React Context 사용
 ---
 
 #### Task 8.2: 게시글 CRUD (localStorage)
-- [ ] 게시글 생성 (localStorage에 저장)
-- [ ] 게시글 수정
-- [ ] 게시글 삭제
-- [ ] Mock 데이터와 병합하여 표시
+- [x] 게시글 생성 (localStorage에 저장)
+- [x] 게시글 수정
+- [x] 게시글 삭제
+- [x] Mock 데이터와 병합하여 표시
 
 **산출물:**
-- `lib/localStorage.ts` (유틸리티 함수)
+- `lib/store.ts` (Zustand persist로 localStorage 자동 처리)
 
 ---
 
 #### Task 8.3: 댓글 CRUD (localStorage)
-- [ ] 댓글 작성 (localStorage)
-- [ ] 대댓글 작성
-- [ ] 댓글 수정/삭제
-- [ ] Optimistic UI 업데이트
+- [x] 댓글 작성 (localStorage)
+- [x] 대댓글 작성
+- [x] 댓글 수정/삭제
+- [x] Optimistic UI 업데이트
 
 **산출물:**
-- 댓글 관련 상태 관리 로직
+- 댓글 관련 상태 관리 로직 (store.ts에 구현)
 
 ---
 
 #### Task 8.4: 투표 시스템 (클라이언트 상태)
-- [ ] Upvote/Downvote 클라이언트 로직
-- [ ] localStorage에 투표 기록 저장
-- [ ] 투표 카운트 실시간 업데이트
+- [x] Upvote/Downvote 클라이언트 로직
+- [x] localStorage에 투표 기록 저장
+- [x] 투표 카운트 실시간 업데이트
 
 **산출물:**
-- 투표 관련 상태 관리 로직
+- 투표 관련 상태 관리 로직 (store.ts에 구현)
 
 ---
 
 #### Task 8.5: 임시 저장 기능
-- [ ] 게시글 작성 중 자동 저장 (Local Storage)
-- [ ] 페이지 새로고침 시 복원
-- [ ] `hooks/useAutoSave.ts` 훅
+- [x] 게시글 작성 중 자동 저장 (Local Storage)
+- [x] 페이지 새로고침 시 복원
+- [x] `hooks/useAutoSave.ts` 훅
 
 **산출물:**
 - `hooks/useAutoSave.ts`
@@ -753,10 +753,10 @@ npm install zustand  # 또는 React Context 사용
 ### Week 9: 검색 & 필터링
 
 #### Task 9.1: 클라이언트 사이드 검색
-- [ ] 검색 결과 페이지 (`app/search/page.tsx`)
-- [ ] 제목, 본문, 태그 검색 (클라이언트)
-- [ ] Mock + localStorage 데이터 통합 검색
-- [ ] 검색어 하이라이트
+- [x] 검색 결과 페이지 (`app/search/page.tsx`)
+- [x] 제목, 본문, 태그 검색 (클라이언트)
+- [x] Mock + localStorage 데이터 통합 검색
+- [x] 검색어 하이라이트
 
 **산출물:**
 - `app/search/page.tsx`
@@ -765,31 +765,31 @@ npm install zustand  # 또는 React Context 사용
 ---
 
 #### Task 9.2: 게시글 필터링
-- [ ] 태그별 필터링
-- [ ] 카테고리별 필터링
-- [ ] 정렬 옵션 (인기순, 최신순, 댓글 많은 순)
-- [ ] URL Query Params 동기화
+- [x] 태그별 필터링
+- [x] 카테고리별 필터링
+- [x] 정렬 옵션 (인기순, 최신순, 댓글 많은 순)
+- [x] URL Query Params 동기화
 
 **산출물:**
-- 필터링 로직 개선
+- 필터링 로직 (search.ts에 구현)
 
 ---
 
 #### Task 9.3: Q&A 필터링
-- [ ] 답변 없는 질문 필터
-- [ ] 채택된 질문 필터
-- [ ] 태그별 필터
-- [ ] 투표 순 정렬
+- [x] 답변 없는 질문 필터
+- [x] 채택된 질문 필터
+- [x] 태그별 필터
+- [x] 투표 순 정렬
 
 **산출물:**
-- Q&A 필터 로직
+- Q&A 필터 로직 (search.ts의 filterQuestions)
 
 ---
 
 #### Task 9.4: 검색 성능 최적화
-- [ ] Debounce 적용
-- [ ] 검색 결과 캐싱
-- [ ] 무한 스크롤 또는 페이지네이션
+- [x] Debounce 적용
+- [x] 검색 결과 캐싱
+- [x] 무한 스크롤 또는 페이지네이션
 
 **산출물:**
 - `hooks/useDebounce.ts`

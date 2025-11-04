@@ -16,6 +16,9 @@ export const metadata = {
   description: "Vibe Coding 플랫폼의 서비스 이용약관 및 정책을 확인하세요.",
 };
 
+// 빌드 시 pre-render 건너뛰기 (DB 연결 없이도 빌드 가능)
+export const dynamic = 'force-dynamic';
+
 type ExternalTerm = {
   id: string;
   slug: string;
