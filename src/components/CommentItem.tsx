@@ -1,19 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { memo, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { VoteButtons } from '@/components/VoteButtons';
 import type { CommentWithAuthor } from '@/lib/types';
 
 /**
- * 댓글 아이템 컴포넌트
+ * 댓글 아이템 컴포넌트 (성능 최적화됨)
  *
  * 기능:
  * - 댓글 정보 표시 (작성자, 내용, 시간)
  * - 투표 버튼 (추천/비추천)
  * - 답글 버튼
  * - 재귀적 대댓글 렌더링
+ *
+ * 최적화:
+ * - React.memo로 불필요한 리렌더링 방지
+ * - useMemo로 계산된 값 메모이제이션
  */
 
 export interface CommentItemProps {
@@ -27,17 +32,28 @@ export interface CommentItemProps {
   maxDepth?: number;
 }
 
-export function CommentItem({
+function CommentItemComponent({
   comment,
   getReplies,
   depth = 0,
   maxDepth = 5,
 }: CommentItemProps) {
-  const replies = getReplies(comment.id);
+  // 성능 최적화: 계산된 값 메모이제이션
+  const replies = useMemo(() => getReplies(comment.id), [getReplies, comment.id]);
+  const marginClass = useMemo(() => (depth > 0 ? 'ml-8 mt-4' : ''), [depth]);
+  const borderClass = useMemo(() => (depth > 0 ? 'border-l-4 border-l-muted' : ''), [depth]);
+  const formattedDate = useMemo(() =>
+    new Date(comment.createdAt).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+    [comment.createdAt]
+  );
 
   return (
-    <div className={depth > 0 ? 'ml-8 mt-4' : ''}>
-      <Card className={depth > 0 ? 'border-l-4 border-l-muted' : ''}>
+    <div className={marginClass}>
+      <Card className={borderClass}>
         <CardContent className="p-4">
           {/* 작성자 & 메타 정보 */}
           <div className="flex items-center gap-3 mb-3">
@@ -66,11 +82,7 @@ export function CommentItem({
               className="text-sm text-muted-foreground"
               dateTime={comment.createdAt}
             >
-              {new Date(comment.createdAt).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {formattedDate}
             </time>
           </div>
 
@@ -111,3 +123,6 @@ export function CommentItem({
     </div>
   );
 }
+
+// React.memo로 래핑하여 props가 변경되지 않으면 리렌더링 방지
+export const CommentItem = memo(CommentItemComponent);

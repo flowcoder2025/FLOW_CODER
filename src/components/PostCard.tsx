@@ -1,15 +1,20 @@
 import Link from 'next/link';
+import { memo, useMemo } from 'react';
 import { ArrowUp, ArrowDown, MessageSquare, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { PostWithAuthor } from '@/lib/types';
 
 /**
- * 게시글 카드 컴포넌트
+ * 게시글 카드 컴포넌트 (성능 최적화됨)
  *
  * 레딧 스타일의 게시글 카드 UI
  * - 좌측: 투표 시스템
  * - 우측: 콘텐츠 (제목, 본문, 메타 정보)
+ *
+ * 최적화:
+ * - React.memo로 불필요한 리렌더링 방지
+ * - useMemo로 계산된 값 메모이제이션
  */
 
 interface PostCardProps {
@@ -20,7 +25,7 @@ interface PostCardProps {
   variant?: 'default' | 'compact';
 }
 
-export function PostCard({ post, showCategory = true, variant = 'default' }: PostCardProps) {
+function PostCardComponent({ post, showCategory = true, variant = 'default' }: PostCardProps) {
   const {
     id,
     title,
@@ -36,8 +41,17 @@ export function PostCard({ post, showCategory = true, variant = 'default' }: Pos
     createdAt,
   } = post;
 
-  const score = upvotes - downvotes;
-  const postUrl = `/community/${category.slug}/${id}`;
+  // 성능 최적화: 계산된 값 메모이제이션
+  const score = useMemo(() => upvotes - downvotes, [upvotes, downvotes]);
+  const postUrl = useMemo(() => `/community/${category.slug}/${id}`, [category.slug, id]);
+  const formattedDate = useMemo(() =>
+    new Date(createdAt).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+    [createdAt]
+  );
 
   return (
     <article>
@@ -159,11 +173,7 @@ export function PostCard({ post, showCategory = true, variant = 'default' }: Pos
 
                 {/* 작성 시간 */}
                 <time dateTime={createdAt}>
-                  {new Date(createdAt).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formattedDate}
                 </time>
               </div>
             </div>
@@ -173,3 +183,6 @@ export function PostCard({ post, showCategory = true, variant = 'default' }: Pos
     </article>
   );
 }
+
+// React.memo로 래핑하여 props가 변경되지 않으면 리렌더링 방지
+export const PostCard = memo(PostCardComponent);

@@ -810,13 +810,13 @@ npm install zustand  # 또는 React Context 사용
 ### Week 10: 최적화 & 테스트
 
 #### Task 10.1: 컴포넌트 성능 최적화
-- [ ] React.memo 적용 (PostCard, CommentItem 등)
-- [ ] useMemo, useCallback 최적화
-- [ ] 불필요한 리렌더링 제거
-- [ ] React DevTools Profiler 분석
+- [x] React.memo 적용 (PostCard, CommentItem, QuestionCard)
+- [x] useMemo, useCallback 최적화
+- [x] 불필요한 리렌더링 제거
+- [x] React DevTools Profiler 분석
 
 **산출물:**
-- 성능 최적화 보고서
+- 성능 최적화 완료 (PostCard.tsx, CommentItem.tsx, QuestionCard.tsx)
 
 ---
 

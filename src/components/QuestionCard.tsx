@@ -1,19 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { memo, useMemo } from 'react';
 import { Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { PostWithAuthor } from '@/lib/types';
 
 /**
- * Q&A 질문 카드 컴포넌트
+ * Q&A 질문 카드 컴포넌트 (성능 최적화됨)
  *
  * 기능:
  * - 질문 제목, 미리보기, 태그 표시
  * - 투표 버튼 (좌측 수직)
  * - 답변 수, 조회수, 작성자 정보
  * - 채택된 답변 여부 표시
+ *
+ * 최적화:
+ * - React.memo로 불필요한 리렌더링 방지
+ * - useMemo로 계산된 값 메모이제이션
  */
 
 export interface QuestionCardProps {
@@ -25,12 +30,40 @@ export interface QuestionCardProps {
   hasAccepted: boolean;
 }
 
-export function QuestionCard({
+function QuestionCardComponent({
   question,
   answerCount,
   hasAccepted,
 }: QuestionCardProps) {
-  const score = question.upvotes - question.downvotes;
+  // 성능 최적화: 계산된 값 메모이제이션
+  const score = useMemo(
+    () => question.upvotes - question.downvotes,
+    [question.upvotes, question.downvotes]
+  );
+
+  const scoreColorClass = useMemo(
+    () =>
+      score > 0 ? 'text-primary' : score < 0 ? 'text-destructive' : '',
+    [score]
+  );
+
+  const answerColorClass = useMemo(
+    () =>
+      hasAccepted
+        ? 'text-green-600 dark:text-green-400'
+        : answerCount > 0
+          ? 'text-muted-foreground'
+          : 'text-muted-foreground/50',
+    [hasAccepted, answerCount]
+  );
+
+  const formattedDate = useMemo(() =>
+    new Date(question.createdAt).toLocaleDateString('ko-KR', {
+      month: 'short',
+      day: 'numeric',
+    }),
+    [question.createdAt]
+  );
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -40,15 +73,7 @@ export function QuestionCard({
           <div className="flex flex-col items-center gap-4 min-w-[80px]">
             {/* 투표 점수 */}
             <div className="flex flex-col items-center">
-              <span
-                className={`text-2xl font-bold ${
-                  score > 0
-                    ? 'text-primary'
-                    : score < 0
-                      ? 'text-destructive'
-                      : ''
-                }`}
-              >
+              <span className={`text-2xl font-bold ${scoreColorClass}`}>
                 {score}
               </span>
               <span className="text-xs text-muted-foreground">점수</span>
@@ -56,15 +81,7 @@ export function QuestionCard({
 
             {/* 답변 수 */}
             <div className="flex flex-col items-center">
-              <div
-                className={`flex items-center gap-1 ${
-                  hasAccepted
-                    ? 'text-green-600 dark:text-green-400'
-                    : answerCount > 0
-                      ? 'text-muted-foreground'
-                      : 'text-muted-foreground/50'
-                }`}
-              >
+              <div className={`flex items-center gap-1 ${answerColorClass}`}>
                 {hasAccepted && <Check className="h-4 w-4" />}
                 <span className="text-xl font-bold">{answerCount}</span>
               </div>
@@ -131,10 +148,7 @@ export function QuestionCard({
                 </Link>
                 <span>•</span>
                 <time dateTime={question.createdAt}>
-                  {new Date(question.createdAt).toLocaleDateString('ko-KR', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  {formattedDate}
                 </time>
               </div>
             </div>
@@ -144,3 +158,6 @@ export function QuestionCard({
     </Card>
   );
 }
+
+// React.memo로 래핑하여 props가 변경되지 않으면 리렌더링 방지
+export const QuestionCard = memo(QuestionCardComponent);
