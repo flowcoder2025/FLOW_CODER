@@ -1255,14 +1255,27 @@ export async function POST(request: NextRequest) {
 ---
 
 #### Task 12.2: SEO 최적화
-- [ ] 메타 태그 추가 (title, description)
-- [ ] Open Graph 이미지 설정
-- [ ] `robots.txt` 생성
-- [ ] `sitemap.xml` 생성
+- [x] 메타 태그 추가 (title, description)
+- [x] Open Graph 이미지 설정
+- [x] `robots.txt` 생성
+- [x] `sitemap.xml` 생성
 
 **산출물:**
 - `app/robots.ts`
 - `app/sitemap.ts`
+
+**완료 내역:**
+- ✅ robots.txt 동적 생성 (크롤러 정책, sitemap 위치)
+- ✅ sitemap.xml 동적 생성 (정적 10개 + 동적 100+ 페이지)
+- ✅ layout.tsx metadata 확장:
+  - Title template (%s | 바이브코딩)
+  - Open Graph 완전 구성
+  - Twitter Card 지원
+  - metadataBase, robots, verification 설정
+- ✅ 환경 변수 설정:
+  - NEXT_PUBLIC_BASE_URL 추가 (.env)
+  - .env.example 생성 (Supabase 설정 포함)
+- ✅ SEO 완전 구현 완료
 
 ---
 
