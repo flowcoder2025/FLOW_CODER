@@ -1154,18 +1154,26 @@ USING (
 **배경**: 이전 세션에서 약관 관리 페이지가 구축되었으나, 전체 Admin 시스템 통합이 누락됨. Zanzibar 권한 시스템 구축 직후 Admin 페이지를 통합하여 권한 관리를 실전에서 검증.
 
 **Task 11.6.1: Admin Layout & 권한 미들웨어**
-- [ ] `lib/admin-middleware.ts` 생성
+- [x] `lib/admin-middleware.ts` 생성
   - `requireAdmin()` - 관리자 전용 권한 체크
   - `requireModerator()` - 모더레이터 이상 권한 체크
   - Zanzibar `check()` 활용
-- [ ] `app/admin/layout.tsx` 생성
+- [x] `app/admin/layout.tsx` 생성
   - AdminSidebar 포함
-  - `requireModerator()` 권한 체크 (Server Component)
+  - `requireAdmin()` 권한 체크 (Server Component)
   - 사용자 역할 조회 및 Sidebar 전달
-- [ ] `components/admin/AdminSidebar.tsx`
-  - Dashboard, Users, Content, Terms, News, Settings 메뉴
-  - adminOnly 플래그 (관리자 전용 메뉴 필터링)
-  - 활성 메뉴 하이라이트
+
+**산출물:**
+- ✅ `lib/admin-middleware.ts` (110줄)
+  - `requireAdmin()`: 관리자 권한 검증 (에러 throw)
+  - `requireModerator()`: 모더레이터 이상 권한 검증 (에러 throw)
+  - `isAdmin()`: 관리자 여부 확인 (boolean, UI용)
+  - `isModerator()`: 모더레이터 여부 확인 (boolean, UI용)
+- ✅ `app/admin/layout.tsx` (100줄)
+  - requireAdmin() 미들웨어 적용 (Server Component)
+  - 사이드바 네비게이션: Dashboard, Users, Terms, Posts, Comments
+  - shadcn/ui 기반 레이아웃 (Card, Button, Separator)
+  - lucide-react 아이콘 사용
 
 **AdminSidebar 메뉴 구조:**
 ```tsx
