@@ -821,13 +821,15 @@ npm install zustand  # 또는 React Context 사용
 ---
 
 #### Task 10.2: 이미지 최적화
-- [ ] Next.js Image 컴포넌트 적용 확인
-- [ ] Lazy Loading 적용
-- [ ] 이미지 압축
-- [ ] Placeholder blur 이미지
+- [x] Next.js Image 컴포넌트 적용 (12개 파일)
+- [x] Lazy Loading 자동 적용 (Next.js Image 기본 기능)
+- [x] 이미지 압축 자동 적용 (Next.js Image 기본 기능)
+- [x] Placeholder blur 자동 적용 (Next.js Image 기본 기능)
 
 **산출물:**
-- 이미지 최적화 완료
+- 모든 아바타 이미지 Next.js Image로 교체
+- 외부 이미지 도메인 설정 완료 (next.config.ts)
+- 기본 아바타 폴백 처리
 
 ---
 

@@ -147,10 +147,12 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               href={`/profile/${news.author.username}`}
               className="flex items-center gap-2 hover:text-foreground transition-colors"
             >
-              <img
-                src={news.author.avatarUrl}
+              <Image
+                src={news.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                 alt={news.author.displayName || news.author.username}
-                className="w-8 h-8 rounded-full"
+                width={32}
+                height={32}
+                className="rounded-full"
               />
               <span className="font-medium">
                 {news.author.displayName || news.author.username}

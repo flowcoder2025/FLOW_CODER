@@ -95,10 +95,12 @@ export function NewsCard({ news }: NewsCardProps) {
                   href={`/profile/${news.author.username}`}
                   className="flex items-center gap-1.5 hover:text-foreground transition-colors"
                 >
-                  <img
-                    src={news.author.avatarUrl}
+                  <Image
+                    src={news.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                     alt={news.author.displayName || news.author.username}
-                    className="w-5 h-5 rounded-full"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
                   />
                   <span className="font-medium">
                     {news.author.displayName || news.author.username}

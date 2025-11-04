@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,10 +59,12 @@ export function AnswerCard({ answer }: AnswerCardProps) {
               href={`/profile/${answer.author.username}`}
               className="flex items-center gap-2 hover:text-foreground transition-colors"
             >
-              <img
-                src={answer.author.avatarUrl}
+              <Image
+                src={answer.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                 alt={answer.author.displayName || answer.author.username}
-                className="w-8 h-8 rounded-full"
+                width={32}
+                height={32}
+                className="rounded-full"
               />
               <div className="flex flex-col">
                 <span className="font-medium text-foreground">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,10 +62,12 @@ function NotificationItem({ notification, onMarkAsRead }: {
       >
         <div className="flex items-center gap-2 w-full">
           {notification.actor?.avatarUrl && (
-            <img
+            <Image
               src={notification.actor.avatarUrl}
               alt={notification.actor.username}
-              className="w-8 h-8 rounded-full"
+              width={32}
+              height={32}
+              className="rounded-full"
             />
           )}
           <div className="flex-1 min-w-0">

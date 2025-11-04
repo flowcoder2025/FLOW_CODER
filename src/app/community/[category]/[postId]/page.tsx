@@ -3,6 +3,7 @@
 import { use } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MessageSquare, Eye, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -101,10 +102,12 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
                   href={`/profile/${post.author.username}`}
                   className="flex items-center gap-2 hover:text-foreground transition-colors"
                 >
-                  <img
-                    src={post.author.avatarUrl}
+                  <Image
+                    src={post.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                     alt={post.author.displayName || post.author.username}
-                    className="w-8 h-8 rounded-full"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
                   />
                   <div className="flex flex-col">
                     <span className="font-medium text-foreground">

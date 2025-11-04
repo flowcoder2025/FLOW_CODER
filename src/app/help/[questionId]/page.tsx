@@ -3,6 +3,7 @@
 import { use, useState } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, MessageSquare, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -147,10 +148,12 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
                   href={`/profile/${question.author.username}`}
                   className="flex items-center gap-2 hover:text-foreground transition-colors"
                 >
-                  <img
-                    src={question.author.avatarUrl}
+                  <Image
+                    src={question.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                     alt={question.author.displayName || question.author.username}
-                    className="w-8 h-8 rounded-full"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
                   />
                   <div className="flex flex-col">
                     <span className="font-medium text-foreground">

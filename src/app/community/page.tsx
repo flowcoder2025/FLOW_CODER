@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare } from 'lucide-react';
@@ -231,10 +232,12 @@ export default function CommunityPage() {
                       {/* 메타 정보 */}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <img
-                            src={post.author.avatarUrl}
+                          <Image
+                            src={post.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                             alt={post.author.displayName || post.author.username}
-                            className="w-5 h-5 rounded-full"
+                            width={20}
+                            height={20}
+                            className="rounded-full"
                           />
                           <span>{post.author.displayName || post.author.username}</span>
                         </div>

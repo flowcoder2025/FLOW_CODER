@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { memo, useMemo } from 'react';
 import { ArrowUp, ArrowDown, MessageSquare, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -138,10 +139,12 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
                   href={`/profile/${author.username}`}
                   className="flex items-center gap-1 hover:text-foreground transition-colors"
                 >
-                  <img
-                    src={author.avatarUrl}
+                  <Image
+                    src={author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                     alt={author.displayName || author.username}
-                    className="w-5 h-5 rounded-full"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
                   />
                   <span className="font-medium">
                     {author.displayName || author.username}

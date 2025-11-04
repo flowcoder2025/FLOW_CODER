@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -85,10 +86,12 @@ export function ProfileHeader({ user, currentUsername }: ProfileHeaderProps) {
       <CardContent className="pt-6">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
           {/* 아바타 */}
-          <img
-            src={profileData.avatarUrl}
+          <Image
+            src={profileData.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
             alt={profileData.displayName}
-            className="w-24 h-24 rounded-full object-cover"
+            width={96}
+            height={96}
+            className="rounded-full object-cover"
           />
 
           {/* 사용자 정보 */}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { memo, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,10 +62,12 @@ function CommentItemComponent({
               href={`/profile/${comment.author.username}`}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <img
-                src={comment.author.avatarUrl}
+              <Image
+                src={comment.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                 alt={comment.author.displayName || comment.author.username}
-                className="w-6 h-6 rounded-full"
+                width={24}
+                height={24}
+                className="rounded-full"
               />
               <span className="font-medium text-sm">
                 {comment.author.displayName || comment.author.username}

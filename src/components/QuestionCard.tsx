@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { memo, useMemo } from 'react';
 import { Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -137,10 +138,12 @@ function QuestionCardComponent({
                   href={`/profile/${question.author.username}`}
                   className="flex items-center gap-1 hover:text-foreground transition-colors"
                 >
-                  <img
-                    src={question.author.avatarUrl}
+                  <Image
+                    src={question.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                     alt={question.author.displayName || question.author.username}
-                    className="w-5 h-5 rounded-full"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
                   />
                   <span className="font-medium">
                     {question.author.displayName || question.author.username}
