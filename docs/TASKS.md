@@ -894,10 +894,10 @@ npm install zustand  # 또는 React Context 사용
 ### Week 11: Supabase + Zanzibar 통합
 
 #### Task 11.1: Supabase 프로젝트 설정
-- [ ] Supabase 프로젝트 생성 (https://supabase.com)
-- [ ] PostgreSQL 데이터베이스 URL 확인
-- [ ] `.env` 설정 (DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY)
-- [ ] Supabase Client 라이브러리 설치
+- [x] Supabase 프로젝트 생성 (https://supabase.com)
+- [x] PostgreSQL 데이터베이스 URL 확인
+- [x] `.env` 설정 (DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY)
+- [x] Supabase Client 라이브러리 설치
 
 **명령어:**
 ```bash
@@ -920,17 +920,31 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 - `lib/supabase.ts` (선택적)
 - 환경 변수 설정 완료
 
+**완료 내역:**
+- ✅ Supabase 프로젝트 생성 (Project: hybcfzamnhvmkvgkepzo)
+- ✅ 프로젝트 상태 Healthy 확인
+- ✅ Database Password 재설정 및 저장
+- ✅ Connection strings 확인:
+  - Transaction Pooler (앱용): port 6543
+  - Session Pooler (마이그레이션용): port 5432 (IPv4 compatible)
+- ✅ `.env` 파일 설정 완료:
+  - `DATABASE_URL` (Transaction Pooler)
+  - `DIRECT_URL` (Session Pooler - IPv4 호환)
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- ✅ @supabase/supabase-js 설치 완료
+
 **참고 문서:**
 - [Supabase 설정 가이드](./Supabase_Setup_Guide.md)
 
 ---
 
 #### Task 11.2: Prisma 스키마 구현 (Zanzibar 포함)
-- [ ] `prisma/schema.prisma` 업데이트
-- [ ] 기존 모델 유지 (User, Post, Comment, Category 등)
-- [ ] Zanzibar 권한 모델 추가 (RelationTuple, RelationDefinition)
-- [ ] Prisma Client 재생성
-- [ ] 마이그레이션 실행
+- [x] `prisma/schema.prisma` 업데이트
+- [x] 기존 모델 유지 (User, Post, Comment, Category 등)
+- [x] Zanzibar 권한 모델 추가 (RelationTuple, RelationDefinition)
+- [x] Prisma Client 재생성
+- [x] 마이그레이션 실행
 
 **Zanzibar 모델 예시:**
 ```prisma
@@ -971,6 +985,19 @@ npx prisma migrate dev --name add_zanzibar_models
 - 업데이트된 `prisma/schema.prisma`
 - Prisma migrations
 - 생성된 Prisma Client
+
+**완료 내역:**
+- ✅ Supabase 프로젝트 연결 완료
+- ✅ `prisma/schema.prisma`에 `directUrl` 설정 추가
+- ✅ Zanzibar 모델 이미 구현되어 있음 확인:
+  - `RelationTuple`: 권한 튜플 (namespace, objectId, relation, subjectType, subjectId)
+  - `RelationDefinition`: 관계 정의 메타데이터 (상속 관계 문서화)
+- ✅ @supabase/supabase-js 설치
+- ✅ Prisma Client 생성 (`npx prisma generate`)
+- ✅ 초기 마이그레이션 실행 (`20251104081530_init_zanzibar`)
+- ✅ Supabase PostgreSQL 데이터베이스에 테이블 생성 완료:
+  - `User`, `Account`, `ExternalTerms`
+  - `relation_tuples`, `relation_definitions` (Zanzibar)
 
 **참고:**
 - [Google Zanzibar 논문](https://research.google/pubs/pub48190/)
