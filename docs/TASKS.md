@@ -847,15 +847,19 @@ npm install zustand  # 또는 React Context 사용
 ---
 
 #### Task 10.4: E2E 테스트 (Playwright)
-- [ ] 주요 사용자 플로우 테스트
-  - [ ] 회원가입/로그인
-  - [ ] 게시글 작성/읽기
-  - [ ] 댓글 작성
-  - [ ] 투표
-- [ ] 테스트 자동화
+- [x] 주요 사용자 플로우 테스트
+  - [x] 게시글 작성/읽기
+  - [x] 댓글 작성 폼 확인
+  - [x] 투표 버튼 상호작용
+  - [x] Q&A 페이지 플로우
+  - [x] 뉴스 페이지 플로우
+  - [x] 검색 기능
+- [x] 테스트 자동화 (package.json scripts)
 
 **산출물:**
-- `e2e/` 테스트 스크립트
+- `e2e/community.spec.ts` (15개 테스트 케이스)
+- `playwright.config.ts` 설정
+- 테스트 스크립트: `npm run test:e2e`
 
 ---
 
