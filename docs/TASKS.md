@@ -866,66 +866,357 @@ npm install zustand  # 또는 React Context 사용
 
 ---
 
-## Phase 4: 데이터베이스 통합 & 배포 (2주)
+## Phase 4: Supabase 통합 & 배포 (2주)
 
-### Week 11: PostgreSQL 통합
+**변경 사항**: PostgreSQL → Supabase + Zanzibar 권한 시스템
 
-#### Task 11.1: PostgreSQL 스키마 구현
-- [ ] `database/schema.sql` 생성
-- [ ] CREATE TABLE 문 작성 (Users, Posts, Comments, Categories, Answers, Votes)
-- [ ] 인덱스 생성
-- [ ] FOREIGN KEY 제약조건 설정
+### Week 11: Supabase + Zanzibar 통합
 
-**산출물:**
-- `database/schema.sql`
-
----
-
-#### Task 11.2: pg 라이브러리 설정
-- [ ] `pg` 패키지 설치
-- [ ] `lib/db.ts` 데이터베이스 연결 파일 생성
-- [ ] 커넥션 풀 설정
-- [ ] `.env`에 DATABASE_URL 추가
+#### Task 11.1: Supabase 프로젝트 설정
+- [ ] Supabase 프로젝트 생성 (https://supabase.com)
+- [ ] PostgreSQL 데이터베이스 URL 확인
+- [ ] `.env` 설정 (DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY)
+- [ ] Supabase Client 라이브러리 설치
 
 **명령어:**
 ```bash
-npm install pg @types/pg
+npm install @supabase/supabase-js
+```
+
+**`.env` 예시:**
+```env
+# Supabase PostgreSQL (Prisma용)
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+
+# Supabase Client (선택적 - 실시간 기능용)
+NEXT_PUBLIC_SUPABASE_URL="https://[PROJECT-REF].supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 ```
 
 **산출물:**
-- `lib/db.ts`
+- Supabase 프로젝트
+- `lib/supabase.ts` (선택적)
+- 환경 변수 설정 완료
+
+**참고 문서:**
+- [Supabase 설정 가이드](./Supabase_Setup_Guide.md)
 
 ---
 
-#### Task 11.3: API Routes 구현 (CRUD)
-- [ ] `app/api/posts/route.ts` (GET, POST)
-- [ ] `app/api/posts/[id]/route.ts` (GET, PATCH, DELETE)
+#### Task 11.2: Prisma 스키마 구현 (Zanzibar 포함)
+- [ ] `prisma/schema.prisma` 업데이트
+- [ ] 기존 모델 유지 (User, Post, Comment, Category 등)
+- [ ] Zanzibar 권한 모델 추가 (RelationTuple, RelationDefinition)
+- [ ] Prisma Client 재생성
+- [ ] 마이그레이션 실행
+
+**Zanzibar 모델 예시:**
+```prisma
+model RelationTuple {
+  id          String   @id @default(cuid())
+  namespace   String   // 'post', 'comment', 'category', 'system'
+  objectId    String   // 리소스 ID
+  relation    String   // 'owner', 'editor', 'viewer', 'moderator'
+  subjectType String   // 'user', 'group'
+  subjectId   String   // User ID
+  createdAt   DateTime @default(now())
+
+  @@unique([namespace, objectId, relation, subjectType, subjectId])
+  @@index([namespace, objectId, relation])
+  @@index([subjectType, subjectId])
+  @@map("relation_tuples")
+}
+
+model RelationDefinition {
+  id           String  @id @default(cuid())
+  namespace    String
+  relation     String
+  inheritsFrom String? // 상속 관계 (예: 'editor' → 'viewer')
+  description  String?
+
+  @@unique([namespace, relation])
+  @@map("relation_definitions")
+}
+```
+
+**명령어:**
+```bash
+npx prisma generate
+npx prisma migrate dev --name add_zanzibar_models
+```
+
+**산출물:**
+- 업데이트된 `prisma/schema.prisma`
+- Prisma migrations
+- 생성된 Prisma Client
+
+**참고:**
+- [Google Zanzibar 논문](https://research.google/pubs/pub48190/)
+- [Zanzibar 권한 모델 설명](./Zanzibar_Permission_System.md)
+
+---
+
+#### Task 11.3: 권한 시스템 구축 (Zanzibar)
+- [ ] `lib/permissions.ts` 생성
+- [ ] 권한 체크 함수 구현 (`check`, `grant`, `revoke`)
+- [ ] 상속 관계 지원 (owner → editor → viewer)
+- [ ] 시스템 레벨 권한 (admin, moderator)
+- [ ] 리스트 필터링 함수 (`listAccessible`)
+
+**핵심 함수:**
+```typescript
+// 권한 확인
+export async function check(
+  userId: string,
+  namespace: Namespace,
+  objectId: string,
+  relation: Relation
+): Promise<boolean>
+
+// 권한 부여
+export async function grant(
+  namespace: Namespace,
+  objectId: string,
+  relation: Relation,
+  subjectType: SubjectType,
+  subjectId: string
+)
+
+// 권한 제거
+export async function revoke(...)
+
+// 접근 가능한 리소스 조회
+export async function listAccessible(
+  userId: string,
+  namespace: Namespace,
+  relation: Relation
+): Promise<string[]>
+```
+
+**산출물:**
+- `lib/permissions.ts`
+- 권한 시스템 유틸리티
+
+**테스트:**
+```bash
+# 권한 시스템 테스트
+npm run test:permissions
+```
+
+---
+
+#### Task 11.4: API Routes 구현 (권한 통합)
+- [ ] `app/api/posts/route.ts` (GET, POST + 권한 체크)
+- [ ] `app/api/posts/[id]/route.ts` (GET, PATCH, DELETE + 권한 체크)
 - [ ] `app/api/posts/[id]/comments/route.ts`
-- [ ] Prepared Statements 사용 (SQL injection 방지)
+- [ ] `app/api/questions/route.ts`
+- [ ] `app/api/answers/route.ts`
+- [ ] 모든 API에 `requirePermission` 미들웨어 적용
+
+**권한 적용 예시:**
+```typescript
+// app/api/posts/[id]/route.ts
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  const session = await getServerSession(authOptions);
+  const { id } = await context.params;
+
+  // 권한 체크 (editor 필요)
+  await requirePermission(session?.user?.id, 'post', id, 'editor');
+
+  // 게시글 수정 로직
+  const body = await request.json();
+  const updatedPost = await prisma.post.update({
+    where: { id },
+    data: body,
+  });
+
+  return NextResponse.json({ post: updatedPost });
+}
+```
 
 **산출물:**
-- API Routes
+- 완전한 API Routes (권한 통합)
+- `app/api/` 디렉토리
 
 ---
 
-#### Task 11.4: Mock API → Real API 전환
-- [ ] 클라이언트 코드 수정 (fetch API 엔드포인트 변경)
-- [ ] localStorage → PostgreSQL 데이터 마이그레이션
-- [ ] 기존 Mock 데이터 삭제 또는 백업
+#### Task 11.5: Supabase RLS 정책 설정 (선택적)
+- [ ] Supabase Dashboard에서 RLS 활성화
+- [ ] 기본 읽기 정책 (public posts)
+- [ ] 수정 정책 (owner + Zanzibar 확인)
+- [ ] 삭제 정책 (owner + moderator)
+
+**RLS 정책 예시 (SQL):**
+```sql
+-- Public posts are viewable by everyone
+CREATE POLICY "Public posts are viewable"
+ON posts FOR SELECT
+USING (true);
+
+-- Users can update their own posts or if authorized
+CREATE POLICY "Authorized users can update posts"
+ON posts FOR UPDATE
+USING (
+  auth.uid() = author_id
+  OR EXISTS (
+    SELECT 1 FROM relation_tuples
+    WHERE namespace = 'post'
+    AND object_id = posts.id::text
+    AND relation IN ('owner', 'editor')
+    AND subject_id = auth.uid()::text
+  )
+);
+```
 
 **산출물:**
-- API 통합 완료
+- Supabase RLS 정책
+- 데이터베이스 레벨 보안
+
+**참고:**
+- [Supabase RLS 가이드](https://supabase.com/docs/guides/auth/row-level-security)
 
 ---
 
-#### Task 11.5: 데이터 마이그레이션
-- [ ] Mock 데이터 → PostgreSQL 이동
-- [ ] 카테고리 데이터 삽입
-- [ ] 테스트 사용자 생성
-- [ ] 데이터 검증
+#### Task 11.6: Admin 페이지 기반 구축 (P0)
+
+**배경**: 이전 세션에서 약관 관리 페이지가 구축되었으나, 전체 Admin 시스템 통합이 누락됨. Zanzibar 권한 시스템 구축 직후 Admin 페이지를 통합하여 권한 관리를 실전에서 검증.
+
+**Task 11.6.1: Admin Layout & 권한 미들웨어**
+- [ ] `lib/admin-middleware.ts` 생성
+  - `requireAdmin()` - 관리자 전용 권한 체크
+  - `requireModerator()` - 모더레이터 이상 권한 체크
+  - Zanzibar `check()` 활용
+- [ ] `app/admin/layout.tsx` 생성
+  - AdminSidebar 포함
+  - `requireModerator()` 권한 체크 (Server Component)
+  - 사용자 역할 조회 및 Sidebar 전달
+- [ ] `components/admin/AdminSidebar.tsx`
+  - Dashboard, Users, Content, Terms, News, Settings 메뉴
+  - adminOnly 플래그 (관리자 전용 메뉴 필터링)
+  - 활성 메뉴 하이라이트
+
+**AdminSidebar 메뉴 구조:**
+```tsx
+const menuItems = [
+  { href: '/admin', label: 'Dashboard', icon: HomeIcon },
+  { href: '/admin/users', label: '사용자 관리', icon: UsersIcon, adminOnly: true },
+  { href: '/admin/content/posts', label: '게시글 관리', icon: FileTextIcon },
+  { href: '/admin/content/comments', label: '댓글 관리', icon: FileTextIcon },
+  { href: '/admin/terms', label: '약관 관리', icon: FileCheckIcon },
+  { href: '/admin/news', label: '뉴스 관리', icon: NewspaperIcon, adminOnly: true },
+  { href: '/admin/settings', label: '설정', icon: SettingsIcon, adminOnly: true },
+]
+```
 
 **산출물:**
-- 데이터 마이그레이션 완료
+- `lib/admin-middleware.ts`
+- `app/admin/layout.tsx`
+- `components/admin/AdminSidebar.tsx`
+
+---
+
+**Task 11.6.2: Admin Dashboard**
+- [ ] `app/admin/page.tsx` (대시보드)
+- [ ] `components/admin/StatsCard.tsx`
+  - 총 사용자, 게시글, 댓글, DAU 표시
+  - 아이콘 + 숫자 카드 UI
+- [ ] `components/admin/RecentActivity.tsx`
+  - 최근 게시글/댓글 타임라인
+- [ ] `app/api/admin/stats/route.ts`
+  - Prisma 병렬 쿼리 (성능 최적화)
+  - `requireModerator()` 권한 체크
+  - DAU 계산 (최근 24시간 활성 사용자)
+
+**통계 항목:**
+- 총 사용자 수
+- 총 게시글 수
+- 총 댓글 수
+- 일일 활성 사용자 (DAU)
+
+**산출물:**
+- Admin Dashboard 페이지
+- 통계 API Route
+
+---
+
+**Task 11.6.3: 사용자 관리 (역할 변경 + Zanzibar 권한 부여)**
+- [ ] `app/admin/users/page.tsx`
+  - 사용자 목록 테이블 (shadcn/ui Table)
+  - 검색 기능 (username, email)
+  - 역할 필터 (USER, MODERATOR, ADMIN)
+  - 페이지네이션
+- [ ] `components/admin/UserRoleDialog.tsx`
+  - 역할 변경 다이얼로그
+  - 드롭다운 (USER/MODERATOR/ADMIN)
+  - 확인 후 API 호출
+- [ ] `app/api/admin/users/route.ts` (GET)
+  - 사용자 목록 조회 (검색, 필터, 페이지네이션)
+  - `requireAdmin()` 권한 체크
+- [ ] `app/api/admin/users/[id]/role/route.ts` (POST)
+  - 역할 변경 로직
+  - Zanzibar 권한 자동 부여:
+    - ADMIN → `grantSystemAdmin(userId)`
+    - MODERATOR → `grantSystemModerator(userId)`
+    - USER → 기존 권한 제거
+  - `requireAdmin()` 권한 체크
+
+**Zanzibar 권한 부여 예시:**
+```typescript
+// 역할 변경 시 자동 권한 부여
+if (role === 'ADMIN') {
+  await grantSystemAdmin(userId)
+} else if (role === 'MODERATOR') {
+  await grantSystemModerator(userId)
+} else {
+  // USER로 변경 시 기존 시스템 권한 제거
+  await revoke('system', 'global', 'admin', 'user', userId)
+  await revoke('system', 'global', 'moderator', 'user', userId)
+}
+```
+
+**산출물:**
+- 사용자 관리 페이지
+- 역할 변경 API (Zanzibar 통합)
+
+---
+
+**Task 11.6.4: 약관 관리 통합 (기존 페이지 권한 보호)**
+- [ ] 기존 약관 API Routes 권한 추가
+  - `app/api/admin/terms/route.ts`
+    - GET: `requireModerator()`
+    - POST: `requireAdmin()`
+  - `app/api/admin/terms/[id]/route.ts`
+    - GET: `requireModerator()`
+    - PATCH: `requireAdmin()`
+    - DELETE: `requireAdmin()`
+- [ ] 기존 페이지 검증
+  - `app/admin/terms/*` 페이지들이 Admin Layout 자동 적용 확인
+  - AdminSidebar에서 약관 관리 메뉴 접근 테스트
+- [ ] UI 개선 (선택적)
+  - shadcn/ui Table 컴포넌트 적용
+  - 발행 상태 Badge 추가
+  - 검색/필터 기능 추가
+
+**권한 체크 예시:**
+```typescript
+// app/api/admin/terms/route.ts
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  await requireModerator(session?.user?.id)  // 모더레이터 이상
+  // ...
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  await requireAdmin(session?.user?.id)  // 관리자 전용
+  // ...
+}
+```
+
+**산출물:**
+- 약관 관리 API Routes (권한 보호)
+- Admin 시스템 통합 완료
 
 ---
 
@@ -964,14 +1255,39 @@ npm install pg @types/pg
 
 ---
 
-#### Task 12.4: Vercel 배포
+#### Task 12.4: Supabase + Vercel 배포
 - [ ] Vercel 계정 연결
 - [ ] GitHub 리포지토리 연결
-- [ ] 환경 변수 설정 (DATABASE_URL, NEXTAUTH_SECRET 등)
-- [ ] 배포 실행
+- [ ] Vercel 환경 변수 설정
+  - [ ] `DATABASE_URL` (Supabase PostgreSQL)
+  - [ ] `DIRECT_URL` (Supabase Direct Connection)
+  - [ ] `NEXTAUTH_URL` (프로덕션 URL)
+  - [ ] `NEXTAUTH_SECRET`
+  - [ ] `GITHUB_ID`, `GITHUB_SECRET`
+  - [ ] `NEXT_PUBLIC_SUPABASE_URL`
+  - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [ ] Prisma 마이그레이션 자동 실행 설정
+- [ ] 배포 실행 및 검증
+
+**Vercel 빌드 설정:**
+```json
+// vercel.json (선택적)
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "DIRECT_URL": "@direct_url"
+  }
+}
+```
 
 **산출물:**
 - 프로덕션 URL
+- Supabase + Vercel 통합 완료
+
+**참고:**
+- [Vercel + Supabase 통합 가이드](https://supabase.com/docs/guides/getting-started/quickstarts/nextjs)
+- [Prisma + Vercel 배포](https://www.prisma.io/docs/guides/deployment/deployment-guides/deploying-to-vercel)
 
 ---
 
@@ -993,35 +1309,94 @@ npx @sentry/wizard@latest -i nextjs
 
 ---
 
+#### Task 12.6: 콘텐츠 모더레이션 (P1)
+
+**Task 12.6.1: 게시글 관리**
+- [ ] `app/admin/content/posts/page.tsx`
+  - 모든 게시글 목록 (카테고리 필터, 검색)
+  - 삭제/복구 버튼
+  - 신고된 게시글 강조 표시
+- [ ] `app/api/admin/posts/route.ts` (GET)
+  - 모든 게시글 조회 (페이지네이션)
+  - `requireModerator()` 권한 체크
+- [ ] `app/api/admin/posts/[id]/route.ts` (DELETE, PATCH)
+  - 게시글 삭제/복구 (soft delete)
+  - `requireModerator()` 권한 체크
+
+**주요 기능:**
+- 카테고리별 필터링
+- 검색 (제목, 본문)
+- 신고 게시글 우선 표시
+- Soft delete (deletedAt 필드 활용)
+
+**산출물:**
+- 게시글 관리 페이지
+- 게시글 관리 API Routes
+
+---
+
+**Task 12.6.2: 댓글 관리**
+- [ ] `app/admin/content/comments/page.tsx`
+  - 모든 댓글 목록
+  - 댓글이 속한 게시글 정보 표시
+  - 삭제/복구 버튼
+  - 신고된 댓글 처리
+- [ ] `app/api/admin/comments/[id]/route.ts` (DELETE, PATCH)
+  - 댓글 삭제/복구
+  - `requireModerator()` 권한 체크
+
+**주요 기능:**
+- 게시글별 댓글 그룹화
+- 댓글 컨텍스트 표시 (게시글 제목, 작성자)
+- Soft delete
+
+**산출물:**
+- 댓글 관리 페이지
+- 댓글 관리 API Routes
+
+---
+
 ## 우선순위 매트릭스
 
-### P0 (필수, Week 1-7)
+### P0 (필수, Week 1-7 + Week 11 Admin 기반)
 - [x] Next.js 프로젝트 초기화
 - [x] 기존 컴포넌트 이전
 - [x] 인증 시스템 (NextAuth.js)
 - [ ] TypeScript 인터페이스 & Mock 데이터
 - [ ] 모든 페이지 UI 구현 (커뮤니티, Q&A, 뉴스, 프로필)
 - [ ] 기본 컴포넌트 (PostCard, CommentList, VoteButtons 등)
+- [ ] **Admin Layout & 권한 미들웨어 (Task 11.6.1)**
+- [ ] **Admin Dashboard (Task 11.6.2)**
+- [ ] **사용자 관리 & Zanzibar 권한 부여 (Task 11.6.3)**
+- [ ] **약관 관리 통합 (Task 11.6.4)**
 
-### P1 (중요, Week 8-10)
+### P1 (중요, Week 8-10 + Week 12 콘텐츠 관리)
 - [ ] 클라이언트 상태 관리
 - [ ] localStorage 기반 CRUD
 - [ ] 검색 & 필터링
 - [ ] 성능 최적화
 - [ ] E2E 테스트
+- [ ] **콘텐츠 모더레이션 - 게시글 (Task 12.6.1)**
+- [ ] **콘텐츠 모더레이션 - 댓글 (Task 12.6.2)**
 
-### P2 (DB 통합, Week 11-12)
-- [ ] PostgreSQL 스키마 구현
-- [ ] API Routes 구현
-- [ ] Mock → Real API 전환
+### P2 (Supabase 통합, Week 11-12)
+- [ ] Supabase 프로젝트 설정
+- [ ] Prisma + Zanzibar 스키마 구현
+- [ ] 권한 시스템 구축
+- [ ] API Routes 구현 (권한 통합)
+- [ ] Supabase RLS 정책 (선택적)
 - [ ] 배포 & 모니터링
 
 ### P3 (향후 고도화)
-- [ ] 실시간 알림 (WebSocket)
-- [ ] 관리자 대시보드
-- [ ] 이미지 업로드 (Cloudinary)
+- [ ] Supabase 실시간 구독 (댓글, 투표 실시간 업데이트)
+- [ ] Supabase Storage (이미지 업로드)
+- [ ] Supabase Auth 전환 (NextAuth → Supabase Auth)
 - [ ] 메시지 시스템 (DM)
-- [ ] ORM 도입 검토 (Prisma/Drizzle)
+- [ ] Zanzibar 권한 캐싱 최적화
+- [ ] **Admin 뉴스 관리 (공식 뉴스 작성/발행)**
+- [ ] **Admin 카테고리 관리 (카테고리 추가/수정/삭제, 모더레이터 지정)**
+- [ ] **Admin 고급 통계 (차트, 리포트, CSV 내보내기)**
+- [ ] **신고 시스템 (사용자 신고 접수/처리)**
 
 ---
 
@@ -1031,7 +1406,8 @@ npx @sentry/wizard@latest -i nextjs
 인증 시스템 (Week 3)
     ├─> 모든 로그인 필요 페이지
     ├─> 프로필 페이지 (Week 7)
-    └─> 게시글/댓글 작성 (Week 5-6)
+    ├─> 게시글/댓글 작성 (Week 5-6)
+    └─> Admin 페이지 (Week 11)
 
 TypeScript 인터페이스 & Mock 데이터 (Week 4)
     ├─> 모든 페이지 UI (Week 4-7)
@@ -1041,16 +1417,26 @@ TypeScript 인터페이스 & Mock 데이터 (Week 4)
 Tiptap 에디터 (Week 5)
     ├─> 게시글 작성 (Week 5)
     ├─> 댓글 작성 (Week 5)
-    └─> Q&A 작성 (Week 6)
+    ├─> Q&A 작성 (Week 6)
+    └─> Admin 뉴스 작성 (P3)
 
 클라이언트 상태 관리 (Week 8)
     ├─> CRUD 기능 (Week 8)
     ├─> 검색 & 필터링 (Week 9)
     └─> Real API 전환 (Week 11)
 
-PostgreSQL 스키마 (Week 11)
-    ├─> API Routes (Week 11)
-    ├─> Mock → Real 전환 (Week 11)
+Supabase + Zanzibar 스키마 (Week 11)
+    ├─> 권한 시스템 (Week 11)
+    ├─> API Routes with 권한 (Week 11)
+    ├─> **Admin 페이지 (Week 11)** ✅
+    │   ├─> Admin Layout & 권한 미들웨어 (Task 11.6.1)
+    │   ├─> Dashboard 통계 (Task 11.6.2)
+    │   ├─> 사용자 관리 & Zanzibar 권한 부여 (Task 11.6.3)
+    │   └─> 약관 관리 통합 (Task 11.6.4)
+    ├─> Supabase RLS (Week 11, 선택적)
+    ├─> **콘텐츠 관리 (Week 12)** ✅
+    │   ├─> 게시글 관리 (Task 12.6.1)
+    │   └─> 댓글 관리 (Task 12.6.2)
     └─> 배포 (Week 12)
 ```
 
@@ -1086,25 +1472,31 @@ PostgreSQL 스키마 (Week 11)
 
 ---
 
-### Phase 4: 데이터베이스 통합 & 배포 (2주)
-- [ ] Week 11: PostgreSQL 통합 (5개 Task)
-- [ ] Week 12: 최종 배포 (5개 Task)
+### Phase 4: Supabase 통합 & 배포 (2주)
+- [ ] Week 11: Supabase + Zanzibar + Admin 기반 (9개 Task)
+  - Task 11.1-11.5: Supabase + Zanzibar (5개)
+  - **Task 11.6: Admin 페이지 기반 (4개 Sub-Task)** ✅ NEW
+- [ ] Week 12: 최종 배포 + 콘텐츠 관리 (7개 Task)
+  - Task 12.1-12.5: 배포 (5개)
+  - **Task 12.6: 콘텐츠 관리 (2개 Sub-Task)** ✅ NEW
 
-**완료율**: 0/10 Tasks
+**완료율**: 0/16 Tasks
 
 ---
 
 ## 전체 진행 상황
 
-**총 Tasks**: 61개 (재구성 후)
+**총 Tasks**: 67개 (Admin 추가 후)
 **완료**: 16개
-**진행률**: 26%
+**진행률**: 24% (16/67)
 
 ---
 
 ## 참고 문서
 
 - [PRD.md](./PRD.md) - 제품 요구사항 문서
+- [Supabase 설정 가이드](./Supabase_Setup_Guide.md) - Supabase 통합 가이드
+- [Zanzibar 권한 시스템](./Zanzibar_Permission_System.md) - 권한 시스템 설명
 - [루트 CLAUDE.md](../CLAUDE.md) - 프로젝트 전역 규칙
 - [Next.js 14 Documentation](https://nextjs.org/docs)
 - [Prisma Documentation](https://www.prisma.io/docs)
@@ -1120,6 +1512,8 @@ PostgreSQL 스키마 (Week 11)
 | 1.0 | 2025-10-15 | 초기 Task 문서 작성 |
 | 1.1 | 2025-10-16 | 프로젝트 쇼케이스 Task 제거, 전체 Task 58→54개로 조정, 기간 13주→12주로 단축 |
 | 1.2 | 2025-10-20 | **UI 우선 개발 전략으로 전면 재구성**<br>- Phase 재구성: 기반(3주) → UI 우선(4주) → 기능 완성(3주) → DB 통합(2주)<br>- Week 4: Prisma Task 제거 → Mock 데이터 & 커뮤니티 UI Task<br>- Week 5-7: 모든 페이지 UI 구현 (Mock 데이터 기반)<br>- Week 8-10: 클라이언트 상태 관리 & 기능 완성<br>- Week 11-12: PostgreSQL 통합 & 배포<br>- 총 Task: 54개 → 61개 (UI 중심으로 재분류) |
+| 1.3 | 2025-11-04 | **Supabase + Zanzibar 권한 시스템으로 전환**<br>- Phase 4 제목 변경: "PostgreSQL 통합" → "Supabase 통합"<br>- Week 11 완전 재구성:<br>&nbsp;&nbsp;• Task 11.1: Supabase 프로젝트 설정<br>&nbsp;&nbsp;• Task 11.2: Prisma + Zanzibar 스키마 (Google Zanzibar 패턴)<br>&nbsp;&nbsp;• Task 11.3: 권한 시스템 구축 (check, grant, revoke)<br>&nbsp;&nbsp;• Task 11.4: API Routes with 권한 통합<br>&nbsp;&nbsp;• Task 11.5: Supabase RLS 정책 (선택적)<br>- Week 12 배포 개선: Supabase + Vercel 통합 가이드<br>- P3 고도화: Supabase 실시간, Storage, Auth 전환 추가<br>- 의존성 관계도 업데이트: Zanzibar 권한 시스템 통합 |
+| 1.4 | 2025-11-04 | **Admin 페이지 구축 추가**<br>- Week 11 Admin 기반 구축 (Task 11.6, 4개 Sub-Task):<br>&nbsp;&nbsp;• Task 11.6.1: Admin Layout & 권한 미들웨어<br>&nbsp;&nbsp;• Task 11.6.2: Admin Dashboard (통계)<br>&nbsp;&nbsp;• Task 11.6.3: 사용자 관리 (역할 변경 + Zanzibar 권한 부여)<br>&nbsp;&nbsp;• Task 11.6.4: 약관 관리 통합 (기존 페이지 권한 보호)<br>- Week 12 콘텐츠 관리 추가 (Task 12.6, 2개 Sub-Task):<br>&nbsp;&nbsp;• Task 12.6.1: 게시글 관리 (삭제/복구)<br>&nbsp;&nbsp;• Task 12.6.2: 댓글 관리 (삭제/복구)<br>- P0 우선순위: Admin Layout, Dashboard, 사용자 관리, 약관 통합<br>- P1 우선순위: 콘텐츠 모더레이션 (게시글/댓글)<br>- P3 고도화: 뉴스 관리, 카테고리 관리, 고급 통계, 신고 시스템<br>- 의존성 관계도 업데이트: Admin 페이지 통합<br>- 참고 문서 추가: Supabase 설정 가이드, Zanzibar 권한 시스템<br>- 총 Task: 61개 → 67개 (+6개) |
 
 ---
 

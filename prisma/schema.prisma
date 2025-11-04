@@ -56,3 +56,48 @@ model ExternalTerms {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// ===== Zanzibar 권한 시스템 (Google Zanzibar 패턴) =====
+
+// 권한 튜플: (namespace:object_id, relation, subject_type:subject_id)
+// 예: (post:123, owner, user:456) = user:456은 post:123의 소유자
+model RelationTuple {
+  id          String   @id @default(cuid())
+
+  // Tuple 구성 요소
+  namespace   String   // 'post', 'comment', 'category', 'system', 'question', 'answer'
+  objectId    String   // 리소스 ID
+  relation    String   // 'owner', 'editor', 'viewer', 'moderator', 'admin'
+  subjectType String   // 'user', 'group', 'user_set'
+  subjectId   String   // User ID 또는 그룹 ID
+
+  createdAt   DateTime @default(now())
+
+  // 유니크 제약: 같은 튜플은 한 번만 존재
+  @@unique([namespace, objectId, relation, subjectType, subjectId])
+
+  // 인덱스: 권한 체크 및 리스트 조회 최적화
+  @@index([namespace, objectId, relation])
+  @@index([subjectType, subjectId])
+  @@index([namespace, relation, subjectId])
+
+  @@map("relation_tuples")
+}
+
+// 관계 정의 메타데이터 (선택적, 상속 관계 문서화)
+model RelationDefinition {
+  id              String   @id @default(cuid())
+  namespace       String   // 'post', 'comment', 'category', 'system'
+  relation        String   // 'owner', 'editor', 'viewer'
+  inheritsFrom    String?  // 상속 관계: 'editor' → 'viewer'
+  description     String?
+
+  @@unique([namespace, relation])
+  @@map("relation_definitions")
+}
+
+// 권한 예시:
+// 1. 게시글 소유자: (post, "123", owner, user, "user_456")
+// 2. 카테고리 모더레이터: (category, "free", moderator, user, "user_789")
+// 3. 시스템 관리자: (system, "global", admin, user, "user_admin")
+// 4. 공개 뷰어: (post, "123", viewer, user, "*") - 모든 사용자
