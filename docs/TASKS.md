@@ -1006,11 +1006,21 @@ npx prisma migrate dev --name add_zanzibar_models
 ---
 
 #### Task 11.3: 권한 시스템 구축 (Zanzibar)
-- [ ] `lib/permissions.ts` 생성
-- [ ] 권한 체크 함수 구현 (`check`, `grant`, `revoke`)
-- [ ] 상속 관계 지원 (owner → editor → viewer)
-- [ ] 시스템 레벨 권한 (admin, moderator)
-- [ ] 리스트 필터링 함수 (`listAccessible`)
+- [x] `lib/permissions.ts` 생성
+- [x] 권한 체크 함수 구현 (`check`, `grant`, `revoke`)
+- [x] 상속 관계 지원 (owner → editor → viewer)
+- [x] 시스템 레벨 권한 (admin, moderator)
+- [x] 리스트 필터링 함수 (`listAccessible`)
+
+**산출물:**
+- ✅ `src/lib/permissions.ts` (337줄) - 완전한 Zanzibar 권한 시스템 구현
+  - 타입 정의: Namespace, Relation, SubjectType
+  - 핵심 함수: `check()`, `grant()`, `revoke()`, `listAccessible()`
+  - 권한 상속: owner → editor → viewer, admin → moderator → member
+  - 시스템 레벨 권한: admin, moderator (글로벌 접근 권한)
+  - 와일드카드 지원: 공개 리소스 ("*")
+  - 헬퍼 함수: `requirePermission()`, `checkAny()`, `checkAll()`, `revokeAll()`
+  - 리소스별 헬퍼: `grantPostOwnership()`, `grantSystemAdmin()` 등
 
 **핵심 함수:**
 ```typescript
