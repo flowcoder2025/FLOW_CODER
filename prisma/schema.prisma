@@ -15,16 +15,38 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// NextAuth.js 인증 모델
+// NextAuth.js 인증 모델 + 커뮤니티 프로필
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
   emailVerified DateTime?
   image         String?
+
+  // 커뮤니티 프로필 확장
+  username      String?   @unique
+  displayName   String?
+  bio           String?   @db.Text
+  reputation    Int       @default(0)
+  role          UserRole  @default(USER)
+
+  // Relations
   accounts      Account[]
+  posts         Post[]
+  comments      Comment[]
+  answers       Answer[]
+  votes         Vote[]
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([username])
 }
 
 model Account {
@@ -56,6 +78,129 @@ model ExternalTerms {
   published   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ===== 커뮤니티 플랫폼 모델 =====
+
+// 카테고리 (게시판 분류)
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  icon        String?
+  color       String?
+  postCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  posts       Post[]
+
+  @@index([slug])
+}
+
+// 게시글 타입 enum
+enum PostType {
+  DISCUSSION
+  QUESTION
+  SHOWCASE
+  NEWS
+}
+
+// 게시글 (커뮤니티, Q&A, 뉴스 통합)
+model Post {
+  id            String   @id @default(cuid())
+  title         String
+  content       String   @db.Text
+  postType      PostType @default(DISCUSSION)
+  authorId      String
+  categoryId    String
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  viewCount     Int      @default(0)
+  isPinned      Boolean  @default(false)
+  isLocked      Boolean  @default(false)
+  tags          String[]
+  coverImageUrl String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category      Category @relation(fields: [categoryId], references: [id])
+  comments      Comment[]
+  answers       Answer[]
+  votes         Vote[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([createdAt(sort: Desc)])
+  @@index([postType])
+}
+
+// 댓글 (스레드 형식 지원)
+model Comment {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  authorId   String
+  postId     String
+  parentId   String?
+  upvotes    Int      @default(0)
+  downvotes  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent     Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+}
+
+// 답변 (Q&A 전용)
+model Answer {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  questionId String
+  authorId   String
+  isAccepted Boolean  @default(false)
+  upvotes    Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  question   Post     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@index([authorId])
+}
+
+// 투표 타입 enum
+enum VoteType {
+  UP
+  DOWN
+}
+
+// 투표 (게시글, 댓글, 답변)
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String?
+  voteType  VoteType
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
 }
 
 // ===== Zanzibar 권한 시스템 (Google Zanzibar 패턴) =====
