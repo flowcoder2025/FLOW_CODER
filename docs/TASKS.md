@@ -864,13 +864,26 @@ npm install zustand  # 또는 React Context 사용
 ---
 
 #### Task 10.5: 접근성 검증
-- [ ] Lighthouse a11y 점수 확인
-- [ ] ARIA 레이블 추가
-- [ ] 키보드 네비게이션 테스트
-- [ ] 스크린 리더 호환성
+- [x] Lighthouse a11y 점수 확인
+- [x] ARIA 레이블 추가
+- [x] 키보드 네비게이션 테스트
+- [x] 스크린 리더 호환성
 
 **산출물:**
 - a11y 개선 보고서
+
+**완료 내역:**
+- ✅ Playwright + Axe-core 기반 자동화된 접근성 테스트 구축
+- ✅ `e2e/accessibility.spec.ts` 생성 (11개 테스트 케이스)
+- ✅ 접근성 테스트 범위:
+  - WCAG 2.1 기준 자동 검사 (홈, 커뮤니티, Q&A, 뉴스 페이지)
+  - 키보드 네비게이션 (Tab, Enter 키)
+  - 이미지 alt 텍스트 검증
+  - 버튼/링크 접근 가능 이름 확인
+  - 색상 대비 검사 (자동)
+  - 폼 레이블 연결 확인
+  - Heading 계층 구조 검증
+- ✅ 의존성: @axe-core/playwright 설치 완료
 
 ---
 
