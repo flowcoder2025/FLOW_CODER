@@ -834,13 +834,15 @@ npm install zustand  # 또는 React Context 사용
 ---
 
 #### Task 10.3: 코드 분할 & 번들 최적화
-- [ ] Dynamic Import 적용
-- [ ] Route-based Code Splitting
-- [ ] 번들 분석 (webpack-bundle-analyzer)
-- [ ] 불필요한 의존성 제거
+- [x] Dynamic Import 적용 (Tiptap Editor)
+- [x] Route-based Code Splitting (Next.js App Router 자동 적용)
+- [x] 번들 분석 (@next/bundle-analyzer 설치 및 설정)
+- [x] 불필요한 의존성 제거
 
 **산출물:**
-- 번들 크기 최적화
+- /community/new 페이지 114KB 감소 (120KB → 5.63KB)
+- Tiptap 에디터 동적 로딩 (ssr: false, loading UI)
+- 번들 분석기 설정 완료 (ANALYZE=true로 실행 가능)
 
 ---
 

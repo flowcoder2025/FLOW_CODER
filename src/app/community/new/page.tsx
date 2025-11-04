@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Editor } from '@/components/Editor';
 import { mockCategories } from '@/lib/mock-data';
+
+// Dynamic import for Tiptap Editor (heavy dependency)
+const Editor = dynamic(() => import('@/components/Editor').then(mod => ({ default: mod.Editor })), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center border rounded-md bg-muted/10">에디터 로딩 중...</div>,
+});
 
 /**
  * 게시글 작성 페이지
