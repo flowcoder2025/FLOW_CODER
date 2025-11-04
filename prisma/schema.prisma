@@ -44,3 +44,15 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
+
+// 외부 약관 관리 모델
+model ExternalTerms {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  content     String   @db.Text
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
