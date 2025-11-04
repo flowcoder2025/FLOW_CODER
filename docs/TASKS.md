@@ -1065,12 +1065,25 @@ npm run test:permissions
 ---
 
 #### Task 11.4: API Routes 구현 (권한 통합)
-- [ ] `app/api/posts/route.ts` (GET, POST + 권한 체크)
-- [ ] `app/api/posts/[id]/route.ts` (GET, PATCH, DELETE + 권한 체크)
-- [ ] `app/api/posts/[id]/comments/route.ts`
-- [ ] `app/api/questions/route.ts`
-- [ ] `app/api/answers/route.ts`
-- [ ] 모든 API에 `requirePermission` 미들웨어 적용
+- [x] `app/api/posts/route.ts` (GET, POST + 권한 체크)
+- [x] `app/api/posts/[id]/route.ts` (GET, PATCH, DELETE + 권한 체크)
+- [x] `app/api/posts/[id]/comments/route.ts`
+- [x] `app/api/questions/route.ts`
+- [x] `app/api/answers/route.ts`
+- [x] 모든 API에 `requirePermission` 미들웨어 적용
+
+**산출물:**
+- ✅ `app/api/posts/route.ts` - 게시글 목록 조회, 생성 (POST 시 자동 owner 권한 부여)
+- ✅ `app/api/posts/[id]/route.ts` - 게시글 상세, 수정 (editor 권한), 삭제 (owner 권한)
+- ✅ `app/api/posts/[id]/comments/route.ts` - 댓글 조회, 작성 (스레드 형식 지원)
+- ✅ `app/api/questions/route.ts` - Q&A 질문 목록, 생성 (최소 15자 제목, 50자 내용 검증)
+- ✅ `app/api/answers/route.ts` - 답변 작성, 채택 (질문 작성자만, reputation +15)
+
+**Zanzibar 권한 통합:**
+- POST 게시글/질문: 자동 `grantPostOwnership()` 호출
+- PATCH 게시글: `requirePermission(editor)` 적용
+- DELETE 게시글: `requirePermission(owner)` 적용
+- 답변 채택: `check(owner)` 권한 확인
 
 **권한 적용 예시:**
 ```typescript
