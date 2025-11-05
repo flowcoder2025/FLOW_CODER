@@ -1,42 +1,44 @@
-'use client';
-
-import { useState } from 'react';
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { NewsCard } from '@/components/NewsCard';
-import { mockPosts, mockCategories } from '@/lib/mock-data';
+import { getNewsPosts, getAllCategories } from '@/lib/data-access';
+import { PostType } from '@/generated/prisma';
 
 /**
- * 뉴스 목록 페이지
+ * 뉴스 목록 페이지 (Server Component)
  *
  * 기능:
  * - NEWS 타입 게시글 목록 표시
- * - 카테고리별 필터링
+ * - 카테고리별 필터링 (URL search params 사용)
  * - 날짜 내림차순 정렬
  */
 
-export default function NewsPage() {
+interface NewsPageProps {
+  searchParams: Promise<{
+    category?: string;
+  }>;
+}
+
+export default async function NewsPage({ searchParams }: NewsPageProps) {
+  const { category: selectedCategory } = await searchParams;
+
+  // 모든 카테고리 가져오기
+  const allCategories = await getAllCategories();
+
   // NEWS 카테고리만 필터링
-  const newsCategories = mockCategories.filter((cat) =>
-    cat.id.startsWith('news_')
+  const newsCategories = allCategories.filter((cat) =>
+    cat.slug.startsWith('news-')
   );
 
-  // NEWS 타입 게시글만 필터링하고 날짜 내림차순 정렬
-  const allNews = mockPosts
-    .filter((post) => post.postType === 'NEWS')
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-  // 선택된 카테고리 상태 관리 ('all' 또는 카테고리 ID)
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // NEWS 타입 게시글 가져오기
+  const allNews = await getNewsPosts();
 
   // 카테고리로 필터링된 뉴스
   const filteredNews =
-    selectedCategory === 'all'
+    !selectedCategory || selectedCategory === 'all'
       ? allNews
-      : allNews.filter((news) => news.categoryId === selectedCategory);
+      : allNews.filter((news) => news.category.slug === selectedCategory);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -51,40 +53,48 @@ export default function NewsPage() {
       {/* 카테고리 필터 */}
       <div className="mb-6">
         <div className="flex flex-wrap gap-2">
-          <Badge
-            variant={selectedCategory === 'all' ? 'default' : 'outline'}
-            className="cursor-pointer hover:bg-primary/90 transition-colors px-4 py-2"
-            onClick={() => setSelectedCategory('all')}
-          >
-            📰 전체 ({allNews.length})
-          </Badge>
+          <Link href="/news">
+            <Badge
+              variant={
+                !selectedCategory || selectedCategory === 'all'
+                  ? 'default'
+                  : 'outline'
+              }
+              className="cursor-pointer hover:bg-primary/90 transition-colors px-4 py-2"
+            >
+              📰 전체 ({allNews.length})
+            </Badge>
+          </Link>
           {newsCategories.map((category) => {
             const count = allNews.filter(
-              (news) => news.categoryId === category.id
+              (news) => news.category.slug === category.slug
             ).length;
             return (
-              <Badge
+              <Link
                 key={category.id}
-                variant={
-                  selectedCategory === category.id ? 'default' : 'outline'
-                }
-                className={`cursor-pointer hover:bg-primary/90 transition-colors px-4 py-2 ${
-                  selectedCategory === category.id
-                    ? ''
-                    : category.color === 'blue'
-                      ? 'hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                      : category.color === 'green'
-                        ? 'hover:bg-green-100 dark:hover:bg-green-900/30'
-                        : category.color === 'purple'
-                          ? 'hover:bg-purple-100 dark:hover:bg-purple-900/30'
-                          : category.color === 'orange'
-                            ? 'hover:bg-orange-100 dark:hover:bg-orange-900/30'
-                            : ''
-                }`}
-                onClick={() => setSelectedCategory(category.id)}
+                href={`/news?category=${category.slug}`}
               >
-                {category.icon} {category.name} ({count})
-              </Badge>
+                <Badge
+                  variant={
+                    selectedCategory === category.slug ? 'default' : 'outline'
+                  }
+                  className={`cursor-pointer hover:bg-primary/90 transition-colors px-4 py-2 ${
+                    selectedCategory === category.slug
+                      ? ''
+                      : category.color === 'blue'
+                        ? 'hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                        : category.color === 'green'
+                          ? 'hover:bg-green-100 dark:hover:bg-green-900/30'
+                          : category.color === 'purple'
+                            ? 'hover:bg-purple-100 dark:hover:bg-purple-900/30'
+                            : category.color === 'orange'
+                              ? 'hover:bg-orange-100 dark:hover:bg-orange-900/30'
+                              : ''
+                  }`}
+                >
+                  {category.icon} {category.name} ({count})
+                </Badge>
+              </Link>
             );
           })}
         </div>
@@ -94,7 +104,28 @@ export default function NewsPage() {
       {filteredNews.length > 0 ? (
         <div className="space-y-6">
           {filteredNews.map((news) => (
-            <NewsCard key={news.id} news={news} />
+            <NewsCard
+              key={news.id}
+              news={{
+                ...news,
+                createdAt: news.createdAt.toISOString(),
+                updatedAt: news.updatedAt.toISOString(),
+                coverImageUrl: news.coverImageUrl || undefined,
+                author: {
+                  id: news.author.id,
+                  username: news.author.username || '',
+                  displayName: news.author.displayName || undefined,
+                  avatarUrl: news.author.image || undefined,
+                  reputation: news.author.reputation,
+                },
+                category: {
+                  ...news.category,
+                  icon: news.category.icon || undefined,
+                  color: news.category.color || undefined,
+                },
+                commentCount: news._count.comments,
+              }}
+            />
           ))}
         </div>
       ) : (

@@ -155,6 +155,8 @@ export async function getPostsByType(postType: PostType, limit?: number) {
           id: true,
           name: true,
           slug: true,
+          icon: true,
+          color: true,
         },
       },
       _count: {
@@ -206,6 +208,8 @@ export async function getRecentPosts(limit: number = 10) {
           id: true,
           name: true,
           slug: true,
+          icon: true,
+          color: true,
         },
       },
       _count: {
@@ -233,6 +237,8 @@ export async function getPostsByUser(userId: string) {
           id: true,
           name: true,
           slug: true,
+          icon: true,
+          color: true,
         },
       },
       _count: {
