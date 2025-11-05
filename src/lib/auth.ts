@@ -4,6 +4,7 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
+import { grantSystemAdmin } from "./permissions";
 
 /**
  * 필수 환경변수 검증 함수
@@ -67,6 +68,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                       reputation: 1000,
                     },
                   });
+
+                  // 시스템 admin 권한 부여
+                  await grantSystemAdmin(user.id);
                 }
 
                 return {
