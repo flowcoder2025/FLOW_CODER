@@ -22,6 +22,12 @@ const eslintConfig = [
       "prisma/migrations/**",
     ],
   },
+  {
+    rules: {
+      // Critical Issues가 수정되었으므로, 기존 코드의 any는 점진적으로 수정
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;

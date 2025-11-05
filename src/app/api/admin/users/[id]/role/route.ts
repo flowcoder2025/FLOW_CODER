@@ -7,6 +7,10 @@ import {
   revoke,
 } from '@/lib/permissions';
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 /**
  * POST /api/admin/users/[id]/role
  * 사용자 역할 변경 + Zanzibar 권한 자동 부여 (관리자 전용)
@@ -19,13 +23,14 @@ import {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     // 관리자 권한 확인
     await requireAdmin();
 
-    const userId = params.id;
+    const { id } = await context.params;
+    const userId = id;
 
     // 요청 본문 파싱
     const body = await request.json();
@@ -97,17 +102,18 @@ export async function POST(
       user: updatedUser,
       message: `Successfully changed ${user.username}'s role to ${role}`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('POST /api/admin/users/[id]/role error:', error);
 
     // 권한 에러 처리
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     if (
-      error.message?.includes('Unauthorized') ||
-      error.message?.includes('Forbidden')
+      errorMessage.includes('Unauthorized') ||
+      errorMessage.includes('Forbidden')
     ) {
       return NextResponse.json(
-        { error: error.message },
-        { status: error.message.includes('Unauthorized') ? 401 : 403 }
+        { error: errorMessage },
+        { status: errorMessage.includes('Unauthorized') ? 401 : 403 }
       );
     }
 

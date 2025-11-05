@@ -4,16 +4,32 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
 
+/**
+ * 필수 환경변수 검증 함수
+ * @param key 환경변수 키
+ * @returns 환경변수 값
+ * @throws 환경변수가 없을 경우 명확한 에러 메시지
+ */
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(
+      `Missing required environment variable: ${key}. Please check your .env file.`
+    );
+  }
+  return value;
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     GitHubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
+      clientId: getRequiredEnv('GITHUB_ID'),
+      clientSecret: getRequiredEnv('GITHUB_SECRET'),
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
+      clientId: getRequiredEnv('GOOGLE_ID'),
+      clientSecret: getRequiredEnv('GOOGLE_SECRET'),
     }),
   ],
   session: {
