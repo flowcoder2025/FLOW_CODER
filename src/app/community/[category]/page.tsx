@@ -1,20 +1,15 @@
-'use client';
-
-import { use, useState, useMemo } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { TrendingUp, Clock, MessageSquare, PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PostCard } from '@/components/PostCard';
-import { getCategoryBySlug, getPostsByCategory } from '@/lib/mock-data';
-import type { PostWithAuthor } from '@/lib/types';
+import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
 
 /**
- * 카테고리별 게시글 목록 페이지
+ * 카테고리별 게시글 목록 페이지 (Server Component)
  *
  * 동적 라우트: /community/[category]
- * Next.js 15: params는 Promise이므로 use() 훅으로 unwrap
+ * URL search params로 정렬, 페이지네이션 처리
  */
 
 type SortOption = 'popular' | 'recent' | 'comments';
@@ -23,72 +18,56 @@ interface CategoryPageProps {
   params: Promise<{
     category: string;
   }>;
+  searchParams: Promise<{
+    sort?: SortOption;
+    page?: string;
+  }>;
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const { category: categorySlug } = use(params);
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+  const { category: categorySlug } = await params;
+  const { sort: sortOption = 'popular', page: pageStr = '1' } = await searchParams;
+  const currentPage = parseInt(pageStr, 10) || 1;
+  const postsPerPage = 20;
 
   // 카테고리 정보 조회
-  const category = getCategoryBySlug(categorySlug);
+  const category = await getCategoryBySlug(categorySlug);
 
   if (!category) {
     notFound();
   }
 
   // 게시글 목록 조회
-  const allPosts = getPostsByCategory(category.id);
+  const allPosts = await getPostsByCategory(categorySlug);
 
-  // 정렬 상태
-  const [sortOption, setSortOption] = useState<SortOption>('popular');
+  // 고정 게시글 우선
+  const pinnedPosts = allPosts.filter((p) => p.isPinned);
+  const regularPosts = allPosts.filter((p) => !p.isPinned);
 
-  // 페이지네이션 상태
-  const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 20;
+  // 정렬
+  const sortFn = (a: any, b: any) => {
+    switch (sortOption) {
+      case 'popular':
+        const aVotes = (a._count?.votes || 0);
+        const bVotes = (b._count?.votes || 0);
+        return bVotes - aVotes;
+      case 'recent':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'comments':
+        return (b._count?.comments || 0) - (a._count?.comments || 0);
+      default:
+        return 0;
+    }
+  };
 
-  // 정렬된 게시글 목록
-  const sortedPosts = useMemo(() => {
-    const posts = [...allPosts];
-
-    // 고정 게시글 우선
-    const pinnedPosts = posts.filter((p) => p.isPinned);
-    const regularPosts = posts.filter((p) => !p.isPinned);
-
-    // 정렬
-    const sortFn = (a: PostWithAuthor, b: PostWithAuthor) => {
-      switch (sortOption) {
-        case 'popular':
-          return (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes);
-        case 'recent':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'comments':
-          return b.commentCount - a.commentCount;
-        default:
-          return 0;
-      }
-    };
-
-    regularPosts.sort(sortFn);
-
-    return [...pinnedPosts, ...regularPosts];
-  }, [allPosts, sortOption]);
+  regularPosts.sort(sortFn);
+  const sortedPosts = [...pinnedPosts, ...regularPosts];
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
   const endIndex = startIndex + postsPerPage;
   const currentPosts = sortedPosts.slice(startIndex, endIndex);
-
-  // 정렬 옵션 변경 핸들러
-  const handleSortChange = (value: string) => {
-    setSortOption(value as SortOption);
-    setCurrentPage(1); // 정렬 변경 시 첫 페이지로 이동
-  };
-
-  // 페이지 변경 핸들러
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -111,31 +90,26 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         {/* 정렬 옵션 */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">정렬:</span>
-          <Select value={sortOption} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="popular">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>인기순</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="recent">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>최신순</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="comments">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>댓글 많은 순</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Link href={`/community/${categorySlug}?sort=popular&page=1`}>
+              <Button variant={sortOption === 'popular' ? 'default' : 'outline'} size="sm">
+                <TrendingUp className="h-4 w-4 mr-1" />
+                인기순
+              </Button>
+            </Link>
+            <Link href={`/community/${categorySlug}?sort=recent&page=1`}>
+              <Button variant={sortOption === 'recent' ? 'default' : 'outline'} size="sm">
+                <Clock className="h-4 w-4 mr-1" />
+                최신순
+              </Button>
+            </Link>
+            <Link href={`/community/${categorySlug}?sort=comments&page=1`}>
+              <Button variant={sortOption === 'comments' ? 'default' : 'outline'} size="sm">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                댓글순
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* 새 글 쓰기 버튼 */}
@@ -151,7 +125,31 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       {currentPosts.length > 0 ? (
         <div className="space-y-4">
           {currentPosts.map((post) => (
-            <PostCard key={post.id} post={post} showCategory={false} />
+            <PostCard
+              key={post.id}
+              post={{
+                ...post,
+                createdAt: post.createdAt.toISOString(),
+                updatedAt: post.updatedAt.toISOString(),
+                coverImageUrl: post.coverImageUrl || undefined,
+                author: {
+                  id: post.author.id,
+                  username: post.author.username || '',
+                  displayName: post.author.displayName || undefined,
+                  avatarUrl: post.author.image || undefined,
+                  reputation: post.author.reputation,
+                },
+                category: {
+                  ...post.category,
+                  icon: post.category.icon || undefined,
+                  color: post.category.color || undefined,
+                },
+                commentCount: post._count.comments,
+                upvotes: 0, // TODO: 실제 투표 데이터 연동
+                downvotes: 0,
+              }}
+              showCategory={false}
+            />
           ))}
         </div>
       ) : (
@@ -166,14 +164,11 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            이전
-          </Button>
+          {currentPage > 1 && (
+            <Link href={`/community/${categorySlug}?sort=${sortOption}&page=${currentPage - 1}`}>
+              <Button variant="outline" size="sm">이전</Button>
+            </Link>
+          )}
 
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
@@ -184,14 +179,14 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                 (page >= currentPage - 1 && page <= currentPage + 1)
               ) {
                 return (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </Button>
+                  <Link key={page} href={`/community/${categorySlug}?sort=${sortOption}&page=${page}`}>
+                    <Button
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                    >
+                      {page}
+                    </Button>
+                  </Link>
                 );
               } else if (page === currentPage - 2 || page === currentPage + 2) {
                 return <span key={page} className="px-2">...</span>;
@@ -200,14 +195,11 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             })}
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            다음
-          </Button>
+          {currentPage < totalPages && (
+            <Link href={`/community/${categorySlug}?sort=${sortOption}&page=${currentPage + 1}`}>
+              <Button variant="outline" size="sm">다음</Button>
+            </Link>
+          )}
         </div>
       )}
     </div>
