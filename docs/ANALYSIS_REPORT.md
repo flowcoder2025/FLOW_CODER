@@ -500,8 +500,14 @@ export function errorResponse(message: string, status: number) {
 - [x] Users DAL 구현
 - [x] Categories DAL 구현 (추가)
 - [x] Comments DAL 구현 (추가)
-- [ ] Mock 데이터 import 제거 (1/11+ 파일 완료)
-- [ ] 페이지별 DB 연동 테스트 (news/[id]/page.tsx 완료)
+- [x] Prisma prepared statement 에러 해결 (pgbouncer 설정)
+- [x] Mock 데이터 import 제거 (5/11+ 파일 완료)
+  - news/[id]/page.tsx ✅
+  - news/page.tsx ✅
+  - help/page.tsx ✅
+  - community/[category]/page.tsx ✅
+  - 나머지는 Task 4에서 Server/Client 분리와 함께 처리
+- [x] 페이지별 DB 연동 테스트 (5개 페이지 완료, 빌드 성공)
 
 **예상 시간**: 3-5일
 **의존성**: Prisma schema 완성 (완료), DB 연결 (완성)
