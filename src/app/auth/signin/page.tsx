@@ -1,9 +1,11 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Github } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -12,12 +14,44 @@ function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   const handleGitHubSignIn = async () => {
     await signIn("github", { callbackUrl });
   };
 
   const handleGoogleSignIn = async () => {
     await signIn("google", { callbackUrl });
+  };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      } else if (result?.url) {
+        window.location.href = result.url;
+      }
+    } catch (err) {
+      setError("로그인 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,21 +104,88 @@ function SignInForm() {
             </Button>
           </div>
 
-          {/* 이메일/비밀번호 로그인 (향후 구현) */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                또는
-              </span>
-            </div>
-          </div>
+          {/* 이메일/비밀번호 로그인 (로컬 개발 환경에서만) */}
+          {isDevelopment && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    또는 (로컬 개발용)
+                  </span>
+                </div>
+              </div>
 
-          <div className="text-center text-sm text-muted-foreground">
-            <p>이메일/비밀번호 로그인은 준비 중입니다</p>
-          </div>
+              <form onSubmit={handleEmailSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">이메일</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@local.dev"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">비밀번호</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="admin123"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+
+                {error && (
+                  <div className="text-sm text-destructive text-center">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "로그인 중..." : "이메일로 로그인"}
+                </Button>
+
+                <div className="text-xs text-muted-foreground text-center space-y-1">
+                  <p>💡 로컬 테스트 계정:</p>
+                  <p>이메일: admin@local.dev</p>
+                  <p>비밀번호: admin123</p>
+                </div>
+              </form>
+            </>
+          )}
+
+          {!isDevelopment && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    또는
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center text-sm text-muted-foreground">
+                <p>이메일/비밀번호 로그인은 준비 중입니다</p>
+              </div>
+            </>
+          )}
 
           {/* 회원가입 링크 */}
           <div className="text-center text-sm">
