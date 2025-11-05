@@ -36,9 +36,12 @@ export function ImageWithFallback({
         style={{ width, height }}
       >
         <div className="flex items-center justify-center w-full h-full">
-          <img
+          <Image
             src={ERROR_IMG_SRC}
             alt="Error loading image"
+            width={88}
+            height={88}
+            unoptimized // Data URL이므로 최적화 불필요
             data-original-url={src}
           />
         </div>
