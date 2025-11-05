@@ -1,6 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireModerator, requireAdmin } from '@/lib/admin-middleware';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  errorResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -20,10 +28,10 @@ export async function GET(
     try {
       await requireModerator();
     } catch (error: any) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
-      );
+      if (error.message?.includes('Unauthorized')) {
+        return unauthorizedResponse(error.message);
+      }
+      return forbiddenResponse(error.message);
     }
 
     const { id } = await context.params;
@@ -33,19 +41,13 @@ export async function GET(
     });
 
     if (!terms) {
-      return NextResponse.json(
-        { success: false, error: '약관을 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return notFoundResponse('약관을 찾을 수 없습니다');
     }
 
-    return NextResponse.json({ success: true, data: terms });
+    return successResponse(terms);
   } catch (error) {
     console.error('External terms fetch error:', error);
-    return NextResponse.json(
-      { success: false, error: '약관을 불러오는데 실패했습니다.' },
-      { status: 500 }
-    );
+    return serverErrorResponse('약관을 불러오는데 실패했습니다', error);
   }
 }
 
@@ -63,10 +65,10 @@ export async function PUT(
     try {
       await requireAdmin();
     } catch (error: any) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
-      );
+      if (error.message?.includes('Unauthorized')) {
+        return unauthorizedResponse(error.message);
+      }
+      return forbiddenResponse(error.message);
     }
 
     const { id } = await context.params;
@@ -79,10 +81,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: '약관을 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return notFoundResponse('약관을 찾을 수 없습니다');
     }
 
     // slug 변경 시 중복 확인
@@ -92,10 +91,7 @@ export async function PUT(
       });
 
       if (duplicateSlug) {
-        return NextResponse.json(
-          { success: false, error: '이미 사용 중인 slug입니다.' },
-          { status: 409 }
-        );
+        return errorResponse('이미 사용 중인 slug입니다', 409, 'DUPLICATE_SLUG');
       }
     }
 
@@ -111,13 +107,10 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ success: true, data: updatedTerms });
+    return successResponse(updatedTerms);
   } catch (error) {
     console.error('External terms update error:', error);
-    return NextResponse.json(
-      { success: false, error: '약관 수정에 실패했습니다.' },
-      { status: 500 }
-    );
+    return serverErrorResponse('약관 수정에 실패했습니다', error);
   }
 }
 
@@ -135,10 +128,10 @@ export async function DELETE(
     try {
       await requireAdmin();
     } catch (error: any) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
-      );
+      if (error.message?.includes('Unauthorized')) {
+        return unauthorizedResponse(error.message);
+      }
+      return forbiddenResponse(error.message);
     }
 
     const { id } = await context.params;
@@ -149,10 +142,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: '약관을 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return notFoundResponse('약관을 찾을 수 없습니다');
     }
 
     // 약관 삭제
@@ -160,12 +150,9 @@ export async function DELETE(
       where: { id },
     });
 
-    return NextResponse.json({ success: true, message: '약관이 삭제되었습니다.' });
+    return successResponse({ message: '약관이 삭제되었습니다' });
   } catch (error) {
     console.error('External terms deletion error:', error);
-    return NextResponse.json(
-      { success: false, error: '약관 삭제에 실패했습니다.' },
-      { status: 500 }
-    );
+    return serverErrorResponse('약관 삭제에 실패했습니다', error);
   }
 }

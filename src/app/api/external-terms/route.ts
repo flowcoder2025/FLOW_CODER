@@ -1,6 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireModerator, requireAdmin } from '@/lib/admin-middleware';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  validationErrorResponse,
+  errorResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 /**
  * GET /api/external-terms - 외부 약관 목록 조회
@@ -22,10 +30,10 @@ export async function GET(request: NextRequest) {
       try {
         await requireModerator();
       } catch (error: any) {
-        return NextResponse.json(
-          { success: false, error: error.message },
-          { status: error.message?.includes('Unauthorized') ? 401 : 403 }
-        );
+        if (error.message?.includes('Unauthorized')) {
+          return unauthorizedResponse(error.message);
+        }
+        return forbiddenResponse(error.message);
       }
     }
 
@@ -43,13 +51,10 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, data: terms });
+    return successResponse(terms);
   } catch (error) {
     console.error('External terms list error:', error);
-    return NextResponse.json(
-      { success: false, error: '약관 목록을 불러오는데 실패했습니다.' },
-      { status: 500 }
-    );
+    return serverErrorResponse('약관 목록을 불러오는데 실패했습니다', error);
   }
 }
 
@@ -64,10 +69,10 @@ export async function POST(request: NextRequest) {
     try {
       await requireAdmin();
     } catch (error: any) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.message?.includes('Unauthorized') ? 401 : 403 }
-      );
+      if (error.message?.includes('Unauthorized')) {
+        return unauthorizedResponse(error.message);
+      }
+      return forbiddenResponse(error.message);
     }
 
     const body = await request.json();
@@ -75,10 +80,7 @@ export async function POST(request: NextRequest) {
 
     // 필수 필드 검증
     if (!slug || !title || !content) {
-      return NextResponse.json(
-        { success: false, error: 'slug, title, content는 필수 항목입니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('slug, title, content는 필수 항목입니다');
     }
 
     // slug 중복 확인
@@ -87,10 +89,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json(
-        { success: false, error: '이미 사용 중인 slug입니다.' },
-        { status: 409 }
-      );
+      return errorResponse('이미 사용 중인 slug입니다', 409, 'DUPLICATE_SLUG');
     }
 
     // 새 약관 생성
@@ -104,15 +103,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      { success: true, data: newTerms },
-      { status: 201 }
-    );
+    return successResponse(newTerms, 201);
   } catch (error) {
     console.error('External terms creation error:', error);
-    return NextResponse.json(
-      { success: false, error: '약관 생성에 실패했습니다.' },
-      { status: 500 }
-    );
+    return serverErrorResponse('약관 생성에 실패했습니다', error);
   }
 }
