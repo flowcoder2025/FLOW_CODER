@@ -1,7 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/permissions';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -98,10 +105,7 @@ export async function GET(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Post not found' },
-        { status: 404 }
-      );
+      return notFoundResponse('게시글을 찾을 수 없습니다');
     }
 
     // 조회수 증가
@@ -114,13 +118,10 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({ post });
+    return successResponse({ post });
   } catch (error) {
     console.error(`GET /api/posts/${(await context.params).id} error:`, error);
-    return NextResponse.json(
-      { error: 'Failed to fetch post' },
-      { status: 500 }
-    );
+    return serverErrorResponse('게시글 조회 중 오류가 발생했습니다', error);
   }
 }
 
@@ -142,10 +143,7 @@ export async function PATCH(
     // 인증 확인
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized: 로그인이 필요합니다.' },
-        { status: 401 }
-      );
+      return unauthorizedResponse();
     }
 
     const { id } = await context.params;
@@ -189,22 +187,16 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({ post });
+    return successResponse({ post });
   } catch (error: any) {
     console.error(`PATCH /api/posts/${(await context.params).id} error:`, error);
 
     // 권한 에러 처리
     if (error.message?.includes('Forbidden') || error.message?.includes('권한')) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 403 }
-      );
+      return forbiddenResponse(error.message);
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update post' },
-      { status: 500 }
-    );
+    return serverErrorResponse('게시글 수정 중 오류가 발생했습니다', error);
   }
 }
 
@@ -220,10 +212,7 @@ export async function DELETE(
     // 인증 확인
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized: 로그인이 필요합니다.' },
-        { status: 401 }
-      );
+      return unauthorizedResponse();
     }
 
     const { id } = await context.params;
@@ -238,10 +227,7 @@ export async function DELETE(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Post not found' },
-        { status: 404 }
-      );
+      return notFoundResponse('게시글을 찾을 수 없습니다');
     }
 
     // 게시글 삭제 (Cascade로 연관 데이터 자동 삭제)
@@ -259,21 +245,15 @@ export async function DELETE(
       },
     });
 
-    return NextResponse.json({ success: true });
+    return successResponse({ success: true });
   } catch (error: any) {
     console.error(`DELETE /api/posts/${(await context.params).id} error:`, error);
 
     // 권한 에러 처리
     if (error.message?.includes('Forbidden') || error.message?.includes('권한')) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 403 }
-      );
+      return forbiddenResponse(error.message);
     }
 
-    return NextResponse.json(
-      { error: 'Failed to delete post' },
-      { status: 500 }
-    );
+    return serverErrorResponse('게시글 삭제 중 오류가 발생했습니다', error);
   }
 }

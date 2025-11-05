@@ -1,6 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  validationErrorResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -24,10 +32,7 @@ export async function GET(
     });
 
     if (!postExists) {
-      return NextResponse.json(
-        { error: 'Post not found' },
-        { status: 404 }
-      );
+      return notFoundResponse('게시글을 찾을 수 없습니다');
     }
 
     // 댓글 조회 (최상위 댓글만, 대댓글 포함)
@@ -85,13 +90,10 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({ comments });
+    return successResponse({ comments });
   } catch (error) {
     console.error(`GET /api/posts/${(await context.params).id}/comments error:`, error);
-    return NextResponse.json(
-      { error: 'Failed to fetch comments' },
-      { status: 500 }
-    );
+    return serverErrorResponse('댓글 목록 조회 중 오류가 발생했습니다', error);
   }
 }
 
@@ -111,10 +113,7 @@ export async function POST(
     // 인증 확인
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized: 로그인이 필요합니다.' },
-        { status: 401 }
-      );
+      return unauthorizedResponse();
     }
 
     const { id } = await context.params;
@@ -126,18 +125,12 @@ export async function POST(
     });
 
     if (!post) {
-      return NextResponse.json(
-        { error: 'Post not found' },
-        { status: 404 }
-      );
+      return notFoundResponse('게시글을 찾을 수 없습니다');
     }
 
     // 댓글 잠금 확인
     if (post.isLocked) {
-      return NextResponse.json(
-        { error: 'Forbidden: 이 게시글은 댓글이 잠겨있습니다.' },
-        { status: 403 }
-      );
+      return forbiddenResponse('이 게시글은 댓글이 잠겨있습니다');
     }
 
     // 요청 본문 파싱
@@ -146,10 +139,7 @@ export async function POST(
 
     // 필수 필드 검증
     if (!content) {
-      return NextResponse.json(
-        { error: 'Bad Request: content는 필수입니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('content는 필수입니다');
     }
 
     // 부모 댓글 존재 확인 (대댓글인 경우)
@@ -159,17 +149,11 @@ export async function POST(
       });
 
       if (!parentComment) {
-        return NextResponse.json(
-          { error: 'Bad Request: 유효하지 않은 parentId입니다.' },
-          { status: 400 }
-        );
+        return validationErrorResponse('유효하지 않은 parentId입니다');
       }
 
       if (parentComment.postId !== id) {
-        return NextResponse.json(
-          { error: 'Bad Request: parentId가 이 게시글의 댓글이 아닙니다.' },
-          { status: 400 }
-        );
+        return validationErrorResponse('parentId가 이 게시글의 댓글이 아닙니다');
       }
     }
 
@@ -194,12 +178,9 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ comment }, { status: 201 });
+    return successResponse({ comment }, 201);
   } catch (error) {
     console.error(`POST /api/posts/${(await context.params).id}/comments error:`, error);
-    return NextResponse.json(
-      { error: 'Failed to create comment' },
-      { status: 500 }
-    );
+    return serverErrorResponse('댓글 생성 중 오류가 발생했습니다', error);
   }
 }

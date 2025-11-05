@@ -1,7 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { grantPostOwnership } from '@/lib/permissions';
+import {
+  successResponse,
+  unauthorizedResponse,
+  validationErrorResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 /**
  * GET /api/posts
@@ -84,7 +90,7 @@ export async function GET(request: NextRequest) {
       prisma.post.count({ where }),
     ]);
 
-    return NextResponse.json({
+    return successResponse({
       posts,
       pagination: {
         total,
@@ -95,10 +101,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('GET /api/posts error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch posts' },
-      { status: 500 }
-    );
+    return serverErrorResponse('게시글 목록 조회 중 오류가 발생했습니다', error);
   }
 }
 
@@ -119,10 +122,7 @@ export async function POST(request: NextRequest) {
     // 인증 확인
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized: 로그인이 필요합니다.' },
-        { status: 401 }
-      );
+      return unauthorizedResponse();
     }
 
     // 요청 본문 파싱
@@ -131,10 +131,7 @@ export async function POST(request: NextRequest) {
 
     // 필수 필드 검증
     if (!title || !content || !categoryId) {
-      return NextResponse.json(
-        { error: 'Bad Request: title, content, categoryId는 필수입니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('title, content, categoryId는 필수입니다.');
     }
 
     // 카테고리 존재 확인
@@ -142,10 +139,7 @@ export async function POST(request: NextRequest) {
       where: { id: categoryId },
     });
     if (!categoryExists) {
-      return NextResponse.json(
-        { error: 'Bad Request: 유효하지 않은 categoryId입니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('유효하지 않은 categoryId입니다.');
     }
 
     // 게시글 생성
@@ -193,12 +187,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ post }, { status: 201 });
+    return successResponse({ post }, 201);
   } catch (error) {
     console.error('POST /api/posts error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create post' },
-      { status: 500 }
-    );
+    return serverErrorResponse('게시글 생성 중 오류가 발생했습니다', error);
   }
 }
