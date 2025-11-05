@@ -519,19 +519,19 @@ export function errorResponse(message: string, status: number) {
 **목표**: 성능 향상, SEO 개선, 번들 크기 감소
 
 **수정 대상 파일**:
-- [ ] `app/community/page.tsx` - Server Component 전환
-- [ ] `app/news/page.tsx` - Server Component 전환
-- [ ] `app/help/page.tsx` - Server Component 전환
-- [ ] `app/profile/[username]/page.tsx` - 부분 Server Component
+- [ ] `app/community/page.tsx` - Server Component 전환 (Deferred: SearchBar/FilterBar 리팩토링 필요)
+- [x] `app/news/page.tsx` - Server Component 전환 ✅ (이미 완료됨)
+- [x] `app/help/page.tsx` - Server Component 전환 ✅ (이미 완료됨)
+- [x] `app/profile/[username]/page.tsx` - DB 연동 완료 ✅ (2025-11-05 완료, 커밋: c2f288c)
 
 **Checklist**:
-- [x] 각 페이지의 Client 필요성 분석
-- [x] Server Component로 전환 가능한 페이지 리팩토링 (news, help, profile 완료)
+- [x] 각 페이지의 Client 필요성 분석 ✅
+- [x] Server Component로 전환 가능한 페이지 리팩토링 (news, help, profile 완료) ✅
 - [ ] Client Component는 하위 컴포넌트로 분리 (community 페이지 보류)
-- [x] 데이터 fetching을 Server Component에서 수행 (profile 페이지)
+- [x] 데이터 fetching을 Server Component에서 수행 (profile 페이지) ✅
 - [ ] 성능 측정 (Before/After)
 
-**예상 시간**: 2-3일
+**예상 시간**: 2-3일 (거의 완료, community 페이지만 보류)
 
 ---
 
@@ -552,12 +552,12 @@ export function errorResponse(message: string, status: number) {
   - `forbiddenResponse(message?)` (403)
   - `notFoundResponse(message?)` (404)
   - `serverErrorResponse(message?, error?)` (500)
-- [ ] `/api/posts/**` 에러 핸들링 적용
-- [ ] `/api/questions/**` 에러 핸들링 적용
-- [ ] `/api/admin/**` 에러 핸들링 적용
-- [ ] `/api/external-terms/**` 에러 핸들링 적용
+- [x] `/api/posts/**` 에러 핸들링 적용 ✅ (2025-11-05 완료, 커밋: 1747fd7)
+- [x] `/api/questions/**` 에러 핸들링 적용 ✅ (2025-11-05 완료, 커밋: 3f013ee)
+- [x] `/api/admin/**` 에러 핸들링 적용 ✅ (2025-11-05 완료, 커밋: ee9313d)
+- [x] `/api/external-terms/**` 에러 핸들링 적용 ✅ (2025-11-05 완료, 커밋: 66b3ce3)
 
-**예상 시간**: 1-2일
+**예상 시간**: 1-2일 ✅ **완료!**
 
 ---
 
