@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Separator } from '@/components/ui/separator';
 import { FileText, Calendar } from 'lucide-react';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 // 빌드 시 pre-render 건너뛰기 (DB 연결 없이도 빌드 가능)
 export const dynamic = 'force-dynamic';
@@ -83,11 +82,10 @@ export default async function ExternalTermsPage({ params }: PageProps) {
 
       {/* 마크다운 콘텐츠 */}
       <div className="max-w-4xl mx-auto">
-        <article className="prose prose-slate dark:prose-invert max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {terms.content}
-          </ReactMarkdown>
-        </article>
+        <MarkdownRenderer
+          content={terms.content}
+          className="prose prose-slate dark:prose-invert max-w-none"
+        />
       </div>
     </div>
   );

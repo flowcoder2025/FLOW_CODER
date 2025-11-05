@@ -41,18 +41,23 @@ export async function GET(request: NextRequest) {
     }
 
     // 정렬 조건 구성
-    let orderBy: Prisma.PostOrderByWithRelationInput = {};
+    let orderBy: Prisma.PostOrderByWithRelationInput[];
     switch (sort) {
       case 'recent':
-        orderBy = { createdAt: 'desc' };
+        orderBy = [{ createdAt: 'desc' }];
         break;
       case 'comments':
-        // comments 정렬은 _count를 통해 처리
-        orderBy = { createdAt: 'desc' }; // 임시로 createdAt 사용
+        orderBy = [
+          { comments: { _count: 'desc' } },
+          { createdAt: 'desc' },
+        ];
         break;
       case 'popular':
       default:
-        orderBy = { upvotes: 'desc' };
+        orderBy = [
+          { upvotes: 'desc' },
+          { createdAt: 'desc' },
+        ];
         break;
     }
 

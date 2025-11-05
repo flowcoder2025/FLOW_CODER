@@ -4,8 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAllCategories } from '@/lib/data-access/categories';
-import { getRecentPosts } from '@/lib/data-access/posts';
+import {
+  getRecentPostsPaginated,
+  type PostWithAuthor as DalPost,
+} from '@/lib/data-access/posts';
+import type { PostWithAuthor as PostCardData } from '@/lib/types';
 import { PostCard } from '@/components/PostCard';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * 커뮤니티 메인 페이지 (Server Component)
@@ -15,6 +21,41 @@ import { PostCard } from '@/components/PostCard';
  * - 최근 게시글 목록 표시 (DB 연동)
  */
 
+function mapPostToCardData(post: DalPost): PostCardData {
+  return {
+    id: post.id,
+    title: post.title,
+    content: post.content,
+    postType: post.postType,
+    authorId: post.authorId,
+    categoryId: post.categoryId,
+    upvotes: post.upvotes,
+    downvotes: post.downvotes,
+    viewCount: post.viewCount,
+    isPinned: post.isPinned,
+    isLocked: post.isLocked,
+    tags: post.tags,
+    coverImageUrl: post.coverImageUrl ?? undefined,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+    author: {
+      id: post.author.id,
+      username: post.author.username || 'unknown',
+      displayName: post.author.displayName ?? undefined,
+      avatarUrl: post.author.image ?? undefined,
+      reputation: post.author.reputation ?? 0,
+    },
+    category: {
+      id: post.category.id,
+      name: post.category.name,
+      slug: post.category.slug,
+      icon: post.category.icon ?? undefined,
+      color: post.category.color ?? undefined,
+    },
+    commentCount: post._count?.comments ?? 0,
+  };
+}
+
 interface CommunityPageProps {
   searchParams: Promise<{
     page?: string;
@@ -23,28 +64,17 @@ interface CommunityPageProps {
 
 export default async function CommunityPage({ searchParams }: CommunityPageProps) {
   const { page: pageStr = '1' } = await searchParams;
-  const currentPage = parseInt(pageStr, 10) || 1;
+  const requestedPage = Number(pageStr) || 1;
   const postsPerPage = 20;
 
-  // 카테고리 목록 조회 (DB)
-  const categories = await getAllCategories();
+  const [categories, postsResult] = await Promise.all([
+    getAllCategories(),
+    getRecentPostsPaginated(requestedPage, postsPerPage),
+  ]);
 
-  // 최근 게시글 조회 (DAL 함수 직접 호출)
-  const allPosts = await getRecentPosts(100); // 최대 100개 조회
-
-  // 페이지네이션 계산
-  const totalPosts = allPosts.length;
-  const totalPages = Math.ceil(totalPosts / postsPerPage);
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const endIndex = startIndex + postsPerPage;
-  const posts = allPosts.slice(startIndex, endIndex);
-
-  const pagination = {
-    total: totalPosts,
-    page: currentPage,
-    limit: postsPerPage,
-    totalPages: totalPages,
-  };
+  const posts: PostCardData[] = postsResult.posts.map(mapPostToCardData);
+  const pagination = postsResult.pagination;
+  const currentPage = pagination.page;
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
@@ -113,31 +143,7 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
           </Card>
         ) : (
           posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={{
-                ...post,
-                createdAt: post.createdAt.toISOString(),
-                updatedAt: post.updatedAt.toISOString(),
-                coverImageUrl: post.coverImageUrl || undefined,
-                author: {
-                  id: post.author.id,
-                  username: post.author.username || '',
-                  displayName: post.author.displayName || undefined,
-                  avatarUrl: post.author.image || undefined,
-                  reputation: post.author.reputation || 0,
-                },
-                category: {
-                  ...post.category,
-                  icon: post.category.icon || undefined,
-                  color: post.category.color || undefined,
-                },
-                commentCount: post._count?.comments || 0,
-                upvotes: 0,
-                downvotes: 0,
-              }}
-              showCategory={true}
-            />
+            <PostCard key={post.id} post={post} showCategory />
           ))
         )}
       </div>
@@ -153,7 +159,6 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
 
           <div className="flex items-center gap-1">
             {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => {
-              // 첫 페이지, 마지막 페이지, 현재 페이지 주변만 표시
               if (
                 page === 1 ||
                 page === pagination.totalPages ||
@@ -169,9 +174,12 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
                     </Button>
                   </Link>
                 );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
+              }
+
+              if (page === currentPage - 2 || page === currentPage + 2) {
                 return <span key={page} className="px-2">...</span>;
               }
+
               return null;
             })}
           </div>

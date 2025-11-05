@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { Post, PostType, Prisma } from '@/generated/prisma';
+import { PostType, Prisma, VoteType } from '@/generated/prisma';
 
 /**
  * 반환 타입 정의
@@ -146,6 +146,21 @@ export type PostWithDetails = Prisma.PostGetPayload<{
     };
   };
 }>;
+
+export interface PaginatedPostsResult {
+  posts: PostWithAuthor[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface VoteSummary {
+  upvotes: number;
+  downvotes: number;
+}
 
 /**
  * 카테고리별 게시글 조회
@@ -500,5 +515,128 @@ export async function getPostsByUser(
   } catch (error) {
     console.error('[DAL] getPostsByUser error:', error);
     throw new Error(`사용자별 게시글 조회 중 오류가 발생했습니다: ${userId}`);
+  }
+}
+
+/**
+ * 최신 게시글 페이지네이션 조회
+ */
+export async function getRecentPostsPaginated(
+  page: number = 1,
+  limit: number = 20
+): Promise<PaginatedPostsResult> {
+  const safePage = page < 1 ? 1 : page;
+  const take = limit < 1 ? 20 : limit;
+  const skip = (safePage - 1) * take;
+
+  try {
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              image: true,
+              reputation: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+              color: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: true,
+              votes: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take,
+      }),
+      prisma.post.count(),
+    ]);
+
+    return {
+      posts,
+      pagination: {
+        total,
+        page: safePage,
+        limit: take,
+        totalPages: Math.max(1, Math.ceil(total / take)),
+      },
+    };
+  } catch (error) {
+    console.error('[DAL] getRecentPostsPaginated error:', error);
+    throw new Error('최신 게시글 페이지네이션 조회 중 오류가 발생했습니다');
+  }
+}
+
+/**
+ * 게시글 투표 요약 정보 (up/down 카운트)
+ */
+export async function getPostVoteSummary(postId: string): Promise<VoteSummary> {
+  try {
+    const summary: VoteSummary = { upvotes: 0, downvotes: 0 };
+
+    const groupedVotes = await prisma.vote.groupBy({
+      by: ['voteType'],
+      _count: {
+        voteType: true,
+      },
+      where: {
+        postId,
+      },
+    });
+
+    for (const vote of groupedVotes) {
+      if (vote.voteType === VoteType.UP) {
+        summary.upvotes = vote._count.voteType;
+      } else if (vote.voteType === VoteType.DOWN) {
+        summary.downvotes = vote._count.voteType;
+      }
+    }
+
+    return summary;
+  } catch (error) {
+    console.error('[DAL] getPostVoteSummary error:', error);
+    throw new Error(`게시글 투표 요약 조회 중 오류가 발생했습니다: ${postId}`);
+  }
+}
+
+/**
+ * 특정 사용자의 게시글 투표 상태
+ */
+export async function getUserVoteForPost(
+  postId: string,
+  userId: string
+): Promise<VoteType | null> {
+  try {
+    const vote = await prisma.vote.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+      select: {
+        voteType: true,
+      },
+    });
+
+    return vote?.voteType ?? null;
+  } catch (error) {
+    console.error('[DAL] getUserVoteForPost error:', error);
+    throw new Error(`게시글 투표 상태 조회 중 오류가 발생했습니다: ${postId}`);
   }
 }

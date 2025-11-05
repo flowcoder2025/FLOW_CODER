@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { useEffect, useState, useTransition } from 'react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button';
  *
  * 기능:
  * - Upvote/Downvote 버튼
- * - 클라이언트 상태 관리 (투표 상태)
+ * - 클라이언트 또는 서버 상태 관리 (투표 상태)
  * - 점수 계산 및 색상 표시
  * - 수직/수평 레이아웃 지원
- * - localStorage 투표 상태 저장
+ * - localStorage 또는 API 기반 투표 유지
  */
 
 export interface VoteButtonsProps {
@@ -28,9 +28,25 @@ export interface VoteButtonsProps {
   voteId?: string;
   /** 추가 클래스명 */
   className?: string;
+  /** 서버 기반 투표를 위한 대상 타입 */
+  targetType?: 'post' | 'comment' | 'answer';
+  /** 서버 기반 투표를 위한 대상 ID */
+  targetId?: string;
+  /** 초기 투표 상태 (서버 렌더링 시 전달) */
+  initialVote?: VoteState;
 }
 
 type VoteState = 'up' | 'down' | null;
+
+type ServerVoteResponse = {
+  upvotes: number;
+  downvotes: number;
+  userVote: 'UP' | 'DOWN' | null;
+};
+
+type VoteApiResponse =
+  | { success: true; data: ServerVoteResponse }
+  | { success: false; error: string };
 
 export function VoteButtons({
   upvotes,
@@ -39,66 +55,129 @@ export function VoteButtons({
   size = 'sm',
   voteId,
   className = '',
+  targetType,
+  targetId,
+  initialVote = null,
 }: VoteButtonsProps) {
-  const [userVote, setUserVote] = useState<VoteState>(null);
+  const usesServerVoting = targetType === 'post' && Boolean(targetId);
+
+  const [userVote, setUserVote] = useState<VoteState>(initialVote ?? null);
   const [localUpvotes, setLocalUpvotes] = useState(upvotes);
   const [localDownvotes, setLocalDownvotes] = useState(downvotes);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  // localStorage에서 투표 상태 불러오기
+  // 최신 props를 상태에 반영
   useEffect(() => {
-    if (voteId && typeof window !== 'undefined') {
-      const savedVote = localStorage.getItem(`vote_${voteId}`);
-      if (savedVote === 'up' || savedVote === 'down') {
-        setUserVote(savedVote);
-        // 저장된 투표를 반영한 점수 계산
-        if (savedVote === 'up') {
-          setLocalUpvotes(upvotes + 1);
-        } else {
-          setLocalDownvotes(downvotes + 1);
-        }
-      }
+    setLocalUpvotes(upvotes);
+    setLocalDownvotes(downvotes);
+  }, [upvotes, downvotes]);
+
+  // 서버에서 전달 받은 초기 투표 상태 동기화
+  useEffect(() => {
+    if (usesServerVoting) {
+      setUserVote(initialVote ?? null);
     }
-  }, [voteId, upvotes, downvotes]);
+  }, [usesServerVoting, initialVote]);
 
-  // 투표 핸들러
-  const handleVote = (voteType: 'up' | 'down') => {
-    let newUpvotes = upvotes;
-    let newDownvotes = downvotes;
+  // localStorage 기반 투표 복원
+  useEffect(() => {
+    if (usesServerVoting || !voteId || typeof window === 'undefined') {
+      return;
+    }
+
+    const savedVote = localStorage.getItem(`vote_${voteId}`);
+    if (savedVote === 'up' || savedVote === 'down') {
+      setUserVote(savedVote);
+      if (savedVote === 'up') {
+        setLocalUpvotes(upvotes + 1);
+      } else {
+        setLocalDownvotes(downvotes + 1);
+      }
+    } else {
+      setUserVote(null);
+    }
+  }, [usesServerVoting, voteId, upvotes, downvotes]);
+
+  const score = localUpvotes - localDownvotes;
+  const disabled = usesServerVoting && isPending;
+
+  const handleServerVote = (voteType: Exclude<VoteState, null>) => {
+    if (!targetId) {
+      return;
+    }
+
+    startTransition(async () => {
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/posts/${targetId}/vote`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ voteType: voteType === 'up' ? 'UP' : 'DOWN' }),
+        });
+
+        const payload = (await response
+          .json()
+          .catch(() => null)) as VoteApiResponse | null;
+
+        if (!response.ok || !payload || payload.success !== true) {
+          const message =
+            payload && payload.success === false
+              ? payload.error
+              : '투표 처리에 실패했습니다.';
+          setError(message);
+          return;
+        }
+
+        const data = payload.data;
+
+        setLocalUpvotes(data.upvotes);
+        setLocalDownvotes(data.downvotes);
+        setUserVote(
+          data.userVote === 'UP' ? 'up' : data.userVote === 'DOWN' ? 'down' : null
+        );
+      } catch (networkError) {
+        console.error('Vote request failed', networkError);
+        setError('투표 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    });
+  };
+
+  const handleLocalVote = (voteType: Exclude<VoteState, null>) => {
     let newVoteState: VoteState = voteType;
+    let newUpvotes = localUpvotes;
+    let newDownvotes = localDownvotes;
 
-    // 기존 투표 상태에 따라 점수 조정
     if (userVote === voteType) {
-      // 같은 버튼 클릭 → 취소
       newVoteState = null;
       if (voteType === 'up') {
-        newUpvotes -= 1;
+        newUpvotes = Math.max(0, newUpvotes - 1);
       } else {
-        newDownvotes -= 1;
+        newDownvotes = Math.max(0, newDownvotes - 1);
       }
     } else if (userVote === null) {
-      // 투표하지 않은 상태 → 새로 투표
       if (voteType === 'up') {
         newUpvotes += 1;
       } else {
         newDownvotes += 1;
       }
     } else {
-      // 다른 투표로 변경 (up ↔ down)
       if (voteType === 'up') {
         newUpvotes += 1;
-        newDownvotes -= 1;
+        newDownvotes = Math.max(0, newDownvotes - 1);
       } else {
         newDownvotes += 1;
-        newUpvotes -= 1;
+        newUpvotes = Math.max(0, newUpvotes - 1);
       }
     }
 
-    // 상태 업데이트
     setUserVote(newVoteState);
     setLocalUpvotes(newUpvotes);
     setLocalDownvotes(newDownvotes);
 
-    // localStorage에 저장
     if (voteId && typeof window !== 'undefined') {
       if (newVoteState === null) {
         localStorage.removeItem(`vote_${voteId}`);
@@ -108,17 +187,30 @@ export function VoteButtons({
     }
   };
 
-  const score = localUpvotes - localDownvotes;
+  const handleVote = (voteType: Exclude<VoteState, null>) => {
+    if (usesServerVoting) {
+      handleServerVote(voteType);
+    } else {
+      handleLocalVote(voteType);
+    }
+  };
 
-  // 수직 레이아웃 (게시글용)
+  const renderErrorMessage = () =>
+    error ? (
+      <span className="sr-only" aria-live="assertive">
+        {error}
+      </span>
+    ) : null;
+
   if (orientation === 'vertical') {
     return (
       <div className={`flex flex-col items-center gap-2 min-w-[50px] ${className}`}>
         <button
-          className="p-2 rounded hover:bg-accent transition-colors"
+          className="p-2 rounded hover:bg-accent transition-colors disabled:opacity-50"
           aria-label="추천"
           type="button"
           onClick={() => handleVote('up')}
+          disabled={disabled}
         >
           <ArrowUp
             className={`${size === 'lg' ? 'h-6 w-6' : 'h-5 w-5'} ${
@@ -136,10 +228,11 @@ export function VoteButtons({
           {score}
         </span>
         <button
-          className="p-2 rounded hover:bg-accent transition-colors"
+          className="p-2 rounded hover:bg-accent transition-colors disabled:opacity-50"
           aria-label="비추천"
           type="button"
           onClick={() => handleVote('down')}
+          disabled={disabled}
         >
           <ArrowDown
             className={`${size === 'lg' ? 'h-6 w-6' : 'h-5 w-5'} ${
@@ -149,11 +242,11 @@ export function VoteButtons({
             }`}
           />
         </button>
+        {renderErrorMessage()}
       </div>
     );
   }
 
-  // 수평 레이아웃 (댓글용)
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <Button
@@ -161,6 +254,7 @@ export function VoteButtons({
         size="sm"
         className="h-7 px-2"
         onClick={() => handleVote('up')}
+        disabled={disabled}
       >
         <ArrowUp
           className={`h-3 w-3 ${
@@ -180,6 +274,7 @@ export function VoteButtons({
         size="sm"
         className="h-7 px-2"
         onClick={() => handleVote('down')}
+        disabled={disabled}
       >
         <ArrowDown
           className={`h-3 w-3 ${
@@ -187,6 +282,7 @@ export function VoteButtons({
           }`}
         />
       </Button>
+      {renderErrorMessage()}
     </div>
   );
 }

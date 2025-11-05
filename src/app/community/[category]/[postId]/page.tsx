@@ -6,7 +6,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CommentList } from '@/components/CommentList';
 import { VoteButtons } from '@/components/VoteButtons';
-import { getPostById } from '@/lib/data-access/posts';
+import {
+  getPostById,
+  getPostVoteSummary,
+  getUserVoteForPost,
+} from '@/lib/data-access/posts';
+import { auth } from '@/lib/auth';
 
 /**
  * 게시글 상세 페이지
@@ -25,19 +30,27 @@ interface PostDetailPageProps {
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const { category: categorySlug, postId } = await params;
 
-  // 게시글 조회 (댓글 포함)
+  const sessionPromise = auth();
   const post = await getPostById(postId);
 
   if (!post) {
     notFound();
   }
 
+  const session = await sessionPromise;
+
+  const [voteSummary, userVoteType] = await Promise.all([
+    getPostVoteSummary(postId),
+    session?.user?.id
+      ? getUserVoteForPost(postId, session.user.id)
+      : Promise.resolve(null),
+  ]);
+
   // getPostById가 이미 댓글을 포함하므로 별도 조회 불필요
   const allComments = post.comments || [];
-
-  // votes 배열에서 upvotes/downvotes 계산 (임시로 0 설정, 추후 실제 집계 로직 추가)
-  const upvotes = 0; // TODO: votes에서 value=1 개수 집계
-  const downvotes = 0; // TODO: votes에서 value=-1 개수 집계
+  const { upvotes, downvotes } = voteSummary;
+  const initialVote =
+    userVoteType === 'UP' ? 'up' : userVoteType === 'DOWN' ? 'down' : null;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -71,7 +84,9 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               downvotes={downvotes}
               orientation="vertical"
               size="lg"
-              voteId={`post_${post.id}`}
+              targetType="post"
+              targetId={post.id}
+              initialVote={initialVote}
             />
 
             {/* 우측: 콘텐츠 섹션 */}

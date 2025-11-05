@@ -12,7 +12,7 @@ import {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
 
@@ -20,7 +20,7 @@ export async function POST(
     return unauthorizedResponse();
   }
 
-  const postId = params.id;
+  const { id: postId } = await params;
   if (!postId) {
     return validationErrorResponse('postId가 필요합니다.');
   }
