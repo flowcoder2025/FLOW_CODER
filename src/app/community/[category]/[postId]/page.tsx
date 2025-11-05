@@ -1,6 +1,3 @@
-'use client';
-
-import { use } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,13 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CommentList } from '@/components/CommentList';
 import { VoteButtons } from '@/components/VoteButtons';
-import { getPostById, getCommentsByPostId } from '@/lib/mock-data';
+import { getPostById } from '@/lib/data-access/posts';
 
 /**
  * 게시글 상세 페이지
  *
  * 동적 라우트: /community/[category]/[postId]
- * Next.js 15: params는 Promise이므로 use() 훅으로 unwrap
+ * Next.js 15: params는 Promise이므로 await로 unwrap
  */
 
 interface PostDetailPageProps {
@@ -25,18 +22,22 @@ interface PostDetailPageProps {
   }>;
 }
 
-export default function PostDetailPage({ params }: PostDetailPageProps) {
-  const { category: categorySlug, postId } = use(params);
+export default async function PostDetailPage({ params }: PostDetailPageProps) {
+  const { category: categorySlug, postId } = await params;
 
-  // 게시글 조회
-  const post = getPostById(postId);
+  // 게시글 조회 (댓글 포함)
+  const post = await getPostById(postId);
 
   if (!post) {
     notFound();
   }
 
-  // 댓글 조회
-  const allComments = getCommentsByPostId(postId);
+  // getPostById가 이미 댓글을 포함하므로 별도 조회 불필요
+  const allComments = post.comments || [];
+
+  // votes 배열에서 upvotes/downvotes 계산 (임시로 0 설정, 추후 실제 집계 로직 추가)
+  const upvotes = 0; // TODO: votes에서 value=1 개수 집계
+  const downvotes = 0; // TODO: votes에서 value=-1 개수 집계
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -66,8 +67,8 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
           <div className="flex items-start gap-6">
             {/* 좌측: 투표 섹션 */}
             <VoteButtons
-              upvotes={post.upvotes}
-              downvotes={post.downvotes}
+              upvotes={upvotes}
+              downvotes={downvotes}
               orientation="vertical"
               size="lg"
               voteId={`post_${post.id}`}
@@ -99,19 +100,19 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6 pb-6 border-b">
                 {/* 작성자 */}
                 <Link
-                  href={`/profile/${post.author.username}`}
+                  href={`/profile/${post.author.username || 'unknown'}`}
                   className="flex items-center gap-2 hover:text-foreground transition-colors"
                 >
                   <Image
-                    src={post.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                    alt={post.author.displayName || post.author.username}
+                    src={post.author.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                    alt={post.author.displayName || post.author.username || 'Unknown'}
                     width={32}
                     height={32}
                     className="rounded-full"
                   />
                   <div className="flex flex-col">
                     <span className="font-medium text-foreground">
-                      {post.author.displayName || post.author.username}
+                      {post.author.displayName || post.author.username || 'Unknown'}
                     </span>
                     {post.author.reputation > 100 && (
                       <span className="text-xs">평판 {post.author.reputation}</span>
@@ -122,8 +123,8 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
                 <span className="text-muted-foreground/50">•</span>
 
                 {/* 작성 시간 */}
-                <time dateTime={post.createdAt}>
-                  {new Date(post.createdAt).toLocaleDateString('ko-KR', {
+                <time dateTime={post.createdAt.toISOString()}>
+                  {post.createdAt.toLocaleDateString('ko-KR', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -145,7 +146,7 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
                 {/* 댓글 수 */}
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
-                  <span>{post.commentCount}</span>
+                  <span>{post._count.comments}</span>
                 </div>
               </div>
 
@@ -170,7 +171,7 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
       </Card>
 
       {/* 댓글 섹션 */}
-      <CommentList comments={allComments} commentCount={post.commentCount} />
+      <CommentList comments={allComments as any} commentCount={post._count.comments} />
     </div>
   );
 }

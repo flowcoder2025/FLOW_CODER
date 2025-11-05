@@ -84,6 +84,7 @@ export async function getPostById(postId: string) {
               username: true,
               displayName: true,
               image: true,
+              reputation: true,
             },
           },
           replies: {
@@ -94,6 +95,7 @@ export async function getPostById(postId: string) {
                   username: true,
                   displayName: true,
                   image: true,
+                  reputation: true,
                 },
               },
             },
