@@ -5,8 +5,9 @@ import { Eye, MessageSquare, Calendar, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NewsCard } from '@/components/NewsCard';
-import { mockPosts } from '@/lib/mock-data';
-import type { PostWithAuthor } from '@/lib/types';
+import { getPostById, getNewsPosts } from '@/lib/data-access';
+import { PostType } from '@/generated/prisma';
+import { prisma } from '@/lib/prisma';
 
 /**
  * 뉴스 상세 페이지
@@ -19,42 +20,91 @@ import type { PostWithAuthor } from '@/lib/types';
  * - 관련 뉴스 추천 (같은 카테고리 우선, 최대 3개)
  */
 
-/** NEWS 포스트 ID로 데이터 가져오기 */
-function getNewsById(id: string): PostWithAuthor | undefined {
-  const post = mockPosts.find((p) => p.id === id && p.postType === 'NEWS');
-  return post;
-}
-
 /** 관련 뉴스 가져오기 (같은 카테고리 우선, 현재 포스트 제외) */
-function getRelatedNews(
-  currentPost: PostWithAuthor,
-  limit: number = 3
-): PostWithAuthor[] {
-  // 현재 포스트 제외한 모든 NEWS
-  const allNews = mockPosts.filter(
-    (p) => p.postType === 'NEWS' && p.id !== currentPost.id
-  );
-
+async function getRelatedNews(currentPostId: string, categoryId: string, limit: number = 3) {
   // 같은 카테고리 뉴스 우선
-  const sameCategory = allNews
-    .filter((p) => p.categoryId === currentPost.categoryId)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  const sameCategory = await prisma.post.findMany({
+    where: {
+      id: { not: currentPostId },
+      postType: PostType.NEWS,
+      categoryId: categoryId,
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          image: true,
+          reputation: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          icon: true,
+          color: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+          votes: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: limit,
+  });
 
-  // 다른 카테고리 뉴스
-  const otherCategory = allNews
-    .filter((p) => p.categoryId !== currentPost.categoryId)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  // 같은 카테고리가 부족하면 다른 카테고리로 채움
+  if (sameCategory.length < limit) {
+    const otherCategory = await prisma.post.findMany({
+      where: {
+        id: { not: currentPostId },
+        postType: PostType.NEWS,
+        categoryId: { not: categoryId },
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            image: true,
+            reputation: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true,
+            color: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+            votes: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit - sameCategory.length,
+    });
 
-  // 같은 카테고리 먼저, 부족하면 다른 카테고리로 채움
-  const related = [...sameCategory, ...otherCategory].slice(0, limit);
+    return [...sameCategory, ...otherCategory];
+  }
 
-  return related;
+  return sameCategory;
 }
 
 interface NewsDetailPageProps {
@@ -66,14 +116,14 @@ interface NewsDetailPageProps {
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   const { id } = await params;
 
-  const news = getNewsById(id);
+  const news = await getPostById(id);
 
   // NEWS가 아니거나 존재하지 않으면 404
-  if (!news) {
+  if (!news || news.postType !== PostType.NEWS) {
     notFound();
   }
 
-  const relatedNews = getRelatedNews(news);
+  const relatedNews = await getRelatedNews(news.id, news.categoryId);
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,8 +198,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               className="flex items-center gap-2 hover:text-foreground transition-colors"
             >
               <Image
-                src={news.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                alt={news.author.displayName || news.author.username}
+                src={news.author.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                alt={news.author.displayName || news.author.username || 'User'}
                 width={32}
                 height={32}
                 className="rounded-full"
@@ -164,8 +214,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* 작성일 */}
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
-              <time dateTime={news.createdAt}>
-                {new Date(news.createdAt).toLocaleDateString('ko-KR', {
+              <time dateTime={news.createdAt.toISOString()}>
+                {news.createdAt.toLocaleDateString('ko-KR', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -186,7 +236,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             {/* 댓글수 */}
             <div className="flex items-center gap-1.5">
               <MessageSquare className="h-4 w-4" />
-              <span>{news.commentCount}</span>
+              <span>{news._count.comments}</span>
             </div>
           </div>
         </header>
@@ -222,7 +272,28 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             <h2 className="text-2xl font-bold mb-6">관련 뉴스</h2>
             <div className="space-y-6">
               {relatedNews.map((related) => (
-                <NewsCard key={related.id} news={related} />
+                <NewsCard
+                  key={related.id}
+                  news={{
+                    ...related,
+                    createdAt: related.createdAt.toISOString(),
+                    updatedAt: related.updatedAt.toISOString(),
+                    coverImageUrl: related.coverImageUrl || undefined,
+                    author: {
+                      id: related.author.id,
+                      username: related.author.username || '',
+                      displayName: related.author.displayName || undefined,
+                      avatarUrl: related.author.image || undefined,
+                      reputation: related.author.reputation,
+                    },
+                    category: {
+                      ...related.category,
+                      icon: related.category.icon || undefined,
+                      color: related.category.color || undefined,
+                    },
+                    commentCount: related._count.comments,
+                  }}
+                />
               ))}
             </div>
           </div>
@@ -234,7 +305,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
 /** 정적 생성: 모든 NEWS 포스트 사전 생성 */
 export async function generateStaticParams() {
-  const newsPosts = mockPosts.filter((p) => p.postType === 'NEWS');
+  const newsPosts = await getNewsPosts();
   return newsPosts.map((post) => ({
     id: post.id,
   }));
