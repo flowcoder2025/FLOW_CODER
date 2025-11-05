@@ -1,5 +1,10 @@
 import { MetadataRoute } from 'next';
-import { mockPosts, mockUsers, mockCategories } from '@/lib/mock-data';
+import {
+  getAllCategories,
+  getRecentPosts,
+  getTopUsersByReputation,
+} from '@/lib/data-access';
+import { PostType } from '@/generated/prisma';
 
 /**
  * sitemap.xml 생성
@@ -7,7 +12,7 @@ import { mockPosts, mockUsers, mockCategories } from '@/lib/mock-data';
  * 정적 페이지와 동적 페이지 URL을 모두 포함
  * 크롤러가 사이트 구조를 이해하도록 changeFrequency와 priority 설정
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vibecoding.com';
 
   // 정적 페이지
@@ -74,8 +79,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  // DB에서 데이터 조회
+  const categories = await getAllCategories();
+  const allPosts = await getRecentPosts(1000); // 최근 1000개 게시글
+  const topUsers = await getTopUsersByReputation(100); // 상위 100명 사용자
+
   // 커뮤니티 카테고리 페이지
-  const categoryPages: MetadataRoute.Sitemap = mockCategories
+  const categoryPages: MetadataRoute.Sitemap = categories
     .filter((cat) => !cat.id.startsWith('news_')) // NEWS 카테고리 제외
     .map((category) => ({
       url: `${baseUrl}/community/${category.slug}`,
@@ -85,42 +95,48 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }));
 
   // 게시글 페이지 (DISCUSSION, SHOWCASE 타입)
-  const postPages: MetadataRoute.Sitemap = mockPosts
-    .filter((post) => post.postType === 'DISCUSSION' || post.postType === 'SHOWCASE')
+  const postPages: MetadataRoute.Sitemap = allPosts
+    .filter(
+      (post) =>
+        post.postType === PostType.DISCUSSION ||
+        post.postType === PostType.SHOWCASE
+    )
     .map((post) => ({
       url: `${baseUrl}/community/${post.category.slug}/${post.id}`,
-      lastModified: new Date(post.updatedAt),
+      lastModified: post.updatedAt,
       changeFrequency: 'daily' as const,
       priority: 0.7,
     }));
 
   // 질문 페이지 (QUESTION 타입)
-  const questionPages: MetadataRoute.Sitemap = mockPosts
-    .filter((post) => post.postType === 'QUESTION')
+  const questionPages: MetadataRoute.Sitemap = allPosts
+    .filter((post) => post.postType === PostType.QUESTION)
     .map((question) => ({
       url: `${baseUrl}/help/${question.id}`,
-      lastModified: new Date(question.updatedAt),
+      lastModified: question.updatedAt,
       changeFrequency: 'daily' as const,
       priority: 0.7,
     }));
 
   // 뉴스 페이지 (NEWS 타입)
-  const newsPages: MetadataRoute.Sitemap = mockPosts
-    .filter((post) => post.postType === 'NEWS')
+  const newsPages: MetadataRoute.Sitemap = allPosts
+    .filter((post) => post.postType === PostType.NEWS)
     .map((news) => ({
       url: `${baseUrl}/news/${news.id}`,
-      lastModified: new Date(news.updatedAt),
+      lastModified: news.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     }));
 
-  // 사용자 프로필 페이지
-  const profilePages: MetadataRoute.Sitemap = mockUsers.map((user) => ({
-    url: `${baseUrl}/profile/${user.username}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.5,
-  }));
+  // 사용자 프로필 페이지 (TOP 100 사용자)
+  const profilePages: MetadataRoute.Sitemap = topUsers
+    .filter((user) => user.username) // username이 있는 사용자만
+    .map((user) => ({
+      url: `${baseUrl}/profile/${user.username}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }));
 
   return [
     ...staticPages,
