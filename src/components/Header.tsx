@@ -35,9 +35,9 @@ export function Header() {
   useEffect(() => {
     fetch('/api/categories')
       .then((res) => res.json())
-      .then((data) => {
-        if (data.categories) {
-          setCategories(data.categories);
+      .then((response) => {
+        if (response.success && response.data?.categories) {
+          setCategories(response.data.categories);
         }
       })
       .catch((err) => {
@@ -56,6 +56,7 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-4">
           <Link href="/" className="hover:text-primary transition-colors">홈</Link>
+          <Link href="/community" className="hover:text-primary transition-colors">커뮤니티</Link>
 
           {/* 카테고리별 개별 버튼 */}
           {categories.map((category) => (
@@ -143,6 +144,13 @@ export function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               홈
+            </Link>
+            <Link
+              href="/community"
+              className="hover:text-primary transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              커뮤니티
             </Link>
 
             {/* 카테고리별 개별 링크 */}
