@@ -635,14 +635,23 @@ export function errorResponse(message: string, status: number) {
 
 #### Task 9: API Routes 권한 체크 완성
 **설명**: 누락된 인증/권한 체크 추가
+**상태**: ✅ **완료 (검증)** - 모든 API Routes 이미 인증 구현됨
 
 **Checklist**:
-- [ ] `/api/posts/route.ts` POST 인증 추가
-- [ ] `/api/questions/route.ts` POST 인증 추가
-- [ ] `/api/answers/route.ts` 권한 체크
-- [ ] 모든 API Routes 권한 매트릭스 문서화
+- [x] `/api/posts/route.ts` POST 인증 추가 - 이미 완료 (route.ts:123-126) ✅
+- [x] `/api/questions/route.ts` POST 인증 추가 - 이미 완료 (route.ts:133-136) ✅
+- [x] `/api/answers/route.ts` 권한 체크 - 이미 완료 (POST:17-23, PATCH:139-151) ✅
+- [x] 모든 API Routes 권한 매트릭스 문서화 - 완료 ✅
+  - `docs/API_Routes_Authorization_Matrix.md` 생성
+  - 12개 API route 파일, 권한 레벨별 분류
+  - PUBLIC, AUTH, OWNER, MODERATOR, ADMIN 레벨 정의
 
-**예상 시간**: 2-3일
+**비고**:
+- 모든 API Routes가 이미 적절한 인증/권한 체크를 가지고 있음을 확인
+- 추가 구현 불필요, 검증 및 문서화만 수행
+- 권한 매트릭스 문서로 향후 API 추가 시 참조 가능
+
+**예상 시간**: 완료 (검증 및 문서화)
 
 ---
 
@@ -718,6 +727,31 @@ export function errorResponse(message: string, status: number) {
   - 기존 코드의 any는 점진적으로 수정 가능하도록 설정
 
 **이유**: 빌드 블로킹 해제, 기술 부채 점진적 개선 전략
+
+---
+
+#### Task 9: API Routes 권한 체크 검증 및 문서화
+**커밋**: (예정)
+**상태**: ✅ 완료 (2025-11-05)
+
+**작업 내용**:
+- ✅ 모든 API Routes 권한 체크 현황 검증
+  - `/api/posts/route.ts` POST: 이미 인증 체크 구현 (route.ts:123-126)
+  - `/api/questions/route.ts` POST: 이미 인증 체크 구현 (route.ts:133-136)
+  - `/api/answers/route.ts` POST/PATCH: 이미 인증/권한 체크 구현 (POST:17-23, PATCH:139-151)
+  - `/api/admin/**`: `requireAdmin()` 미들웨어 적용
+  - `/api/external-terms/**`: `requireModerator()`, `requireAdmin()` 적용
+
+- ✅ 권한 매트릭스 문서 생성: `docs/API_Routes_Authorization_Matrix.md`
+  - 12개 API route 파일 문서화
+  - 권한 레벨 정의 (PUBLIC, AUTH, OWNER, MODERATOR, ADMIN)
+  - 각 엔드포인트별 Method와 필요 권한 매트릭스 작성
+  - 검증 위치 명시 (파일명:줄번호)
+
+**결과**:
+- 모든 API Routes가 적절한 인증/권한 체크를 이미 구현하고 있음 확인
+- 추가 코드 구현 불필요, 검증 및 문서화로 완료
+- 향후 API 추가 시 참조 가능한 권한 가이드 확보
 
 ---
 
