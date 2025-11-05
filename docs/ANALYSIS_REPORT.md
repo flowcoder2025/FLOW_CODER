@@ -566,16 +566,26 @@ export function errorResponse(message: string, status: number) {
 #### Task 6: Mock 데이터 제거 → DB 연동
 **설명**: Task 3 기반으로 실제 페이지들을 DB 연동으로 전환
 **의존성**: Task 3 완료 필요
+**상태**: ⏸️ **부분 완료 (2/8 파일, 25%)** - Server Component만 완료, Client Component 보류
 
-**Checklist**:
-- [ ] `/app/community/[category]/page.tsx` DB 연동
-- [ ] `/app/news/page.tsx` DB 연동
-- [ ] `/app/help/page.tsx` DB 연동
-- [ ] `/app/profile/[username]/page.tsx` DB 연동
-- [ ] `/components/Hero.tsx` 실시간 데이터 연동
-- [ ] `lib/mock-data.ts` 사용 제거 확인
+**완료 파일 (Server Component/Server-side)**:
+- [x] `/app/community/[category]/[postId]/page.tsx` - Server Component 전환 ✅
+- [x] `/app/sitemap.ts` - DAL 사용 전환 ✅
 
-**예상 시간**: 3-5일
+**보류 파일 (Client Component - 복잡한 리팩토링 필요)**:
+- [ ] `/app/community/[category]/page.tsx` - SearchBar/FilterBar 리팩토링 필요
+- [ ] `/app/help/[questionId]/page.tsx` - useState, 폼 핸들러 (Client 필수)
+- [ ] `/app/community/new/page.tsx` - 폼 전체 (Client 필수)
+- [ ] `/components/NotificationBell.tsx` - Dropdown, localStorage (Client)
+- [ ] `/lib/store.ts` - Zustand 전역 상태 (전체 리팩토링 필요)
+- [ ] `lib/mock-data.ts` 완전 제거 (Client Component 의존성 해결 필요)
+
+**비고**:
+- Client Component 파일들은 API routes + client fetch 패턴으로 전환 필요 (Phase 별도)
+- Server Component 전환 가능 파일: 모두 완료
+- 나머지는 더 큰 리팩토링 필요 (Task 별도 분리 검토)
+
+**예상 시간**: 3-5일 (Server 전환 완료, Client 전환은 추가 Phase 필요)
 
 ---
 
