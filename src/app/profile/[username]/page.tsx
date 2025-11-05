@@ -2,11 +2,15 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileTabs } from '@/components/ProfileTabs';
-import { mockUsers, mockPosts, mockComments } from '@/lib/mock-data';
-import type { User, PostWithAuthor, CommentWithAuthor } from '@/lib/types';
+import {
+  getUserByUsername,
+  getPostsByUser,
+  getCommentsByUser,
+} from '@/lib/data-access';
+import type { PostWithAuthor, CommentWithAuthor } from '@/lib/types';
 
 /**
- * 사용자 프로필 페이지
+ * 사용자 프로필 페이지 (Server Component)
  *
  * 기능:
  * - username 기반 동적 라우팅
@@ -14,35 +18,6 @@ import type { User, PostWithAuthor, CommentWithAuthor } from '@/lib/types';
  * - 통계 카드 (게시글/댓글/평판)
  * - ProfileTabs (게시글/댓글 탭)
  */
-
-/** username으로 사용자 찾기 */
-function getUserByUsername(username: string): User | undefined {
-  return mockUsers.find((u) => u.username === username);
-}
-
-/** 사용자의 모든 게시글 가져오기 */
-function getUserPosts(userId: string): PostWithAuthor[] {
-  return mockPosts.filter((p) => p.authorId === userId);
-}
-
-/** 사용자의 모든 댓글 가져오기 */
-function getUserComments(userId: string): CommentWithAuthor[] {
-  return mockComments
-    .filter((c) => c.authorId === userId)
-    .map((comment) => {
-      // 댓글에 해당하는 포스트 찾기
-      const post = mockPosts.find((p) => p.id === comment.postId);
-      if (!post) {
-        // 포스트가 없으면 스킵 (드물지만 방어적 처리)
-        return null;
-      }
-      return {
-        ...comment,
-        post,
-      };
-    })
-    .filter((c) => c !== null) as CommentWithAuthor[];
-}
 
 
 interface ProfilePageProps {
@@ -54,30 +29,130 @@ interface ProfilePageProps {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
 
-  const user = getUserByUsername(username);
+  // DB에서 사용자 조회
+  const user = await getUserByUsername(username);
 
   // 존재하지 않는 사용자면 404
   if (!user) {
     notFound();
   }
 
-  const userPosts = getUserPosts(user.id);
-  const userComments = getUserComments(user.id);
-  // Mock: 현재 로그인한 사용자 (실제로는 useSession으로 가져옴)
+  // DB에서 사용자 게시글 및 댓글 조회
+  const dbPosts = await getPostsByUser(user.id);
+  const dbComments = await getCommentsByUser(user.id);
+
+  // Mock: 현재 로그인한 사용자 (실제로는 getServerSession으로 가져옴)
   const currentUsername = 'admin';
+
+  // PostWithAuthor 타입으로 변환
+  const userPosts: PostWithAuthor[] = dbPosts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    content: post.content,
+    authorId: post.authorId,
+    categoryId: post.categoryId,
+    postType: post.postType,
+    upvotes: post.upvotes,
+    downvotes: post.downvotes,
+    viewCount: post.viewCount,
+    isPinned: post.isPinned,
+    isLocked: post.isLocked,
+    tags: post.tags,
+    coverImageUrl: post.coverImageUrl || undefined,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+    author: {
+      id: user.id,
+      username: user.username || '',
+      displayName: user.displayName || undefined,
+      avatarUrl: user.image || undefined,
+      reputation: user.reputation,
+    },
+    category: {
+      id: post.category.id,
+      name: post.category.name,
+      slug: post.category.slug,
+      icon: post.category.icon || undefined,
+      color: post.category.color || undefined,
+    },
+    commentCount: post._count.comments,
+  }));
+
+  // CommentWithAuthor 타입으로 변환
+  const userComments: CommentWithAuthor[] = dbComments.map((comment) => ({
+    id: comment.id,
+    content: comment.content,
+    authorId: comment.authorId,
+    postId: comment.postId,
+    parentId: comment.parentId || undefined,
+    upvotes: comment.upvotes,
+    downvotes: comment.downvotes,
+    createdAt: comment.createdAt.toISOString(),
+    updatedAt: comment.updatedAt.toISOString(),
+    author: {
+      id: user.id,
+      username: user.username || '',
+      displayName: user.displayName || undefined,
+      avatarUrl: user.image || undefined,
+      reputation: user.reputation,
+    },
+    post: {
+      id: comment.post.id,
+      title: comment.post.title,
+      content: '',
+      authorId: user.id,
+      categoryId: '',
+      postType: 'DISCUSSION' as const,
+      upvotes: 0,
+      downvotes: 0,
+      viewCount: 0,
+      isPinned: false,
+      isLocked: false,
+      tags: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      author: {
+        id: user.id,
+        username: user.username || '',
+        displayName: user.displayName || undefined,
+        avatarUrl: user.image || undefined,
+        reputation: user.reputation,
+      },
+      category: {
+        id: '',
+        name: comment.post.category.slug,
+        slug: comment.post.category.slug,
+      },
+      commentCount: 0,
+    },
+  }));
+
+  // User 타입으로 변환
+  const userForHeader = {
+    id: user.id,
+    username: user.username || '',
+    email: '', // ProfileHeader에서는 email이 표시되지 않음
+    displayName: user.displayName || undefined,
+    bio: user.bio || undefined,
+    avatarUrl: user.image || undefined,
+    reputation: user.reputation,
+    role: user.role,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.createdAt.toISOString(), // DB에서 updatedAt이 없으므로 createdAt 사용
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
       <div className="max-w-4xl mx-auto">
         {/* 프로필 헤더 */}
-        <ProfileHeader user={user} currentUsername={currentUsername} />
+        <ProfileHeader user={userForHeader} currentUsername={currentUsername} />
 
         {/* 통계 카드 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {/* 게시글 수 */}
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-3xl font-bold text-primary">{userPosts.length}</p>
+              <p className="text-3xl font-bold text-primary">{user._count.posts}</p>
               <p className="text-sm text-muted-foreground mt-1">게시글</p>
             </CardContent>
           </Card>
@@ -85,7 +160,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           {/* 댓글 수 */}
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-3xl font-bold text-primary">{userComments.length}</p>
+              <p className="text-3xl font-bold text-primary">{user._count.comments}</p>
               <p className="text-sm text-muted-foreground mt-1">댓글</p>
             </CardContent>
           </Card>
@@ -104,11 +179,4 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       </div>
     </div>
   );
-}
-
-/** 정적 생성: 모든 사용자 프로필 사전 생성 */
-export async function generateStaticParams() {
-  return mockUsers.map((user) => ({
-    username: user.username,
-  }));
 }
