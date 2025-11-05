@@ -611,15 +611,25 @@ export function errorResponse(message: string, status: number) {
 
 #### Task 8: 이미지 최적화 (next/image)
 **설명**: `<img>` → `next/image` 전환으로 성능 개선
+**상태**: ✅ **완료** - 프로젝트 전체 next/image 사용 중
 
 **Checklist**:
-- [ ] `components/ImageWithFallback.tsx` next/image 전환
-- [ ] 모든 `<img>` 태그 사용 위치 검색
-- [ ] 각 이미지 컴포넌트 next/image로 전환
-- [ ] width/height prop 추가
-- [ ] Lighthouse 성능 측정 (Before/After)
+- [x] `components/ImageWithFallback.tsx` next/image 전환 ✅
+  - 메인 이미지: 이미 next/image 사용 중
+  - fallback 이미지: `<img>` → next/image Image 전환 완료
+- [x] 모든 `<img>` 태그 사용 위치 검색 ✅
+  - 검색 결과: ImageWithFallback.tsx 1곳만 존재
+- [x] 각 이미지 컴포넌트 next/image로 전환 ✅
+- [x] width/height prop 추가 ✅
+  - fallback: 88x88 명시
+- [ ] Lighthouse 성능 측정 (Before/After) - 생략 (이미 next/image 사용 중이었음)
 
-**예상 시간**: 2-3일
+**비고**:
+- 프로젝트 전체에서 `<img>` 태그는 ImageWithFallback.tsx의 fallback 1곳만 사용
+- 나머지는 모두 next/image Image 컴포넌트 사용 중
+- 최적화 완료 (unoptimized 플래그는 외부 이미지 및 data URL 처리용)
+
+**예상 시간**: 완료 (20분)
 
 ---
 
