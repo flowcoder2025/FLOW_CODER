@@ -14,12 +14,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Code, Menu, X, LogOut, User, Settings } from "lucide-react";
-import { useState } from "react";
+import { Code, Menu, X, LogOut, User, Settings, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  description: string | null;
+  postCount: number;
+}
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const { data: session, status } = useSession();
+
+  // 카테고리 목록 로드
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.categories) {
+          setCategories(data.categories);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load categories:', err);
+      });
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
@@ -32,7 +56,34 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/" className="hover:text-primary transition-colors">홈</Link>
-          <Link href="/community" className="hover:text-primary transition-colors">커뮤니티</Link>
+
+          {/* 커뮤니티 드롭다운 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="hover:text-primary transition-colors px-0 h-auto font-normal">
+                커뮤니티
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem asChild>
+                <Link href="/community" className="cursor-pointer">
+                  전체 커뮤니티
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>카테고리</DropdownMenuLabel>
+              {categories.map((category) => (
+                <DropdownMenuItem key={category.id} asChild>
+                  <Link href={`/community/${category.slug}`} className="cursor-pointer">
+                    {category.icon && <span className="mr-2">{category.icon}</span>}
+                    {category.name}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Link href="/help" className="hover:text-primary transition-colors">Help me</Link>
           <Link href="/news" className="hover:text-primary transition-colors">뉴스</Link>
         </nav>
@@ -108,20 +159,28 @@ export function Header() {
             >
               홈
             </Link>
-            <Link
-              href="/community"
-              className="hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              커뮤니티
-            </Link>
-            <Link
-              href="/projects"
-              className="hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              프로젝트
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/community"
+                className="hover:text-primary transition-colors font-semibold"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                커뮤니티
+              </Link>
+              <div className="pl-4 flex flex-col gap-2">
+                {categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/community/${category.slug}`}
+                    className="hover:text-primary transition-colors text-sm"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {category.icon && <span className="mr-2">{category.icon}</span>}
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <Link
               href="/help"
               className="hover:text-primary transition-colors"

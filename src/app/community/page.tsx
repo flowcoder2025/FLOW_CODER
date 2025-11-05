@@ -1,110 +1,62 @@
-'use client';
-
-import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare } from 'lucide-react';
-import { SearchBar } from '@/components/SearchBar';
-import { FilterBar } from '@/components/FilterBar';
-import { mockCategories, getPostsByCategory, mockPosts } from '@/lib/mock-data';
-import type { PostSortOption, PostFilterOptions, PostWithAuthor } from '@/lib/types';
+import { MessageSquare, PenSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { getAllCategories } from '@/lib/data-access/categories';
+import { PostCard } from '@/components/PostCard';
 
 /**
- * 커뮤니티 메인 페이지
+ * 커뮤니티 메인 페이지 (Server Component)
  *
  * 기능:
- * - 카테고리 카드 표시
- * - 검색 바 (SearchBar)
- * - 필터 바 (FilterBar): 카테고리, 타입, 정렬, 태그
- * - 필터링된 게시글 목록 표시
+ * - 카테고리 카드 표시 (DB 연동)
+ * - 최근 게시글 목록 표시 (DB 연동)
  */
-export default function CommunityPage() {
-  // 검색 & 필터 상태
-  const [keyword, setKeyword] = useState('');
-  const [filters, setFilters] = useState<PostFilterOptions>({});
-  const [sortBy, setSortBy] = useState<PostSortOption>('recent');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // 필터링 & 정렬 로직
-  const filteredPosts = useMemo(() => {
-    let posts: PostWithAuthor[] = mockPosts;
+interface CommunityPageProps {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+}
 
-    // 검색어 필터링
-    if (keyword) {
-      posts = posts.filter(
-        (post) =>
-          post.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          post.content.toLowerCase().includes(keyword.toLowerCase())
-      );
-    }
+export default async function CommunityPage({ searchParams }: CommunityPageProps) {
+  const { page: pageStr = '1' } = await searchParams;
+  const currentPage = parseInt(pageStr, 10) || 1;
+  const postsPerPage = 20;
 
-    // 카테고리 필터링
-    if (filters.categoryId) {
-      posts = posts.filter((post) => post.categoryId === filters.categoryId);
-    }
+  // 카테고리 목록 조회 (DB)
+  const categories = await getAllCategories();
 
-    // 게시글 타입 필터링
-    if (filters.postType) {
-      posts = posts.filter((post) => post.postType === filters.postType);
-    }
-
-    // 태그 필터링
-    if (selectedTags.length > 0) {
-      posts = posts.filter((post) =>
-        selectedTags.every((tag) => post.tags.includes(tag))
-      );
-    }
-
-    // 정렬
-    posts.sort((a, b) => {
-      switch (sortBy) {
-        case 'popular':
-          return b.upvotes - b.downvotes - (a.upvotes - a.downvotes);
-        case 'recent':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'comments':
-          return b.commentCount - a.commentCount;
-        case 'views':
-          return b.viewCount - a.viewCount;
-        default:
-          return 0;
-      }
-    });
-
-    return posts;
-  }, [keyword, filters, selectedTags, sortBy]);
-
-  // 필터 초기화
-  const handleReset = () => {
-    setKeyword('');
-    setFilters({});
-    setSortBy('recent');
-    setSelectedTags([]);
-  };
-
-  // 태그 제거
-  const handleTagRemove = (tag: string) => {
-    setSelectedTags((prev) => prev.filter((t) => t !== tag));
-  };
+  // 최근 게시글 조회 (API 호출)
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?sort=recent&page=${currentPage}&limit=${postsPerPage}`, {
+    cache: 'no-store',
+  });
+  const data = await res.json();
+  const posts = data.posts || [];
+  const pagination = data.pagination || { total: 0, page: currentPage, limit: postsPerPage, totalPages: 1 };
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
       {/* 페이지 헤더 */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">커뮤니티</h1>
-        <p className="text-muted-foreground">
-          바이브코딩 사용자들과 자유롭게 소통하고 지식을 공유하세요
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">커뮤니티</h1>
+          <p className="text-muted-foreground">
+            바이브코딩 사용자들과 자유롭게 소통하고 지식을 공유하세요
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/community/new">
+            <PenSquare className="h-4 w-4 mr-2" />
+            새 글 쓰기
+          </Link>
+        </Button>
       </div>
 
       {/* 카테고리 그리드 */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        {mockCategories.map((category) => {
-          const categoryPosts = getPostsByCategory(category.id);
-          const recentPost = categoryPosts[0];
-
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
+        {categories.map((category) => {
           return (
             <Link
               key={category.id}
@@ -121,21 +73,9 @@ export default function CommunityPage() {
                   <CardDescription>{category.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {recentPost ? (
-                    <div className="text-sm text-muted-foreground">
-                      <p className="line-clamp-2 mb-2">최근: {recentPost.title}</p>
-                      <div className="flex items-center gap-2 text-xs">
-                        <MessageSquare className="h-3 w-3" />
-                        <span>{recentPost.commentCount}개 댓글</span>
-                        <span>•</span>
-                        <span>{recentPost.upvotes}개 추천</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic">
-                      아직 게시글이 없습니다
-                    </p>
-                  )}
+                  <p className="text-sm text-muted-foreground">
+                    카테고리를 클릭하여 게시글을 확인하세요
+                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -143,120 +83,96 @@ export default function CommunityPage() {
         })}
       </div>
 
-      {/* 검색 & 필터 섹션 */}
-      <div className="space-y-4 mb-8">
-        <SearchBar
-          onSearch={setKeyword}
-          placeholder="게시글 검색..."
-          liveSearch
-        />
-        <FilterBar
-          filters={filters}
-          sortBy={sortBy}
-          selectedTags={selectedTags}
-          onFilterChange={setFilters}
-          onSortChange={setSortBy}
-          onTagRemove={handleTagRemove}
-          onReset={handleReset}
-        />
+      {/* 최근 게시글 섹션 */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-4">최근 게시글</h2>
       </div>
 
       {/* 게시글 목록 */}
-      <div className="space-y-4">
-        {filteredPosts.length === 0 ? (
+      <div className="space-y-4 mb-8">
+        {posts.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <p className="text-muted-foreground">
-                검색 결과가 없습니다. 다른 검색어나 필터를 시도해보세요.
+                아직 게시글이 없습니다. 첫 번째 게시글을 작성해보세요!
               </p>
+              <Button asChild className="mt-4">
+                <Link href="/community/new">첫 번째 글 작성하기</Link>
+              </Button>
             </CardContent>
           </Card>
         ) : (
-          filteredPosts.map((post) => (
-            <Link
+          posts.map((post: any) => (
+            <PostCard
               key={post.id}
-              href={`/community/${post.category.slug}/${post.id}`}
-              className="block"
-            >
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    {/* 투표 섹션 */}
-                    <div className="flex flex-col items-center gap-1 min-w-[40px]">
-                      <span className="text-lg font-bold">
-                        {post.upvotes - post.downvotes}
-                      </span>
-                      <span className="text-xs text-muted-foreground">추천</span>
-                    </div>
-
-                    {/* 게시글 정보 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline">
-                          {post.category.icon} {post.category.name}
-                        </Badge>
-                        {post.isPinned && (
-                          <Badge variant="secondary">📌 고정</Badge>
-                        )}
-                      </div>
-
-                      <h3 className="text-lg font-semibold mb-2 line-clamp-1">
-                        {post.title}
-                      </h3>
-
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {post.content}
-                      </p>
-
-                      {/* 태그 */}
-                      {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {post.tags.map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="text-xs cursor-pointer"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (!selectedTags.includes(tag)) {
-                                  setSelectedTags((prev) => [...prev, tag]);
-                                }
-                              }}
-                            >
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* 메타 정보 */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Image
-                            src={post.author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                            alt={post.author.displayName || post.author.username}
-                            width={20}
-                            height={20}
-                            className="rounded-full"
-                          />
-                          <span>{post.author.displayName || post.author.username}</span>
-                        </div>
-                        <span>•</span>
-                        <div className="flex items-center gap-1">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>{post.commentCount}</span>
-                        </div>
-                        <span>•</span>
-                        <span>{new Date(post.createdAt).toLocaleDateString('ko-KR')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+              post={{
+                ...post,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+                coverImageUrl: post.coverImageUrl || undefined,
+                author: {
+                  id: post.author.id,
+                  username: post.author.username || '',
+                  displayName: post.author.displayName || undefined,
+                  avatarUrl: post.author.image || undefined,
+                  reputation: post.author.reputation || 0,
+                },
+                category: {
+                  ...post.category,
+                  icon: post.category.icon || undefined,
+                  color: post.category.color || undefined,
+                },
+                commentCount: post._count?.comments || 0,
+                upvotes: post.upvotes || 0,
+                downvotes: post.downvotes || 0,
+              }}
+              showCategory={true}
+            />
           ))
         )}
       </div>
+
+      {/* 페이지네이션 */}
+      {pagination.totalPages > 1 && (
+        <div className="mt-8 flex justify-center items-center gap-2">
+          {currentPage > 1 && (
+            <Link href={`/community?page=${currentPage - 1}`}>
+              <Button variant="outline" size="sm">이전</Button>
+            </Link>
+          )}
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => {
+              // 첫 페이지, 마지막 페이지, 현재 페이지 주변만 표시
+              if (
+                page === 1 ||
+                page === pagination.totalPages ||
+                (page >= currentPage - 1 && page <= currentPage + 1)
+              ) {
+                return (
+                  <Link key={page} href={`/community?page=${page}`}>
+                    <Button
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                    >
+                      {page}
+                    </Button>
+                  </Link>
+                );
+              } else if (page === currentPage - 2 || page === currentPage + 2) {
+                return <span key={page} className="px-2">...</span>;
+              }
+              return null;
+            })}
+          </div>
+
+          {currentPage < pagination.totalPages && (
+            <Link href={`/community?page=${currentPage + 1}`}>
+              <Button variant="outline" size="sm">다음</Button>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }
