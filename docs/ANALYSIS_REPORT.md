@@ -493,13 +493,15 @@ export function errorResponse(message: string, status: number) {
 - `lib/data-access/users.ts` (사용자 정보)
 
 **Checklist**:
-- [ ] Data Access Layer 구조 설계
-- [ ] Posts DAL 구현
-- [ ] Questions DAL 구현
-- [ ] News DAL 구현
-- [ ] Users DAL 구현
-- [ ] Mock 데이터 import 제거
-- [ ] 페이지별 DB 연동 테스트
+- [x] Data Access Layer 구조 설계
+- [x] Posts DAL 구현
+- [x] Questions DAL 구현 (answers.ts)
+- [x] News DAL 구현 (posts.ts 내 포함)
+- [x] Users DAL 구현
+- [x] Categories DAL 구현 (추가)
+- [x] Comments DAL 구현 (추가)
+- [ ] Mock 데이터 import 제거 (1/11+ 파일 완료)
+- [ ] 페이지별 DB 연동 테스트 (news/[id]/page.tsx 완료)
 
 **예상 시간**: 3-5일
 **의존성**: Prisma schema 완성 (완료), DB 연결 (완성)
