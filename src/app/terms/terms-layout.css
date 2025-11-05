@@ -1,0 +1,9 @@
+/* 약관 페이지에서 헤더와 푸터 숨김 */
+body:has(.terms-page-wrapper) header,
+body:has(.terms-page-wrapper) footer {
+  display: none;
+}
+
+body:has(.terms-page-wrapper) main {
+  padding-top: 0;
+}
