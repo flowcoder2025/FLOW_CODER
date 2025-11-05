@@ -525,10 +525,10 @@ export function errorResponse(message: string, status: number) {
 - [ ] `app/profile/[username]/page.tsx` - 부분 Server Component
 
 **Checklist**:
-- [ ] 각 페이지의 Client 필요성 분석
-- [ ] Server Component로 전환 가능한 페이지 리팩토링
-- [ ] Client Component는 하위 컴포넌트로 분리
-- [ ] 데이터 fetching을 Server Component에서 수행
+- [x] 각 페이지의 Client 필요성 분석
+- [x] Server Component로 전환 가능한 페이지 리팩토링 (news, help, profile 완료)
+- [ ] Client Component는 하위 컴포넌트로 분리 (community 페이지 보류)
+- [x] 데이터 fetching을 Server Component에서 수행 (profile 페이지)
 - [ ] 성능 측정 (Before/After)
 
 **예상 시간**: 2-3일
@@ -544,9 +544,14 @@ export function errorResponse(message: string, status: number) {
 - 모든 API Routes 에러 핸들링 통일
 
 **Checklist**:
-- [ ] `lib/api-response.ts` 유틸리티 생성
+- [x] `lib/api-response.ts` 유틸리티 생성 ✅ (2025-11-05 완료, 커밋: d499e22)
   - `successResponse(data, status)`
-  - `errorResponse(message, status)`
+  - `errorResponse(message, status, code?)`
+  - `validationErrorResponse(message, fields?)`
+  - `unauthorizedResponse(message?)` (401)
+  - `forbiddenResponse(message?)` (403)
+  - `notFoundResponse(message?)` (404)
+  - `serverErrorResponse(message?, error?)` (500)
 - [ ] `/api/posts/**` 에러 핸들링 적용
 - [ ] `/api/questions/**` 에러 핸들링 적용
 - [ ] `/api/admin/**` 에러 핸들링 적용
