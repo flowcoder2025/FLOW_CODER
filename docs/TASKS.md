@@ -1344,6 +1344,24 @@ export async function POST(request: NextRequest) {
   - Next.js 중첩 레이아웃으로 자동 권한 보호
 - Admin 시스템 통합 완료
 
+**⚠️ 2025-11-05 현황 업데이트**
+
+**실제 구현 완료된 Admin 페이지:**
+- ✅ `/admin` - Dashboard (통계 표시)
+- ✅ `/admin/users` - 사용자 관리 (역할 변경, Zanzibar 권한 부여)
+- ✅ `/admin/external-terms` - 약관 관리 (목록, 생성, 수정)
+
+**미구현 페이지 (향후 작업 필요):**
+- ❌ `/admin/content/posts` - 게시글 관리
+- ❌ `/admin/content/comments` - 댓글 관리
+
+**수정 사항:**
+- Layout 404 에러 수정: 미구현 페이지 링크 주석 처리
+- 약관 링크 수정: `/admin/terms` → `/admin/external-terms`
+- Select.Item 에러 수정: 사용자 관리 페이지 역할 필터 빈 문자열 문제 해결
+
+**Commit:** `25ccb7f - fix: Admin 페이지 404 에러 및 Select.Item 에러 수정`
+
 ---
 
 ### Week 12: 최종 배포
