@@ -47,8 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 return null;
               }
 
-              // 로컬 테스트용 하드코딩된 admin 계정
-              // 실제 프로덕션에서는 이 provider가 비활성화됨
+              // 1. 하드코딩된 admin 계정 체크
               if (
                 credentials.email === "admin@local.dev" &&
                 credentials.password === "admin123"
@@ -81,7 +80,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 };
               }
 
-              return null;
+              // 2. 일반 사용자 로그인 (DB 조회)
+              const user = await prisma.user.findUnique({
+                where: { email: credentials.email as string },
+              });
+
+              if (!user) {
+                return null;
+              }
+
+              // 로컬 개발 환경에서는 비밀번호 검증 생략
+              // (회원가입 시 비밀번호를 저장하지 않았으므로)
+              // 실제 프로덕션에서는 bcrypt 등으로 해싱된 비밀번호 검증 필요
+
+              return {
+                id: user.id,
+                email: user.email,
+                name: user.displayName || user.username,
+                image: user.image,
+              };
             },
           }),
         ]

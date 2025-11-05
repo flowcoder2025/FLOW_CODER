@@ -1,18 +1,70 @@
 "use client";
 
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Github } from "lucide-react";
 import Link from "next/link";
 
 export default function SignUpPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   const handleGitHubSignUp = async () => {
     await signIn("github", { callbackUrl: "/" });
   };
 
   const handleGoogleSignUp = async () => {
     await signIn("google", { callbackUrl: "/" });
+  };
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // 서버에 회원가입 요청
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, username, displayName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "회원가입 중 오류가 발생했습니다.");
+        return;
+      }
+
+      // 회원가입 성공 후 자동 로그인
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: "/",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("회원가입은 완료되었으나 로그인에 실패했습니다. 로그인 페이지에서 다시 시도해주세요.");
+      } else if (result?.url) {
+        window.location.href = result.url;
+      }
+    } catch (err) {
+      setError("회원가입 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -65,21 +117,109 @@ export default function SignUpPage() {
             </Button>
           </div>
 
-          {/* 이메일/비밀번호 회원가입 (향후 구현) */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                또는
-              </span>
-            </div>
-          </div>
+          {/* 이메일/비밀번호 회원가입 (로컬 개발 환경에서만) */}
+          {isDevelopment && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    또는 (로컬 개발용)
+                  </span>
+                </div>
+              </div>
 
-          <div className="text-center text-sm text-muted-foreground">
-            <p>이메일 회원가입은 준비 중입니다</p>
-          </div>
+              <form onSubmit={handleEmailSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">이메일</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="username">사용자명</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={isLoading}
+                    required
+                    minLength={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="displayName">표시 이름</Label>
+                  <Input
+                    id="displayName"
+                    type="text"
+                    placeholder="홍길동"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">비밀번호</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="최소 6자 이상"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                {error && (
+                  <div className="text-sm text-destructive text-center">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "처리 중..." : "이메일로 가입하기"}
+                </Button>
+              </form>
+            </>
+          )}
+
+          {!isDevelopment && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    또는
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center text-sm text-muted-foreground">
+                <p>이메일 회원가입은 준비 중입니다</p>
+              </div>
+            </>
+          )}
 
           {/* 로그인 링크 */}
           <div className="text-center text-sm">
