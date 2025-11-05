@@ -183,10 +183,50 @@ export async function getNewsPosts(limit?: number) {
 }
 
 /**
- * Q&A 게시글 목록 조회
+ * Q&A 게시글 목록 조회 (답변 정보 포함)
  */
 export async function getQuestionPosts(limit?: number) {
-  return await getPostsByType(PostType.QUESTION, limit);
+  return await prisma.post.findMany({
+    where: { postType: PostType.QUESTION },
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          image: true,
+          reputation: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          icon: true,
+          color: true,
+        },
+      },
+      answers: {
+        select: {
+          id: true,
+          isAccepted: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+          votes: true,
+          answers: true,
+        },
+      },
+    },
+    orderBy: [
+      { isPinned: 'desc' },
+      { createdAt: 'desc' },
+    ],
+    take: limit,
+  });
 }
 
 /**

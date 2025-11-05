@@ -1,23 +1,16 @@
-'use client';
-
-import { useState } from 'react';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { QuestionCard } from '@/components/QuestionCard';
-import {
-  getQuestions,
-  getAnswerCount,
-  hasAcceptedAnswer,
-} from '@/lib/mock-data';
+import { getQuestionPosts } from '@/lib/data-access';
 
 /**
- * Help me - Q&A 목록 페이지
+ * Help me - Q&A 목록 페이지 (Server Component)
  *
  * 기능:
  * - 질문 목록 표시
- * - 필터링: 전체 / 미답변 / 채택됨
+ * - 필터링: 전체 / 미답변 / 채택됨 (URL search params)
  * - 질문하기 버튼
  *
  * 라우트: /help
@@ -25,16 +18,22 @@ import {
 
 type FilterType = 'all' | 'unanswered' | 'accepted';
 
-export default function HelpPage() {
-  const [filter, setFilter] = useState<FilterType>('all');
+interface HelpPageProps {
+  searchParams: Promise<{
+    filter?: FilterType;
+  }>;
+}
 
-  // 모든 질문 가져오기
-  const allQuestions = getQuestions();
+export default async function HelpPage({ searchParams }: HelpPageProps) {
+  const { filter = 'all' } = await searchParams;
+
+  // 모든 질문 가져오기 (QUESTION 타입 게시글)
+  const allQuestions = await getQuestionPosts();
 
   // 필터링된 질문 목록
   const filteredQuestions = allQuestions.filter((question) => {
-    const answerCount = getAnswerCount(question.id);
-    const hasAccepted = hasAcceptedAnswer(question.id);
+    const answerCount = question._count.answers;
+    const hasAccepted = question.answers?.some((a) => a.isAccepted) || false;
 
     if (filter === 'unanswered') {
       return answerCount === 0;
@@ -43,6 +42,13 @@ export default function HelpPage() {
     }
     return true; // 'all'
   });
+
+  // 카운트 계산
+  const unansweredCount = allQuestions.filter((q) => q._count.answers === 0)
+    .length;
+  const acceptedCount = allQuestions.filter(
+    (q) => q.answers?.some((a) => a.isAccepted)
+  ).length;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -62,26 +68,41 @@ export default function HelpPage() {
         </Button>
       </div>
 
-      {/* 필터 탭 */}
-      <Tabs
-        value={filter}
-        onValueChange={(value) => setFilter(value as FilterType)}
-        className="mb-6"
-      >
-        <TabsList>
-          <TabsTrigger value="all">
+      {/* 필터 탭 (Link 기반) */}
+      <div className="mb-6">
+        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+          <Link
+            href="/help"
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+              filter === 'all' || !filter
+                ? 'bg-background text-foreground shadow-sm'
+                : 'hover:bg-background/50'
+            }`}
+          >
             전체 ({allQuestions.length})
-          </TabsTrigger>
-          <TabsTrigger value="unanswered">
-            미답변 (
-            {allQuestions.filter((q) => getAnswerCount(q.id) === 0).length})
-          </TabsTrigger>
-          <TabsTrigger value="accepted">
-            채택됨 (
-            {allQuestions.filter((q) => hasAcceptedAnswer(q.id)).length})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+          </Link>
+          <Link
+            href="/help?filter=unanswered"
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+              filter === 'unanswered'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'hover:bg-background/50'
+            }`}
+          >
+            미답변 ({unansweredCount})
+          </Link>
+          <Link
+            href="/help?filter=accepted"
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+              filter === 'accepted'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'hover:bg-background/50'
+            }`}
+          >
+            채택됨 ({acceptedCount})
+          </Link>
+        </div>
+      </div>
 
       {/* 질문 목록 */}
       <div className="space-y-4">
@@ -89,9 +110,27 @@ export default function HelpPage() {
           filteredQuestions.map((question) => (
             <QuestionCard
               key={question.id}
-              question={question}
-              answerCount={getAnswerCount(question.id)}
-              hasAccepted={hasAcceptedAnswer(question.id)}
+              question={{
+                ...question,
+                createdAt: question.createdAt.toISOString(),
+                updatedAt: question.updatedAt.toISOString(),
+                coverImageUrl: question.coverImageUrl || undefined,
+                author: {
+                  id: question.author.id,
+                  username: question.author.username || '',
+                  displayName: question.author.displayName || undefined,
+                  avatarUrl: question.author.image || undefined,
+                  reputation: question.author.reputation,
+                },
+                category: {
+                  ...question.category,
+                  icon: question.category.icon || undefined,
+                  color: question.category.color || undefined,
+                },
+                commentCount: question._count.comments,
+              }}
+              answerCount={question._count.answers}
+              hasAccepted={question.answers?.some((a) => a.isAccepted) || false}
             />
           ))
         ) : (
