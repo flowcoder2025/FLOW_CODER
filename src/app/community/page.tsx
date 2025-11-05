@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, PenSquare } from 'lucide-react';
+import { PenSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAllCategories } from '@/lib/data-access/categories';
+import { getRecentPosts } from '@/lib/data-access/posts';
 import { PostCard } from '@/components/PostCard';
 
 /**
@@ -28,13 +29,22 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
   // 카테고리 목록 조회 (DB)
   const categories = await getAllCategories();
 
-  // 최근 게시글 조회 (API 호출)
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?sort=recent&page=${currentPage}&limit=${postsPerPage}`, {
-    cache: 'no-store',
-  });
-  const data = await res.json();
-  const posts = data.posts || [];
-  const pagination = data.pagination || { total: 0, page: currentPage, limit: postsPerPage, totalPages: 1 };
+  // 최근 게시글 조회 (DAL 함수 직접 호출)
+  const allPosts = await getRecentPosts(100); // 최대 100개 조회
+
+  // 페이지네이션 계산
+  const totalPosts = allPosts.length;
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const posts = allPosts.slice(startIndex, endIndex);
+
+  const pagination = {
+    total: totalPosts,
+    page: currentPage,
+    limit: postsPerPage,
+    totalPages: totalPages,
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
@@ -102,13 +112,13 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
             </CardContent>
           </Card>
         ) : (
-          posts.map((post: any) => (
+          posts.map((post) => (
             <PostCard
               key={post.id}
               post={{
                 ...post,
-                createdAt: post.createdAt,
-                updatedAt: post.updatedAt,
+                createdAt: post.createdAt.toISOString(),
+                updatedAt: post.updatedAt.toISOString(),
                 coverImageUrl: post.coverImageUrl || undefined,
                 author: {
                   id: post.author.id,
@@ -123,8 +133,8 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
                   color: post.category.color || undefined,
                 },
                 commentCount: post._count?.comments || 0,
-                upvotes: post.upvotes || 0,
-                downvotes: post.downvotes || 0,
+                upvotes: 0,
+                downvotes: 0,
               }}
               showCategory={true}
             />
