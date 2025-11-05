@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -71,7 +71,7 @@ export default function AdminUsersPage() {
       });
 
       if (search) params.append('search', search);
-      if (roleFilter) params.append('role', roleFilter);
+      if (roleFilter && roleFilter !== 'all') params.append('role', roleFilter);
 
       const response = await fetch(`/api/admin/users?${params.toString()}`);
 
@@ -154,7 +154,7 @@ export default function AdminUsersPage() {
             <SelectValue placeholder="역할 필터" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">전체</SelectItem>
+            <SelectItem value="all">전체</SelectItem>
             <SelectItem value="USER">USER</SelectItem>
             <SelectItem value="MODERATOR">MODERATOR</SelectItem>
             <SelectItem value="ADMIN">ADMIN</SelectItem>

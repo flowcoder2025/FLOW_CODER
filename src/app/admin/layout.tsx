@@ -66,32 +66,34 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               </Button>
             </Link>
 
-            <Link href="/admin/terms">
+            <Link href="/admin/external-terms">
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <FileText className="h-4 w-4" />
                 약관 관리
               </Button>
             </Link>
 
+            {/* TODO: 콘텐츠 관리 페이지 구현 후 활성화
             <Separator className="my-2" />
 
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
               콘텐츠 관리
             </div>
 
-            <Link href="/admin/posts">
+            <Link href="/admin/content/posts">
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <MessageSquare className="h-4 w-4" />
                 게시글 관리
               </Button>
             </Link>
 
-            <Link href="/admin/comments">
+            <Link href="/admin/content/comments">
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <MessageSquare className="h-4 w-4" />
                 댓글 관리
               </Button>
             </Link>
+            */}
           </nav>
         </aside>
 
