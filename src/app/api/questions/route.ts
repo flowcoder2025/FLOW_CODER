@@ -1,7 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { grantPostOwnership } from '@/lib/permissions';
+import {
+  successResponse,
+  unauthorizedResponse,
+  validationErrorResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 /**
  * GET /api/questions
@@ -96,7 +102,7 @@ export async function GET(request: NextRequest) {
       prisma.post.count({ where }),
     ]);
 
-    return NextResponse.json({
+    return successResponse({
       questions,
       pagination: {
         total,
@@ -107,10 +113,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('GET /api/questions error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch questions' },
-      { status: 500 }
-    );
+    return serverErrorResponse('질문 목록 조회 중 오류가 발생했습니다', error);
   }
 }
 
@@ -129,10 +132,7 @@ export async function POST(request: NextRequest) {
     // 인증 확인
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized: 로그인이 필요합니다.' },
-        { status: 401 }
-      );
+      return unauthorizedResponse();
     }
 
     // 요청 본문 파싱
@@ -141,25 +141,16 @@ export async function POST(request: NextRequest) {
 
     // 필수 필드 검증
     if (!title || !content || !categoryId || !tags || tags.length === 0) {
-      return NextResponse.json(
-        { error: 'Bad Request: title, content, categoryId, tags는 필수입니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('title, content, categoryId, tags는 필수입니다');
     }
 
     // 질문 형식 검증
     if (title.length < 15) {
-      return NextResponse.json(
-        { error: 'Bad Request: 제목은 최소 15자 이상이어야 합니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('제목은 최소 15자 이상이어야 합니다');
     }
 
     if (content.length < 50) {
-      return NextResponse.json(
-        { error: 'Bad Request: 내용은 최소 50자 이상이어야 합니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('내용은 최소 50자 이상이어야 합니다');
     }
 
     // 카테고리 존재 확인
@@ -167,10 +158,7 @@ export async function POST(request: NextRequest) {
       where: { id: categoryId },
     });
     if (!categoryExists) {
-      return NextResponse.json(
-        { error: 'Bad Request: 유효하지 않은 categoryId입니다.' },
-        { status: 400 }
-      );
+      return validationErrorResponse('유효하지 않은 categoryId입니다');
     }
 
     // 질문 생성 (postType: QUESTION 고정)
@@ -218,12 +206,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ question }, { status: 201 });
+    return successResponse({ question }, 201);
   } catch (error) {
     console.error('POST /api/questions error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create question' },
-      { status: 500 }
-    );
+    return serverErrorResponse('질문 생성 중 오류가 발생했습니다', error);
   }
 }
