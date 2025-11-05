@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/admin-middleware';
 import { prisma } from '@/lib/prisma';
 import {
@@ -6,6 +6,14 @@ import {
   grantSystemModerator,
   revoke,
 } from '@/lib/permissions';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  notFoundResponse,
+  validationErrorResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -38,9 +46,8 @@ export async function POST(
 
     // 역할 검증
     if (!role || !['USER', 'MODERATOR', 'ADMIN'].includes(role)) {
-      return NextResponse.json(
-        { error: 'Invalid role. Must be USER, MODERATOR, or ADMIN' },
-        { status: 400 }
+      return validationErrorResponse(
+        'Invalid role. Must be USER, MODERATOR, or ADMIN'
       );
     }
 
@@ -56,15 +63,12 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return notFoundResponse('사용자를 찾을 수 없습니다');
     }
 
     // 이미 동일한 역할이면 스킵
     if (user.role === role) {
-      return NextResponse.json(
-        { error: 'User already has this role' },
-        { status: 400 }
-      );
+      return validationErrorResponse('User already has this role');
     }
 
     // 1. User 모델의 role 필드 업데이트
@@ -98,7 +102,7 @@ export async function POST(
       await revoke('system', 'global', 'moderator', 'user', userId);
     }
 
-    return NextResponse.json({
+    return successResponse({
       user: updatedUser,
       message: `Successfully changed ${user.username}'s role to ${role}`,
     });
@@ -107,19 +111,13 @@ export async function POST(
 
     // 권한 에러 처리
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    if (
-      errorMessage.includes('Unauthorized') ||
-      errorMessage.includes('Forbidden')
-    ) {
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: errorMessage.includes('Unauthorized') ? 401 : 403 }
-      );
+    if (errorMessage.includes('Unauthorized')) {
+      return unauthorizedResponse(errorMessage);
+    }
+    if (errorMessage.includes('Forbidden')) {
+      return forbiddenResponse(errorMessage);
     }
 
-    return NextResponse.json(
-      { error: 'Failed to change user role' },
-      { status: 500 }
-    );
+    return serverErrorResponse('사용자 역할 변경 중 오류가 발생했습니다', error);
   }
 }

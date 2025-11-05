@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { requireModerator } from '@/lib/admin-middleware';
 import { prisma } from '@/lib/prisma';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 /**
  * GET /api/admin/stats
@@ -43,7 +49,7 @@ export async function GET(request: NextRequest) {
         }),
       ]);
 
-    return NextResponse.json({
+    return successResponse({
       stats: {
         totalUsers,
         totalPosts,
@@ -55,19 +61,13 @@ export async function GET(request: NextRequest) {
     console.error('GET /api/admin/stats error:', error);
 
     // 권한 에러 처리
-    if (
-      error.message?.includes('Unauthorized') ||
-      error.message?.includes('Forbidden')
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message.includes('Unauthorized') ? 401 : 403 }
-      );
+    if (error.message?.includes('Unauthorized')) {
+      return unauthorizedResponse(error.message);
+    }
+    if (error.message?.includes('Forbidden')) {
+      return forbiddenResponse(error.message);
     }
 
-    return NextResponse.json(
-      { error: 'Failed to fetch admin statistics' },
-      { status: 500 }
-    );
+    return serverErrorResponse('관리자 통계 조회 중 오류가 발생했습니다', error);
   }
 }

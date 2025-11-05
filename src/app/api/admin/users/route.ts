@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/admin-middleware';
 import { prisma } from '@/lib/prisma';
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 /**
  * GET /api/admin/users
@@ -74,7 +80,7 @@ export async function GET(request: NextRequest) {
       prisma.user.count({ where }),
     ]);
 
-    return NextResponse.json({
+    return successResponse({
       users,
       pagination: {
         total,
@@ -87,19 +93,13 @@ export async function GET(request: NextRequest) {
     console.error('GET /api/admin/users error:', error);
 
     // 권한 에러 처리
-    if (
-      error.message?.includes('Unauthorized') ||
-      error.message?.includes('Forbidden')
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message.includes('Unauthorized') ? 401 : 403 }
-      );
+    if (error.message?.includes('Unauthorized')) {
+      return unauthorizedResponse(error.message);
+    }
+    if (error.message?.includes('Forbidden')) {
+      return forbiddenResponse(error.message);
     }
 
-    return NextResponse.json(
-      { error: 'Failed to fetch users' },
-      { status: 500 }
-    );
+    return serverErrorResponse('사용자 목록 조회 중 오류가 발생했습니다', error);
   }
 }
