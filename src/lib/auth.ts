@@ -10,15 +10,24 @@ import { grantSystemAdmin } from "./permissions";
  * 필수 환경변수 검증 함수
  * @param key 환경변수 키
  * @returns 환경변수 값
- * @throws 환경변수가 없을 경우 명확한 에러 메시지
+ * @throws 런타임에 환경변수가 없을 경우 명확한 에러 메시지
+ * @note 빌드 시점에는 더미 값 사용 (실제 연결은 런타임에만 발생)
  */
 function getRequiredEnv(key: string): string {
   const value = process.env[key];
+
+  // 빌드 시점에는 더미 값 사용
   if (!value) {
-    throw new Error(
-      `Missing required environment variable: ${key}. Please check your .env file.`
-    );
+    // 프로덕션 런타임에서만 에러 발생 (빌드 시점 제외)
+    if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+      throw new Error(
+        `Missing required environment variable: ${key}. Please check your .env file.`
+      );
+    }
+    // 빌드 시점이나 서버 시작 전에는 더미 값 반환
+    return 'dummy-value-for-build';
   }
+
   return value;
 }
 
