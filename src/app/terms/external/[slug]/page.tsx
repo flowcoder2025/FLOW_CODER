@@ -30,6 +30,11 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export async function generateStaticParams() {
+  // 빌드 시점에 DATABASE_URL이 없으면 빈 배열 반환 (동적 렌더링으로 전환)
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('dummy')) {
+    return [];
+  }
+
   try {
     const terms = await prisma.externalTerms.findMany({
       where: { published: true },
