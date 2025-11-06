@@ -79,10 +79,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // 빌드 시점에 DATABASE_URL이 없으면 정적 페이지만 반환
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('dummy')) {
+    return staticPages;
+  }
+
   // DB에서 데이터 조회
-  const categories = await getAllCategories();
-  const allPosts = await getRecentPosts(1000); // 최근 1000개 게시글
-  const topUsers = await getTopUsersByReputation(100); // 상위 100명 사용자
+  let categories, allPosts, topUsers;
+  try {
+    categories = await getAllCategories();
+    allPosts = await getRecentPosts(1000); // 최근 1000개 게시글
+    topUsers = await getTopUsersByReputation(100); // 상위 100명 사용자
+  } catch (error) {
+    console.error('sitemap generation error:', error);
+    // DB 연결 실패 시 정적 페이지만 반환
+    return staticPages;
+  }
 
   // 커뮤니티 카테고리 페이지
   const categoryPages: MetadataRoute.Sitemap = categories
