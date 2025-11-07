@@ -174,7 +174,7 @@ export function CommunityPreview() {
                     </Card>
                   ) : (
                     <Card className={`h-full bg-gradient-to-br ${item.gradient} text-white border-0`}>
-                      <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+                      <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
                         <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
                         <p className="text-white/90 mb-6">{item.description}</p>
                         <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
