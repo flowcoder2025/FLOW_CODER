@@ -70,6 +70,7 @@ export function CommunityPreview() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -83,6 +84,7 @@ export function CommunityPreview() {
     if (!emblaApi) return;
     setCanScrollPrev(emblaApi.canScrollPrev());
     setCanScrollNext(emblaApi.canScrollNext());
+    setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
   useEffect(() => {
@@ -95,14 +97,11 @@ export function CommunityPreview() {
   return (
     <section id="community" className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
-        {/* Section Header - 디자인 일관성 유지 */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            활발한 개발자 커뮤니티
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            인기 포스트와 커뮤니티 소식을 확인하세요
-          </p>
+        {/* 좌상단 토픽 배지 */}
+        <div className="mb-6">
+          <Badge className="bg-purple-600 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-700">
+            🔥 오늘의 토픽
+          </Badge>
         </div>
 
         {/* Carousel */}
@@ -210,6 +209,11 @@ export function CommunityPreview() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           )}
+
+          {/* 페이지네이션 인디케이터 (우하단) */}
+          <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+            {selectedIndex + 1} / {featuredPosts.length}
+          </div>
         </div>
       </div>
     </section>
