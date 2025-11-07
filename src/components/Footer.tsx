@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Code, Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -8,10 +9,23 @@ export function Footer() {
         <div className="grid md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Code className="w-6 h-6" />
-              <span className="text-lg font-semibold">Vibe Coding</span>
-            </div>
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Image
+                src="/FlowCoder_White_-removebg-preview.png"
+                alt="FlowCoder"
+                width={120}
+                height={40}
+                className="h-10 w-auto dark:hidden"
+              />
+              <Image
+                src="/FlowCoder_Dark_-removebg-preview.png"
+                alt="FlowCoder"
+                width={120}
+                height={40}
+                className="h-10 w-auto hidden dark:block"
+              />
+              <span className="text-lg font-semibold">FlowCoder</span>
+            </Link>
             <p className="text-sm text-muted-foreground">
               개발자들을 위한 영감이 넘치는 공간. 함께 코딩하고, 배우고, 성장하는 커뮤니티.
             </p>
@@ -169,7 +183,7 @@ export function Footer() {
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 Vibe Coding. All rights reserved.
+            © 2025 FlowCoder. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <Link href="/terms/privacy" className="hover:text-primary transition-colors">

@@ -14,8 +14,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Code, Menu, X, LogOut, User, Settings } from "lucide-react";
+import { Menu, X, LogOut, User, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 
 interface Category {
   id: string;
@@ -30,6 +32,13 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const { data: session, status } = useSession();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // 클라이언트에서만 테마 이미지 렌더링
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 카테고리 목록 로드
   useEffect(() => {
@@ -49,8 +58,17 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Code className="w-8 h-8" />
-          <span className="text-xl font-semibold">Vibe Coding</span>
+          {mounted && (
+            <Image
+              src={resolvedTheme === 'dark' ? '/FlowCoder_Dark_-removebg-preview.png' : '/FlowCoder_White_-removebg-preview.png'}
+              alt="FlowCoder"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
+          )}
+          <span className="text-xl font-semibold">FlowCoder</span>
         </Link>
 
         {/* Desktop Navigation */}
