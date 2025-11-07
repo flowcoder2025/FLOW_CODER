@@ -67,9 +67,10 @@ const featuredPosts = [
 ];
 
 export function CommunityPreview() {
+  // 무한 루프를 위해 아이템 복제
+  const duplicatedPosts = [...featuredPosts, ...featuredPosts, ...featuredPosts];
+
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const scrollPrev = useCallback(() => {
@@ -82,8 +83,6 @@ export function CommunityPreview() {
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
@@ -108,7 +107,7 @@ export function CommunityPreview() {
         <div className="relative">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
-              {featuredPosts.map((item, index) => (
+              {duplicatedPosts.map((item, index) => (
                 <div key={index} className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0 pr-6">
                   {item.type === "post" ? (
                     <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative min-h-[400px]">
@@ -188,31 +187,27 @@ export function CommunityPreview() {
             </div>
           </div>
 
-          {/* Navigation Buttons */}
-          {canScrollPrev && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-background shadow-lg"
-              onClick={scrollPrev}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-          )}
-          {canScrollNext && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-background shadow-lg"
-              onClick={scrollNext}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          )}
+          {/* Navigation Buttons - 무한 루프이므로 항상 표시 */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-background shadow-lg"
+            onClick={scrollPrev}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-background shadow-lg"
+            onClick={scrollNext}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
 
           {/* 페이지네이션 인디케이터 (우하단) */}
           <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
-            {selectedIndex + 1} / {featuredPosts.length}
+            {(selectedIndex % featuredPosts.length) + 1} / {featuredPosts.length}
           </div>
         </div>
       </div>
