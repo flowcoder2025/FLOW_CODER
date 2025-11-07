@@ -1,35 +1,43 @@
+import { prisma } from '@/lib/prisma';
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Clock, TrendingUp } from "lucide-react";
 
-const newsItems = [
-  {
-    title: "Next.js 15 정식 출시: 새로운 기능과 개선사항",
-    excerpt: "성능 향상과 개발자 경험 개선을 중심으로 한 메이저 업데이트",
-    category: "Framework",
-    date: "2024-01-15",
-    trending: true,
-    thumbnail: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop"
-  },
-  {
-    title: "TypeScript 5.4 베타 버전 공개",
-    excerpt: "타입 추론 개선과 새로운 유틸리티 타입 추가",
-    category: "Language",
-    date: "2024-01-14",
-    trending: false,
-    thumbnail: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=400&fit=crop"
-  },
-  {
-    title: "React Server Components 실전 활용 가이드",
-    excerpt: "커뮤니티 멤버가 공유한 실무 적용 경험담",
-    category: "Tutorial",
-    date: "2024-01-13",
-    trending: true,
-    thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=400&fit=crop"
-  }
-];
+/**
+ * LatestNews Server Component
+ *
+ * DB에서 isPinned=true인 NEWS 타입 게시물을 조회하여 표시
+ */
+export async function LatestNews() {
+  // isPinned=true이고 NEWS 타입인 게시물 조회 (최신순, 최대 3개)
+  const posts = await prisma.post.findMany({
+    where: {
+      isPinned: true,
+      postType: 'NEWS',
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 3,
+    include: {
+      category: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
 
-export function LatestNews() {
+  // 뉴스 항목 변환
+  const newsItems = posts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    excerpt: post.content.substring(0, 100),
+    category: post.category.name,
+    date: post.createdAt.toLocaleDateString('ko-KR'),
+    trending: post.upvotes > 50, // 추천 50개 이상이면 trending
+    thumbnail: post.coverImageUrl || getDefaultNewsThumbnail(),
+  }));
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -85,4 +93,17 @@ export function LatestNews() {
       </div>
     </section>
   );
+}
+
+/**
+ * 기본 뉴스 썸네일 이미지 랜덤 선택
+ */
+function getDefaultNewsThumbnail(): string {
+  const defaults = [
+    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=400&fit=crop',
+  ];
+
+  return defaults[Math.floor(Math.random() * defaults.length)];
 }

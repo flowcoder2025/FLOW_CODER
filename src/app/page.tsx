@@ -1,13 +1,13 @@
-import { FeaturedProjects } from "@/components/FeaturedProjects";
-import { CommunityPreview } from "@/components/CommunityPreview";
+import { FeaturedProjectsServer } from "@/components/FeaturedProjectsServer";
+import { CommunityPreviewServer } from "@/components/CommunityPreviewServer";
 import { LatestNews } from "@/components/LatestNews";
 
 export default function HomePage() {
   return (
     <>
-      <CommunityPreview />
+      <CommunityPreviewServer />
       <LatestNews />
-      <FeaturedProjects />
+      <FeaturedProjectsServer />
     </>
   );
 }

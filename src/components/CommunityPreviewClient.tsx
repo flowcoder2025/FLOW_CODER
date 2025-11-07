@@ -8,67 +8,41 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
-const featuredPosts = [
-  {
-    type: "post" as const,
-    author: {
-      name: "김개발",
-      avatar: "/api/placeholder/32/32",
-      role: "Senior Frontend Developer"
-    },
-    title: "React 19의 새로운 기능들에 대한 리뷰",
-    excerpt: "새로 출시된 React 19를 실제 프로젝트에 적용해보면서 느낀 점들을 공유합니다...",
-    tags: ["React", "Frontend", "Review"],
-    likes: 42,
-    comments: 18,
-    timeAgo: "2시간 전",
-    trending: true,
-    thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop"
-  },
-  {
-    type: "post" as const,
-    author: {
-      name: "박풀스택",
-      avatar: "/api/placeholder/32/32",
-      role: "Fullstack Engineer"
-    },
-    title: "AI를 활용한 코드 리뷰 자동화 경험담",
-    excerpt: "OpenAI API를 활용해서 팀의 코드 리뷰 프로세스를 개선한 과정을 소개합니다...",
-    tags: ["AI", "DevOps", "Productivity"],
-    likes: 67,
-    comments: 25,
-    timeAgo: "4시간 전",
-    trending: false,
-    thumbnail: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop"
-  },
-  {
-    type: "post" as const,
-    author: {
-      name: "이모바일",
-      avatar: "/api/placeholder/32/32",
-      role: "Mobile Developer"
-    },
-    title: "Flutter vs React Native 2024년 비교분석",
-    excerpt: "두 프레임워크의 최신 버전을 실제 프로젝트에서 비교 테스트한 결과입니다...",
-    tags: ["Flutter", "React Native", "Mobile"],
-    likes: 38,
-    comments: 12,
-    timeAgo: "6시간 전",
-    trending: false,
-    thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=400&fit=crop"
-  },
-  {
-    type: "ad" as const,
-    title: "FlowCoder와 함께 성장하세요",
-    description: "전 세계 10,000명 이상의 개발자들이 함께하는 커뮤니티",
-    action: "지금 참여하기",
-    gradient: "from-blue-500 to-purple-600"
-  }
-];
+type PostItem = {
+  type: 'post';
+  id: string;
+  author: {
+    name: string;
+    avatar: string;
+    role: string;
+  };
+  title: string;
+  excerpt: string;
+  tags: string[];
+  likes: number;
+  comments: number;
+  timeAgo: string;
+  trending: boolean;
+  thumbnail: string;
+};
 
-export function CommunityPreview() {
+type AdItem = {
+  type: 'ad';
+  title: string;
+  description: string;
+  action: string;
+  gradient: string;
+};
+
+type CommunityItem = PostItem | AdItem;
+
+interface CommunityPreviewClientProps {
+  items: CommunityItem[];
+}
+
+export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
   // 무한 루프를 위해 아이템 복제
-  const duplicatedPosts = [...featuredPosts, ...featuredPosts, ...featuredPosts];
+  const duplicatedPosts = [...items, ...items, ...items];
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -207,7 +181,7 @@ export function CommunityPreview() {
 
           {/* 페이지네이션 인디케이터 (우하단) */}
           <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
-            {(selectedIndex % featuredPosts.length) + 1} / {featuredPosts.length}
+            {(selectedIndex % items.length) + 1} / {items.length}
           </div>
         </div>
       </div>

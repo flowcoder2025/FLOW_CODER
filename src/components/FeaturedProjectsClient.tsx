@@ -6,35 +6,22 @@ import { Button } from "./ui/button";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { Github, ExternalLink, Star, GitFork } from "lucide-react";
 
-const projects = [
-  {
-    title: "E-Commerce Platform",
-    description: "현대적인 온라인 쇼핑몰 솔루션. React, Node.js, PostgreSQL을 사용하여 구축된 확장 가능한 플랫폼입니다.",
-    image: "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXZlbG9wZXIlMjBjb21wdXRlciUyMHNldHVwfGVufDF8fHx8MTc1OTExODI5NXww&ixlib=rb-4.1.0&q=80&w=1080",
-    techs: ["React", "Node.js", "PostgreSQL", "Stripe"],
-    stars: 234,
-    forks: 45,
-    featured: true
-  },
-  {
-    title: "AI Chat Bot",
-    description: "OpenAI GPT를 활용한 지능형 챗봇. 자연어 처리와 컨텍스트 이해 기능을 제공합니다.",
-    image: "https://images.unsplash.com/photo-1582005450386-52b25f82d9bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2RpbmclMjB0ZWFtJTIwY29sbGFib3JhdGlvbnxlbnwxfHx8fDE3NTkxMTgyOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    techs: ["Python", "OpenAI", "FastAPI", "Docker"],
-    stars: 189,
-    forks: 32
-  },
-  {
-    title: "Mobile Finance App",
-    description: "React Native로 개발된 개인 재정 관리 앱. 실시간 거래 추적과 예산 관리 기능을 제공합니다.",
-    image: "https://images.unsplash.com/photo-1628017974725-18928e8e8211?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB0ZWNoJTIwb2ZmaWNlfGVufDF8fHx8MTc1OTA4NzUwNHww&ixlib=rb-4.1.0&q=80&w=1080",
-    techs: ["React Native", "Firebase", "Expo", "TypeScript"],
-    stars: 156,
-    forks: 28
-  }
-];
+type Project = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  techs: string[];
+  stars: number;
+  forks: number;
+  featured?: boolean;
+};
 
-export function FeaturedProjects() {
+interface FeaturedProjectsClientProps {
+  projects: Project[];
+}
+
+export function FeaturedProjectsClient({ projects }: FeaturedProjectsClientProps) {
   return (
     <section id="projects" className="py-16">
       <div className="container mx-auto px-4">

@@ -80,9 +80,9 @@ export default function AdminUsersPage() {
       }
 
       const data = await response.json();
-      setUsers(data.users);
-      setTotal(data.pagination.total);
-      setTotalPages(data.pagination.totalPages);
+      setUsers(data.data.users || []);
+      setTotal(data.data.pagination?.total || 0);
+      setTotalPages(data.data.pagination?.totalPages || 1);
     } catch (error) {
       console.error('Fetch users error:', error);
     } finally {
