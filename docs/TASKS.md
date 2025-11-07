@@ -1544,13 +1544,16 @@ npm install @sentry/nextjs
 
 ---
 
-**Task 12.6.2: 댓글 관리**
-- [ ] `app/admin/content/comments/page.tsx`
+**Task 12.6.2: 댓글 관리** ✅
+- [x] `app/admin/content/comments/page.tsx`
   - 모든 댓글 목록
   - 댓글이 속한 게시글 정보 표시
   - 삭제/복구 버튼
   - 신고된 댓글 처리
-- [ ] `app/api/admin/comments/[id]/route.ts` (DELETE, PATCH)
+- [x] `app/api/admin/comments/route.ts` (GET)
+  - 모든 댓글 조회 (페이지네이션, 검색, includeDeleted)
+  - `requireModerator()` 권한 체크
+- [x] `app/api/admin/comments/[id]/route.ts` (DELETE, PATCH)
   - 댓글 삭제/복구
   - `requireModerator()` 권한 체크
 
@@ -1562,6 +1565,21 @@ npm install @sentry/nextjs
 **산출물:**
 - 댓글 관리 페이지
 - 댓글 관리 API Routes
+
+**완료 내역:**
+- ✅ 관리자 댓글 API 구현:
+  - GET /api/admin/comments: 전체 댓글 조회 (페이지네이션, 검색, includeDeleted)
+  - DELETE /api/admin/comments/[id]: 소프트 삭제 (deletedAt 설정)
+  - PATCH /api/admin/comments/[id]: restore 파라미터로 복구
+- ✅ 관리자 댓글 관리 UI 구현:
+  - 댓글 목록 테이블 (내용 미리보기, 작성자, 게시글 링크)
+  - 대댓글 표시 (parentId 정보 표시)
+  - 삭제된 댓글 토글 스위치
+  - 삭제된 댓글 시각적 표시 (빨간 배경, "삭제됨" 배지)
+  - 삭제/복구 버튼
+  - 게시글 바로가기 링크 (ExternalLink 아이콘)
+- ✅ 관리자 레이아웃 메뉴 추가 (댓글 관리)
+- ✅ 권한 레벨: requireModerator (모더레이터 이상)
 
 ---
 
