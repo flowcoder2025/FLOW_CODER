@@ -19,7 +19,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Pin, PinOff, Edit, Trash2, Search, Eye } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Pin, PinOff, Edit, Trash2, Search, Eye, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -30,6 +32,7 @@ type Post = {
   isPinned: boolean;
   viewCount: number;
   upvotes: number;
+  deletedAt: string | null;
   createdAt: string;
   author: {
     username: string | null;
@@ -41,6 +44,7 @@ type Post = {
   };
   _count: {
     comments: number;
+    answers: number;
   };
 };
 
@@ -66,6 +70,7 @@ export default function AdminPostsPage() {
   const [postTypeFilter, setPostTypeFilter] = useState<string>('all');
   const [pinnedFilter, setPinnedFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [includeDeleted, setIncludeDeleted] = useState(false);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -90,6 +95,10 @@ export default function AdminPostsPage() {
         params.append('search', searchQuery.trim());
       }
 
+      if (includeDeleted) {
+        params.append('includeDeleted', 'true');
+      }
+
       const response = await fetch(`/api/admin/posts?${params}`);
       if (!response.ok) throw new Error('Failed to fetch posts');
 
@@ -106,7 +115,7 @@ export default function AdminPostsPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [page, postTypeFilter, pinnedFilter]);
+  }, [page, postTypeFilter, pinnedFilter, includeDeleted]);
 
   const handleTogglePin = async (postId: string, currentPinned: boolean) => {
     try {
@@ -127,7 +136,7 @@ export default function AdminPostsPage() {
   };
 
   const handleDelete = async (postId: string, title: string) => {
-    if (!confirm(`"${title}" 게시물을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+    if (!confirm(`"${title}" 게시물을 삭제하시겠습니까?`)) {
       return;
     }
 
@@ -143,6 +152,28 @@ export default function AdminPostsPage() {
     } catch (error) {
       console.error('Failed to delete post:', error);
       alert('게시물 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleRestore = async (postId: string, title: string) => {
+    if (!confirm(`"${title}" 게시물을 복구하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/posts/${postId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restore: true }),
+      });
+
+      if (!response.ok) throw new Error('Failed to restore post');
+
+      alert('게시물이 복구되었습니다.');
+      fetchPosts();
+    } catch (error) {
+      console.error('Failed to restore post:', error);
+      alert('게시물 복구에 실패했습니다.');
     }
   };
 
@@ -168,48 +199,60 @@ export default function AdminPostsPage() {
       </div>
 
       {/* 필터 및 검색 */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="제목 또는 내용 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setPage(1);
-                  fetchPosts();
-                }
-              }}
-              className="pl-10"
-            />
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="제목 또는 내용 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setPage(1);
+                    fetchPosts();
+                  }
+                }}
+                className="pl-10"
+              />
+            </div>
           </div>
+
+          <Select value={postTypeFilter} onValueChange={setPostTypeFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="게시물 타입" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체 타입</SelectItem>
+              <SelectItem value="DISCUSSION">토론</SelectItem>
+              <SelectItem value="QUESTION">질문</SelectItem>
+              <SelectItem value="SHOWCASE">쇼케이스</SelectItem>
+              <SelectItem value="NEWS">뉴스</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={pinnedFilter} onValueChange={setPinnedFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="고정 상태" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체</SelectItem>
+              <SelectItem value="pinned">고정됨</SelectItem>
+              <SelectItem value="unpinned">고정 안됨</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <Select value={postTypeFilter} onValueChange={setPostTypeFilter}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="게시물 타입" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">전체 타입</SelectItem>
-            <SelectItem value="DISCUSSION">토론</SelectItem>
-            <SelectItem value="QUESTION">질문</SelectItem>
-            <SelectItem value="SHOWCASE">쇼케이스</SelectItem>
-            <SelectItem value="NEWS">뉴스</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={pinnedFilter} onValueChange={setPinnedFilter}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="고정 상태" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">전체</SelectItem>
-            <SelectItem value="pinned">고정됨</SelectItem>
-            <SelectItem value="unpinned">고정 안됨</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* 삭제된 게시글 표시 토글 */}
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="include-deleted"
+            checked={includeDeleted}
+            onCheckedChange={setIncludeDeleted}
+          />
+          <Label htmlFor="include-deleted">삭제된 게시글 포함</Label>
+        </div>
       </div>
 
       {/* 게시물 목록 */}
@@ -243,13 +286,14 @@ export default function AdminPostsPage() {
               </TableRow>
             ) : (
               posts.map((post) => (
-                <TableRow key={post.id}>
+                <TableRow key={post.id} className={post.deletedAt ? 'bg-red-50' : ''}>
                   <TableCell>
                     <Button
                       variant={post.isPinned ? 'default' : 'outline'}
                       size="icon"
                       onClick={() => handleTogglePin(post.id, post.isPinned)}
                       title={post.isPinned ? '고정 해제' : '홈에 고정'}
+                      disabled={!!post.deletedAt}
                     >
                       {post.isPinned ? (
                         <Pin className="h-4 w-4" />
@@ -259,13 +303,20 @@ export default function AdminPostsPage() {
                     </Button>
                   </TableCell>
                   <TableCell className="font-medium max-w-md truncate">
-                    <Link
-                      href={`/community/posts/${post.id}`}
-                      className="hover:underline"
-                      target="_blank"
-                    >
-                      {post.title}
-                    </Link>
+                    <div>
+                      <Link
+                        href={`/community/posts/${post.id}`}
+                        className="hover:underline"
+                        target="_blank"
+                      >
+                        {post.title}
+                      </Link>
+                      {post.deletedAt && (
+                        <Badge variant="destructive" className="ml-2">
+                          삭제됨
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{getPostTypeBadge(post.postType)}</TableCell>
                   <TableCell>
@@ -284,26 +335,41 @@ export default function AdminPostsPage() {
                     {post.upvotes}
                   </TableCell>
                   <TableCell className="text-center">
-                    {post._count.comments}
+                    {post.postType === 'QUESTION'
+                      ? post._count.answers
+                      : post._count.comments}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => router.push(`/community/posts/${post.id}`)}
-                        title="보기"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(post.id, post.title)}
-                        title="삭제"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      {!post.deletedAt ? (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/community/posts/${post.id}`)}
+                            title="보기"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(post.id, post.title)}
+                            title="삭제"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRestore(post.id, post.title)}
+                          title="복구"
+                        >
+                          <RotateCcw className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

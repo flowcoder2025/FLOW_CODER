@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/admin-middleware';
+import { requireModerator } from '@/lib/admin-middleware';
 import {
   successResponse,
   serverErrorResponse,
@@ -10,7 +10,7 @@ import { Prisma } from '@/generated/prisma';
 
 /**
  * GET /api/admin/posts
- * 관리자 전용 게시글 목록 조회
+ * 모더레이터 이상 전용 게시글 목록 조회
  *
  * Query Parameters:
  * - postType: 게시글 타입 필터 (optional)
@@ -20,11 +20,12 @@ import { Prisma } from '@/generated/prisma';
  * - page: 페이지 번호 (default: 1)
  * - limit: 페이지당 항목 수 (default: 20)
  * - search: 제목/내용 검색 (optional)
+ * - includeDeleted: 삭제된 게시글 포함 여부 (true/false, default: false)
  */
 export async function GET(request: NextRequest) {
   try {
-    // 관리자 권한 확인
-    await requireAdmin();
+    // 모더레이터 권한 확인
+    await requireModerator();
 
     const { searchParams } = new URL(request.url);
     const postType = searchParams.get('postType');
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search');
+    const includeDeleted = searchParams.get('includeDeleted') === 'true';
     const skip = (page - 1) * limit;
 
     // 필터 조건 구성
@@ -56,6 +58,11 @@ export async function GET(request: NextRequest) {
         { title: { contains: search, mode: 'insensitive' } },
         { content: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    // 삭제된 게시글 필터링 (기본: 삭제되지 않은 것만)
+    if (!includeDeleted) {
+      where.deletedAt = null;
     }
 
     // 정렬 조건 구성

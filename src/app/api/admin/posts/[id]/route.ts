@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/admin-middleware';
+import { requireModerator } from '@/lib/admin-middleware';
 import {
   successResponse,
   notFoundResponse,
@@ -14,7 +14,7 @@ type RouteContext = {
 
 /**
  * PATCH /api/admin/posts/[id]
- * 관리자 전용 게시글 수정
+ * 모더레이터 이상 전용 게시글 수정 및 복구
  *
  * Body:
  * - isPinned: boolean (optional) - 홈 화면 고정 여부
@@ -24,14 +24,15 @@ type RouteContext = {
  * - coverImageUrl: string (optional)
  * - postType: PostType (optional)
  * - categoryId: string (optional)
+ * - restore: boolean (optional) - 삭제된 게시글 복구
  */
 export async function PATCH(
   request: NextRequest,
   context: RouteContext
 ) {
   try {
-    // 관리자 권한 확인
-    await requireAdmin();
+    // 모더레이터 권한 확인
+    await requireModerator();
 
     const { id } = await context.params;
 
@@ -54,6 +55,7 @@ export async function PATCH(
       coverImageUrl,
       postType,
       categoryId,
+      restore,
     } = body;
 
     // 수정할 필드만 포함
@@ -65,6 +67,11 @@ export async function PATCH(
     if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
     if (postType !== undefined) updateData.postType = postType;
     if (categoryId !== undefined) updateData.categoryId = categoryId;
+
+    // 복구 요청 처리
+    if (restore === true) {
+      updateData.deletedAt = null;
+    }
 
     // 입력 검증
     if (title !== undefined && title.length > 200) {
@@ -145,44 +152,42 @@ export async function PATCH(
 
 /**
  * DELETE /api/admin/posts/[id]
- * 관리자 전용 게시글 삭제
+ * 모더레이터 이상 전용 게시글 소프트 삭제
+ * (실제 삭제가 아닌 deletedAt 타임스탬프 설정)
  */
 export async function DELETE(
   request: NextRequest,
   context: RouteContext
 ) {
   try {
-    // 관리자 권한 확인
-    await requireAdmin();
+    // 모더레이터 권한 확인
+    await requireModerator();
 
     const { id } = await context.params;
 
-    // 게시글 정보 조회 (카테고리 postCount 감소용)
+    // 게시글 존재 확인
     const post = await prisma.post.findUnique({
       where: { id },
-      select: { categoryId: true },
     });
 
     if (!post) {
       return notFoundResponse('게시글을 찾을 수 없습니다');
     }
 
-    // 게시글 삭제 (Cascade로 연관 데이터 자동 삭제)
-    await prisma.$transaction([
-      prisma.post.delete({
-        where: { id },
-      }),
-      prisma.category.update({
-        where: { id: post.categoryId },
-        data: {
-          postCount: {
-            decrement: 1,
-          },
-        },
-      }),
-    ]);
+    // 이미 삭제된 게시글인지 확인
+    if (post.deletedAt) {
+      return validationErrorResponse('이미 삭제된 게시글입니다');
+    }
 
-    return successResponse({ success: true });
+    // 소프트 삭제 (deletedAt 설정)
+    await prisma.post.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return successResponse({ success: true, message: '게시글이 삭제되었습니다' });
   } catch (error: any) {
     console.error(`DELETE /api/admin/posts/${(await context.params).id} error:`, error);
 

@@ -122,6 +122,7 @@ model Post {
   isLocked      Boolean  @default(false)
   tags          String[]
   coverImageUrl String?
+  deletedAt     DateTime? // Soft delete
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -136,6 +137,7 @@ model Post {
   @@index([authorId])
   @@index([createdAt(sort: Desc)])
   @@index([postType])
+  @@index([deletedAt])
 }
 
 // 댓글 (스레드 형식 지원)
@@ -147,6 +149,7 @@ model Comment {
   parentId   String?
   upvotes    Int      @default(0)
   downvotes  Int      @default(0)
+  deletedAt  DateTime? // Soft delete
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -159,6 +162,7 @@ model Comment {
   @@index([postId])
   @@index([authorId])
   @@index([parentId])
+  @@index([deletedAt])
 }
 
 // 답변 (Q&A 전용)
