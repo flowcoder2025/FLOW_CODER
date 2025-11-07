@@ -1506,15 +1506,15 @@ npm install @sentry/nextjs
 
 #### Task 12.6: 콘텐츠 모더레이션 (P1)
 
-**Task 12.6.1: 게시글 관리**
-- [ ] `app/admin/content/posts/page.tsx`
+**Task 12.6.1: 게시글 관리** ✅
+- [x] `app/admin/content/posts/page.tsx`
   - 모든 게시글 목록 (카테고리 필터, 검색)
   - 삭제/복구 버튼
   - 신고된 게시글 강조 표시
-- [ ] `app/api/admin/posts/route.ts` (GET)
+- [x] `app/api/admin/posts/route.ts` (GET)
   - 모든 게시글 조회 (페이지네이션)
   - `requireModerator()` 권한 체크
-- [ ] `app/api/admin/posts/[id]/route.ts` (DELETE, PATCH)
+- [x] `app/api/admin/posts/[id]/route.ts` (DELETE, PATCH)
   - 게시글 삭제/복구 (soft delete)
   - `requireModerator()` 권한 체크
 
@@ -1527,6 +1527,20 @@ npm install @sentry/nextjs
 **산출물:**
 - 게시글 관리 페이지
 - 게시글 관리 API Routes
+
+**완료 내역:**
+- ✅ Prisma 스키마 소프트 삭제 필드 추가 (Post.deletedAt, Comment.deletedAt)
+- ✅ 마이그레이션 생성 및 Supabase 수동 적용
+- ✅ 관리자 API 구현:
+  - GET /api/admin/posts: includeDeleted 파라미터 추가
+  - DELETE /api/admin/posts/[id]: 소프트 삭제 (deletedAt 설정)
+  - PATCH /api/admin/posts/[id]: restore 파라미터로 복구 (deletedAt null)
+- ✅ 관리자 게시글 관리 UI 개선:
+  - 삭제된 게시글 토글 스위치
+  - 삭제된 게시글 시각적 표시 (빨간 배경, 배지)
+  - 복구 버튼 추가
+  - 삭제된 게시글은 고정 버튼 비활성화
+- ✅ 권한 레벨 변경: requireAdmin → requireModerator (모더레이터 이상 권한)
 
 ---
 
