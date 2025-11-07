@@ -99,7 +99,7 @@ export function CommunityPreview() {
       <div className="container mx-auto px-4">
         {/* 좌상단 토픽 배지 */}
         <div className="mb-6">
-          <Badge className="bg-purple-600 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-700">
+          <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 text-base font-bold hover:from-orange-600 hover:to-red-600 border-0 shadow-lg">
             🔥 오늘의 토픽
           </Badge>
         </div>
