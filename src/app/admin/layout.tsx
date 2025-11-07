@@ -11,6 +11,7 @@ import {
   FileText,
   MessageSquare,
   Shield,
+  Activity,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -83,6 +84,19 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <MessageSquare className="h-4 w-4" />
                 게시글 관리
+              </Button>
+            </Link>
+
+            <Separator className="my-2" />
+
+            <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+              시스템
+            </div>
+
+            <Link href="/admin/monitoring">
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <Activity className="h-4 w-4" />
+                성능 모니터링
               </Button>
             </Link>
           </nav>

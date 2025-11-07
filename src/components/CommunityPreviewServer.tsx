@@ -59,7 +59,7 @@ export async function CommunityPreviewServer() {
   const adCard = {
     type: 'ad' as const,
     title: 'FlowCoder와 함께 성장하세요',
-    description: '전 세계 10,000명 이상의 개발자들이 함께하는 커뮤니티',
+    description: '비개발자들을 위한 커뮤니티',
     action: '지금 참여하기',
     gradient: 'from-blue-500 to-purple-600',
   };
