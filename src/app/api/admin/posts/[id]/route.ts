@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireModerator } from '@/lib/admin-middleware';
+import { triggerWebhooks } from '@/lib/webhooks';
 import {
   successResponse,
   notFoundResponse,
@@ -137,6 +138,17 @@ export async function PATCH(
       },
     });
 
+    // 웹훅 트리거 (비동기, 실패해도 메인 로직에 영향 없음)
+    triggerWebhooks('POST_UPDATED', {
+      postId: post.id,
+      title: post.title,
+      content: post.content,
+      authorId: post.authorId,
+      categoryId: post.categoryId,
+      isPinned: post.isPinned,
+      updatedFields: Object.keys(updateData),
+    }).catch((err) => console.error('Webhook trigger failed:', err));
+
     return successResponse({ post });
   } catch (error: any) {
     console.error(`PATCH /api/admin/posts/${(await context.params).id} error:`, error);
@@ -186,6 +198,14 @@ export async function DELETE(
         deletedAt: new Date(),
       },
     });
+
+    // 웹훅 트리거 (비동기, 실패해도 메인 로직에 영향 없음)
+    triggerWebhooks('POST_DELETED', {
+      postId: post.id,
+      title: post.title,
+      authorId: post.authorId,
+      categoryId: post.categoryId,
+    }).catch((err) => console.error('Webhook trigger failed:', err));
 
     return successResponse({ success: true, message: '게시글이 삭제되었습니다' });
   } catch (error: any) {

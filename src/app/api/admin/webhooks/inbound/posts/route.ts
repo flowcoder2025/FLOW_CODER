@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@/generated/prisma';
 import { grantPostOwnership } from '@/lib/permissions';
@@ -12,110 +11,11 @@ import {
 } from '@/lib/api-response';
 
 /**
- * GET /api/posts
- * 게시글 목록 조회
+ * POST /api/admin/webhooks/inbound/posts
+ * 인바운드 웹훅: 외부 시스템에서 게시글 생성
  *
- * Query Parameters:
- * - category: 카테고리 slug (optional)
- * - postType: 게시글 타입 (optional)
- * - sort: popular | recent | comments (default: popular)
- * - page: 페이지 번호 (default: 1)
- * - limit: 페이지당 항목 수 (default: 20)
- */
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const postType = searchParams.get('postType');
-    const sort = searchParams.get('sort') || 'popular';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const skip = (page - 1) * limit;
-
-    // 필터 조건 구성
-    const where: Prisma.PostWhereInput = {};
-    if (category) {
-      where.category = { slug: category };
-    }
-    if (postType) {
-      where.postType = postType as Prisma.PostWhereInput['postType'];
-    }
-
-    // 정렬 조건 구성
-    let orderBy: Prisma.PostOrderByWithRelationInput[];
-    switch (sort) {
-      case 'recent':
-        orderBy = [{ createdAt: 'desc' }];
-        break;
-      case 'comments':
-        orderBy = [
-          { comments: { _count: 'desc' } },
-          { createdAt: 'desc' },
-        ];
-        break;
-      case 'popular':
-      default:
-        orderBy = [
-          { upvotes: 'desc' },
-          { createdAt: 'desc' },
-        ];
-        break;
-    }
-
-    // 게시글 조회
-    const [posts, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: {
-          author: {
-            select: {
-              id: true,
-              username: true,
-              displayName: true,
-              image: true,
-            },
-          },
-          category: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              icon: true,
-              color: true,
-            },
-          },
-          _count: {
-            select: {
-              comments: true,
-              answers: true,
-            },
-          },
-        },
-      }),
-      prisma.post.count({ where }),
-    ]);
-
-    return successResponse({
-      posts,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    console.error('GET /api/posts error:', error);
-    return serverErrorResponse('게시글 목록 조회 중 오류가 발생했습니다', error);
-  }
-}
-
-/**
- * POST /api/posts
- * 새 게시글 생성 (인증 필요)
+ * Headers:
+ * - X-Admin-API-Key: 관리자 API 키 (환경변수 ADMIN_API_KEY와 일치해야 함)
  *
  * Body:
  * - title: string (필수)
@@ -124,18 +24,26 @@ export async function GET(request: NextRequest) {
  * - categoryId: string (필수)
  * - tags: string[]
  * - coverImageUrl: string (optional)
+ * - authorId: string (선택 - 없으면 시스템 계정 사용)
  */
 export async function POST(request: NextRequest) {
   try {
-    // 인증 확인
-    const session = await auth();
-    if (!session?.user?.id) {
-      return unauthorizedResponse();
+    // API Key 인증 확인
+    const apiKey = request.headers.get('X-Admin-API-Key');
+    const validApiKey = process.env.ADMIN_API_KEY;
+
+    if (!validApiKey) {
+      console.error('ADMIN_API_KEY not configured in environment variables');
+      return serverErrorResponse('서버 설정 오류: API 키가 구성되지 않았습니다');
+    }
+
+    if (!apiKey || apiKey !== validApiKey) {
+      return unauthorizedResponse('유효하지 않은 API 키입니다');
     }
 
     // 요청 본문 파싱
     const body = await request.json();
-    const { title, content, postType, categoryId, tags, coverImageUrl } = body;
+    const { title, content, postType, categoryId, tags, coverImageUrl, authorId } = body;
 
     // 필수 필드 검증
     if (!title || !content || !categoryId) {
@@ -172,6 +80,26 @@ export async function POST(request: NextRequest) {
       return validationErrorResponse('유효하지 않은 categoryId입니다.');
     }
 
+    // authorId 검증 (제공된 경우)
+    let finalAuthorId = authorId;
+    if (authorId) {
+      const authorExists = await prisma.user.findUnique({
+        where: { id: authorId },
+      });
+      if (!authorExists) {
+        return validationErrorResponse('유효하지 않은 authorId입니다.');
+      }
+    } else {
+      // authorId가 없으면 시스템 계정 또는 첫 번째 admin 사용
+      const systemUser = await prisma.user.findFirst({
+        where: { role: 'ADMIN' },
+      });
+      if (!systemUser) {
+        return serverErrorResponse('시스템 계정을 찾을 수 없습니다. authorId를 제공해주세요.');
+      }
+      finalAuthorId = systemUser.id;
+    }
+
     // 트랜잭션: 게시글 생성 + Zanzibar 권한 부여 + postCount 증가
     const post = await prisma.$transaction(async (tx) => {
       // 1. 게시글 생성
@@ -180,7 +108,7 @@ export async function POST(request: NextRequest) {
           title,
           content,
           postType: postType || 'DISCUSSION',
-          authorId: session.user.id,
+          authorId: finalAuthorId,
           categoryId,
           tags: tags || [],
           coverImageUrl,
@@ -207,7 +135,7 @@ export async function POST(request: NextRequest) {
       });
 
       // 2. Zanzibar 권한 부여: 게시글 작성자에게 owner 권한 자동 부여
-      await grantPostOwnership(newPost.id, session.user.id);
+      await grantPostOwnership(newPost.id, finalAuthorId);
 
       // 3. 카테고리 게시글 수 증가
       await tx.category.update({
@@ -231,11 +159,12 @@ export async function POST(request: NextRequest) {
       categoryId: post.categoryId,
       postType: post.postType,
       tags: post.tags,
+      source: 'inbound_webhook',
     }).catch((err) => console.error('Webhook trigger failed:', err));
 
     return successResponse({ post }, 201);
   } catch (error) {
-    console.error('POST /api/posts error:', error);
+    console.error('POST /api/admin/webhooks/inbound/posts error:', error);
     return serverErrorResponse('게시글 생성 중 오류가 발생했습니다', error);
   }
 }

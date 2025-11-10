@@ -251,3 +251,30 @@ model RelationDefinition {
 // 2. 카테고리 모더레이터: (category, "free", moderator, user, "user_789")
 // 3. 시스템 관리자: (system, "global", admin, user, "user_admin")
 // 4. 공개 뷰어: (post, "123", viewer, user, "*") - 모든 사용자
+
+// ===== 아웃바운드 웹훅 시스템 =====
+
+enum WebhookEvent {
+  POST_CREATED
+  POST_UPDATED
+  POST_DELETED
+}
+
+model WebhookSubscription {
+  id          String        @id @default(cuid())
+  url         String        // 웹훅을 전송할 외부 URL
+  secret      String        // HMAC 서명용 시크릿 키
+  events      WebhookEvent[] // 구독할 이벤트 목록
+  isActive    Boolean       @default(true)
+  description String?       // 웹훅 설명
+
+  // 통계
+  lastTriggeredAt DateTime?
+  failureCount    Int       @default(0)
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([isActive])
+  @@map("webhook_subscriptions")
+}
