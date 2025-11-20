@@ -81,55 +81,38 @@ export default function NewPostPage() {
     setIsSubmitting(true);
 
     try {
-      // 현재 사용자 (Mock - 실제로는 인증 시스템에서 가져옴)
-      const currentUser = {
-        id: 'mock_user_1',
-        username: 'test_user',
-        displayName: '테스트 사용자',
-        email: 'test@example.com',
-        avatarUrl: 'https://ui-avatars.com/api/?name=Test+User&background=random',
-        role: 'user' as const,
-        reputation: 100,
-        createdAt: new Date().toISOString(),
-      };
+      // API 호출: 게시글 생성
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          content,
+          postType: 'DISCUSSION',
+          categoryId: category,
+          tags,
+        }),
+      });
 
-      // 선택된 카테고리 정보
-      const selectedCategory = mockCategories.find((c) => c.id === category);
-      if (!selectedCategory) {
-        throw new Error('카테고리를 찾을 수 없습니다.');
+      const data = await response.json();
+
+      if (!response.ok) {
+        // API 에러 처리
+        throw new Error(data.error || '게시글 작성에 실패했습니다.');
       }
 
-      // 새 게시글 객체 생성
-      const newPost = {
-        id: `post_${Date.now()}`,
-        title: title.trim(),
-        content,
-        authorId: currentUser.id,
-        author: currentUser,
-        categoryId: category,
-        category: selectedCategory,
-        tags,
-        upvotes: 0,
-        downvotes: 0,
-        viewCount: 0,
-        commentCount: 0,
-        isPinned: false,
-        isLocked: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // localStorage에 저장
-      const storedPosts = localStorage.getItem('community_posts');
-      const posts = storedPosts ? JSON.parse(storedPosts) : [];
-      posts.unshift(newPost); // 최신 게시글이 앞에 오도록
-      localStorage.setItem('community_posts', JSON.stringify(posts));
-
-      // 성공 - 카테고리 페이지로 리다이렉트
-      router.push(`/community/${selectedCategory.slug}`);
+      // 성공 - 생성된 게시글의 카테고리로 리다이렉트
+      const selectedCategory = mockCategories.find((c) => c.id === category);
+      if (selectedCategory) {
+        router.push(`/community/${selectedCategory.slug}`);
+      } else {
+        router.push('/community');
+      }
     } catch (error) {
       console.error('게시글 저장 실패:', error);
-      alert('게시글 저장에 실패했습니다. 다시 시도해주세요.');
+      alert(error instanceof Error ? error.message : '게시글 저장에 실패했습니다. 다시 시도해주세요.');
       setIsSubmitting(false);
     }
   };
