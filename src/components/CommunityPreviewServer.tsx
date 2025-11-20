@@ -2,6 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { CommunityPreviewClient } from './CommunityPreviewClient';
 
 /**
+ * HTML 태그를 제거하고 텍스트만 추출
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
  * CommunityPreview Server Component
  *
  * DB에서 isPinned=true인 DISCUSSION 타입 게시물을 조회하여
@@ -37,23 +44,26 @@ export async function CommunityPreviewServer() {
   });
 
   // 클라이언트 컴포넌트에 필요한 형식으로 변환
-  const featuredPosts = posts.map((post) => ({
-    type: 'post' as const,
-    id: post.id,
-    author: {
-      name: post.author.displayName || post.author.username || '익명',
-      avatar: post.author.image || '/api/placeholder/32/32',
-      role: post.author.role || 'USER',
-    },
-    title: post.title,
-    excerpt: post.content.substring(0, 100) + '...',
-    tags: post.tags,
-    likes: post.upvotes,
-    comments: post._count.comments,
-    timeAgo: getTimeAgo(post.createdAt),
-    trending: post.upvotes > 50, // 추천 50개 이상이면 trending
-    thumbnail: post.coverImageUrl || getDefaultThumbnail(),
-  }));
+  const featuredPosts = posts.map((post) => {
+    const plainText = stripHtml(post.content);
+    return {
+      type: 'post' as const,
+      id: post.id,
+      author: {
+        name: post.author.displayName || post.author.username || '익명',
+        avatar: post.author.image || '/api/placeholder/32/32',
+        role: post.author.role || 'USER',
+      },
+      title: post.title,
+      excerpt: plainText.substring(0, 100) + (plainText.length > 100 ? '...' : ''),
+      tags: post.tags,
+      likes: post.upvotes,
+      comments: post._count.comments,
+      timeAgo: getTimeAgo(post.createdAt),
+      trending: post.upvotes > 50, // 추천 50개 이상이면 trending
+      thumbnail: post.coverImageUrl || getDefaultThumbnail(),
+    };
+  });
 
   // 광고 카드 추가
   const adCard = {
