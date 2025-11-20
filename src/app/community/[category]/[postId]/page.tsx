@@ -1,17 +1,26 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MessageSquare, Eye, ChevronRight } from 'lucide-react';
+import { MessageSquare, Eye, ChevronRight, Edit } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { CommentList } from '@/components/CommentList';
 import { VoteButtons } from '@/components/VoteButtons';
+import { DeletePostButton } from '@/components/DeletePostButton';
 import {
   getPostById,
   getPostVoteSummary,
   getUserVoteForPost,
 } from '@/lib/data-access/posts';
 import { auth } from '@/lib/auth';
+
+/**
+ * HTML 태그를 제거하고 텍스트만 추출
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
 
 /**
  * 게시글 상세 페이지
@@ -109,7 +118,26 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               </div>
 
               {/* 제목 */}
-              <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <h1 className="text-3xl font-bold flex-1">{post.title}</h1>
+
+                {/* 수정/삭제 버튼 (작성자만 표시) */}
+                {session?.user?.id === post.author.id && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/community/${categorySlug}/${postId}/edit`}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        수정
+                      </Link>
+                    </Button>
+                    <DeletePostButton
+                      postId={postId}
+                      postTitle={post.title}
+                      categorySlug={categorySlug}
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* 작성자 & 메타 정보 */}
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6 pb-6 border-b">
@@ -167,7 +195,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
               {/* 본문 */}
               <div className="prose prose-neutral dark:prose-invert max-w-none mb-6">
-                <p className="whitespace-pre-wrap text-base leading-relaxed">{post.content}</p>
+                <p className="whitespace-pre-wrap text-base leading-relaxed">{stripHtml(post.content)}</p>
               </div>
 
               {/* 태그 */}
