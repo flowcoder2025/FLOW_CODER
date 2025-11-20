@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { uploadPostImage } from '@/lib/storage';
+import { requirePermission } from '@/lib/permissions';
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,16 +29,50 @@ export async function POST(req: NextRequest) {
     const postId = formData.get('postId') as string | null;
 
     if (!file) {
+      console.error('[Upload] 파일이 전송되지 않았습니다.');
       return NextResponse.json(
         { success: false, error: '파일이 전송되지 않았습니다.' },
         { status: 400 }
       );
     }
 
+    console.log('[Upload] 파일 정보:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      postId,
+    });
+
+    // Zanzibar 권한 체크: 게시글 수정 권한 확인
+    if (postId) {
+      try {
+        await requirePermission(session.user.id, 'post', postId, 'editor');
+        console.log('[Upload] 권한 체크 성공:', {
+          userId: session.user.id,
+          postId,
+        });
+      } catch (permissionError: unknown) {
+        console.error('[Upload] 권한 체크 실패:', permissionError);
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              permissionError instanceof Error
+                ? permissionError.message
+                : '게시글 수정 권한이 없습니다.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // 이미지 업로드
     const result = await uploadPostImage(file, postId || undefined);
 
+    console.log('[Upload] 업로드 결과:', result);
+
     if (!result.success) {
+      console.error('[Upload] 업로드 실패:', result.error);
       return NextResponse.json(
         { success: false, error: result.error },
         { status: 400 }

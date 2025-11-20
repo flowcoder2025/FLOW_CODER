@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Pin, PinOff, Trash2, Search, Eye, RotateCcw } from 'lucide-react';
+import { Pin, PinOff, Trash2, Search, Eye, RotateCcw, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -30,6 +30,7 @@ type Post = {
   title: string;
   postType: string;
   isPinned: boolean;
+  isFeatured: boolean;
   viewCount: number;
   upvotes: number;
   deletedAt: string | null;
@@ -69,6 +70,7 @@ export default function AdminPostsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [postTypeFilter, setPostTypeFilter] = useState<string>('all');
   const [pinnedFilter, setPinnedFilter] = useState<string>('all');
+  const [featuredFilter, setFeaturedFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [includeDeleted, setIncludeDeleted] = useState(false);
 
@@ -89,6 +91,12 @@ export default function AdminPostsPage() {
         params.append('isPinned', 'true');
       } else if (pinnedFilter === 'unpinned') {
         params.append('isPinned', 'false');
+      }
+
+      if (featuredFilter === 'featured') {
+        params.append('isFeatured', 'true');
+      } else if (featuredFilter === 'unfeatured') {
+        params.append('isFeatured', 'false');
       }
 
       if (searchQuery.trim()) {
@@ -115,7 +123,7 @@ export default function AdminPostsPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [page, postTypeFilter, pinnedFilter, includeDeleted]);
+  }, [page, postTypeFilter, pinnedFilter, featuredFilter, includeDeleted]);
 
   const handleTogglePin = async (postId: string, currentPinned: boolean) => {
     try {
@@ -132,6 +140,24 @@ export default function AdminPostsPage() {
     } catch (error) {
       console.error('Failed to toggle pin:', error);
       alert('게시물 고정 상태를 변경하는데 실패했습니다.');
+    }
+  };
+
+  const handleToggleFeatured = async (postId: string, currentFeatured: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/posts/${postId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFeatured: !currentFeatured }),
+      });
+
+      if (!response.ok) throw new Error('Failed to toggle featured');
+
+      alert(`게시물이 ${!currentFeatured ? '주목할 만한 프로젝트로 지정' : '주목할 만한 프로젝트에서 제외'}되었습니다.`);
+      fetchPosts();
+    } catch (error) {
+      console.error('Failed to toggle featured:', error);
+      alert('게시물 featured 상태를 변경하는데 실패했습니다.');
     }
   };
 
@@ -242,6 +268,17 @@ export default function AdminPostsPage() {
               <SelectItem value="unpinned">고정 안됨</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select value={featuredFilter} onValueChange={setFeaturedFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="주목 상태" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체</SelectItem>
+              <SelectItem value="featured">주목 프로젝트</SelectItem>
+              <SelectItem value="unfeatured">일반</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* 삭제된 게시글 표시 토글 */}
@@ -261,6 +298,7 @@ export default function AdminPostsPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">고정</TableHead>
+              <TableHead className="w-12">주목</TableHead>
               <TableHead>제목</TableHead>
               <TableHead className="w-24">타입</TableHead>
               <TableHead className="w-32">카테고리</TableHead>
@@ -274,13 +312,13 @@ export default function AdminPostsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   로딩 중...
                 </TableCell>
               </TableRow>
             ) : posts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   게시물이 없습니다.
                 </TableCell>
               </TableRow>
@@ -292,7 +330,7 @@ export default function AdminPostsPage() {
                       variant={post.isPinned ? 'default' : 'outline'}
                       size="icon"
                       onClick={() => handleTogglePin(post.id, post.isPinned)}
-                      title={post.isPinned ? '고정 해제' : '홈에 고정'}
+                      title={post.isPinned ? '고정 해제' : '카테고리에 고정'}
                       disabled={!!post.deletedAt}
                     >
                       {post.isPinned ? (
@@ -300,6 +338,18 @@ export default function AdminPostsPage() {
                       ) : (
                         <PinOff className="h-4 w-4" />
                       )}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant={post.isFeatured ? 'default' : 'outline'}
+                      size="icon"
+                      onClick={() => handleToggleFeatured(post.id, post.isFeatured)}
+                      title={post.isFeatured ? '주목 프로젝트 해제' : '주목할 만한 프로젝트로 지정'}
+                      disabled={!!post.deletedAt}
+                      className={post.isFeatured ? 'bg-yellow-500 hover:bg-yellow-600' : ''}
+                    >
+                      <Star className={`h-4 w-4 ${post.isFeatured ? 'fill-white' : ''}`} />
                     </Button>
                   </TableCell>
                   <TableCell className="font-medium max-w-md truncate">

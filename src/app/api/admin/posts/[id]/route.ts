@@ -18,7 +18,8 @@ type RouteContext = {
  * 모더레이터 이상 전용 게시글 수정 및 복구
  *
  * Body:
- * - isPinned: boolean (optional) - 홈 화면 고정 여부
+ * - isPinned: boolean (optional) - 카테고리 고정 여부
+ * - isFeatured: boolean (optional) - 주목할 만한 프로젝트 지정 여부
  * - title: string (optional)
  * - content: string (optional)
  * - tags: string[] (optional)
@@ -50,6 +51,7 @@ export async function PATCH(
     const body = await request.json();
     const {
       isPinned,
+      isFeatured,
       title,
       content,
       tags,
@@ -62,6 +64,7 @@ export async function PATCH(
     // 수정할 필드만 포함
     const updateData: any = {};
     if (isPinned !== undefined) updateData.isPinned = isPinned;
+    if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
     if (title !== undefined) updateData.title = title;
     if (content !== undefined) updateData.content = content;
     if (tags !== undefined) updateData.tags = tags;
@@ -146,6 +149,7 @@ export async function PATCH(
       authorId: post.authorId,
       categoryId: post.categoryId,
       isPinned: post.isPinned,
+      isFeatured: post.isFeatured,
       updatedFields: Object.keys(updateData),
     }).catch((err) => console.error('Webhook trigger failed:', err));
 

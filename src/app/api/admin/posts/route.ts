@@ -15,6 +15,7 @@ import { Prisma } from '@/generated/prisma';
  * Query Parameters:
  * - postType: 게시글 타입 필터 (optional)
  * - isPinned: 핀 상태 필터 (true/false, optional)
+ * - isFeatured: 주목 프로젝트 필터 (true/false, optional)
  * - category: 카테고리 slug (optional)
  * - sort: recent | popular | pinned (default: recent)
  * - page: 페이지 번호 (default: 1)
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const postType = searchParams.get('postType');
     const isPinnedParam = searchParams.get('isPinned');
+    const isFeaturedParam = searchParams.get('isFeatured');
     const category = searchParams.get('category');
     const sort = searchParams.get('sort') || 'recent';
     const page = parseInt(searchParams.get('page') || '1');
@@ -47,6 +49,10 @@ export async function GET(request: NextRequest) {
 
     if (isPinnedParam !== null) {
       where.isPinned = isPinnedParam === 'true';
+    }
+
+    if (isFeaturedParam !== null) {
+      where.isFeatured = isFeaturedParam === 'true';
     }
 
     if (category) {

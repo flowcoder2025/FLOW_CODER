@@ -118,7 +118,8 @@ model Post {
   upvotes       Int      @default(0)
   downvotes     Int      @default(0)
   viewCount     Int      @default(0)
-  isPinned      Boolean  @default(false)
+  isPinned      Boolean  @default(false)  // 카테고리별 고정 게시글
+  isFeatured    Boolean  @default(false)  // 홈 캐러셀 "주목할 만한 프로젝트"
   isLocked      Boolean  @default(false)
   tags          String[]
   coverImageUrl String?  // 레거시 필드 (하위 호환성)
@@ -139,6 +140,7 @@ model Post {
   @@index([createdAt(sort: Desc)])
   @@index([postType])
   @@index([deletedAt])
+  @@index([isFeatured])  // 홈 캐러셀 조회 최적화
 }
 
 // 게시글 이미지 (다중 이미지 첨부 지원)

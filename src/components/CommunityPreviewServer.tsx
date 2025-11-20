@@ -11,20 +11,20 @@ function stripHtml(html: string): string {
 /**
  * CommunityPreview Server Component
  *
- * DB에서 isPinned=true인 DISCUSSION 타입 게시물을 조회하여
+ * DB에서 isFeatured=true인 "주목할 만한 프로젝트" 게시물을 조회하여
  * Client Component로 전달
  */
 export async function CommunityPreviewServer() {
-  // isPinned=true이고 DISCUSSION 타입인 게시물 조회 (최신순, 최대 4개)
+  // isFeatured=true인 게시물 조회 (최신순, 최대 6개)
   const posts = await prisma.post.findMany({
     where: {
-      isPinned: true,
-      postType: 'DISCUSSION',
+      isFeatured: true,
+      deletedAt: null, // 삭제되지 않은 게시글만
     },
     orderBy: {
       createdAt: 'desc',
     },
-    take: 4,
+    take: 6, // 캐러셀에 더 많은 컨텐츠 표시
     include: {
       author: {
         select: {
@@ -40,8 +40,8 @@ export async function CommunityPreviewServer() {
         },
       },
       images: {
-        where: {
-          isFeatured: true,
+        orderBy: {
+          order: 'asc', // order 순으로 정렬하여 첫 번째 이미지 가져오기
         },
         select: {
           url: true,
