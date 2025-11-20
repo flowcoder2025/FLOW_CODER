@@ -62,10 +62,10 @@ export function Header() {
             <Image
               src="/FlowCoder.png"
               alt="FlowCoder"
-              width={120}
+              width={40}
               height={40}
               style={{ height: 'auto' }}
-              className="w-[120px]"
+              className="w-[40px]"
               priority
             />
           )}
