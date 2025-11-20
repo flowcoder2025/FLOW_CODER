@@ -60,7 +60,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           {mounted && (
             <Image
-              src={resolvedTheme === 'dark' ? '/FlowCoder_Dark_-removebg-preview.png' : '/FlowCoder_White_-removebg-preview.png'}
+              src="/FlowCoder.png"
               alt="FlowCoder"
               width={120}
               height={40}

@@ -11,20 +11,12 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Image
-                src="/FlowCoder_White_-removebg-preview.png"
+                src="/FlowCoder.png"
                 alt="FlowCoder"
                 width={120}
                 height={40}
                 style={{ height: 'auto' }}
-                className="w-[120px] dark:hidden"
-              />
-              <Image
-                src="/FlowCoder_Dark_-removebg-preview.png"
-                alt="FlowCoder"
-                width={120}
-                height={40}
-                style={{ height: 'auto' }}
-                className="w-[120px] hidden dark:block"
+                className="w-[120px]"
               />
               <span className="text-lg font-semibold">FlowCoder</span>
             </Link>
