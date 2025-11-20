@@ -4,15 +4,14 @@ import { FeaturedProjectsClient } from './FeaturedProjectsClient';
 /**
  * FeaturedProjects Server Component
  *
- * DB에서 isFeatured=true인 SHOWCASE 타입 게시물을 조회하여
- * Client Component로 전달
+ * DB에서 isFeatured=true인 게시물을 조회하여
+ * Client Component로 전달 (모든 게시물 타입 지원)
  */
 export async function FeaturedProjectsServer() {
-  // isFeatured=true이고 SHOWCASE 타입인 게시물 조회 (최신순, 최대 3개)
+  // isFeatured=true인 게시물 조회 (최신순, 최대 3개)
   const posts = await prisma.post.findMany({
     where: {
       isFeatured: true,
-      postType: 'SHOWCASE',
       deletedAt: null,
     },
     orderBy: {
