@@ -14,8 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { mockNotifications, getUnreadNotificationCount } from '@/lib/mock-data';
 import type { Notification } from '@/lib/types';
+import { useSession } from 'next-auth/react';
 
 /**
  * 알림 벨 컴포넌트
@@ -24,7 +24,7 @@ import type { Notification } from '@/lib/types';
  * - 읽지 않은 알림 개수 Badge 표시
  * - 드롭다운 메뉴로 알림 목록 표시
  * - 알림 클릭 시 읽음 처리 및 해당 링크로 이동
- * - localStorage에 읽음 상태 저장
+ * - 서버 API와 연동하여 실시간 알림 관리
  */
 
 /** 알림 아이템 컴포넌트 */
@@ -89,61 +89,96 @@ function NotificationItem({ notification, onMarkAsRead }: {
 }
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { data: session, status } = useSession();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // localStorage에서 읽음 상태 로드
-  useEffect(() => {
+  // API에서 알림 목록 가져오기
+  const fetchNotifications = async () => {
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const stored = localStorage.getItem('notification_read_status');
-      if (stored) {
-        const readIds: string[] = JSON.parse(stored);
-        const updated = mockNotifications.map((notif) => ({
-          ...notif,
-          read: readIds.includes(notif.id) || notif.read,
-        }));
-        setNotifications(updated);
-        setUnreadCount(updated.filter((n) => !n.read).length);
-      } else {
-        setUnreadCount(getUnreadNotificationCount('current_user'));
+      setLoading(true);
+      const response = await fetch('/api/notifications?limit=10');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch notifications');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setNotifications(data.data.notifications);
+        setUnreadCount(data.data.unreadCount);
       }
     } catch (error) {
-      console.error('Failed to load notification read status:', error);
-      setUnreadCount(getUnreadNotificationCount('current_user'));
+      console.error('Failed to fetch notifications:', error);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
+
+  // 로그인 상태 변경 시 알림 목록 가져오기
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchNotifications();
+    } else if (status === 'unauthenticated') {
+      setNotifications([]);
+      setUnreadCount(0);
+      setLoading(false);
+    }
+  }, [status, session?.user]);
 
   // 알림을 읽음 처리
-  const markAsRead = (id: string) => {
-    const updated = notifications.map((notif) =>
-      notif.id === id ? { ...notif, read: true } : notif
-    );
-    setNotifications(updated);
-    setUnreadCount(updated.filter((n) => !n.read).length);
-
-    // localStorage에 저장
+  const markAsRead = async (id: string) => {
     try {
-      const readIds = updated.filter((n) => n.read).map((n) => n.id);
-      localStorage.setItem('notification_read_status', JSON.stringify(readIds));
+      const response = await fetch(`/api/notifications/${id}/read`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+
+      // 로컬 상태 업데이트
+      const updated = notifications.map((notif) =>
+        notif.id === id ? { ...notif, read: true } : notif
+      );
+      setNotifications(updated);
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Failed to save notification read status:', error);
+      console.error('Failed to mark notification as read:', error);
     }
   };
 
   // 모두 읽음 처리
-  const markAllAsRead = () => {
-    const updated = notifications.map((notif) => ({ ...notif, read: true }));
-    setNotifications(updated);
-    setUnreadCount(0);
-
-    // localStorage에 저장
+  const markAllAsRead = async () => {
     try {
-      const readIds = updated.map((n) => n.id);
-      localStorage.setItem('notification_read_status', JSON.stringify(readIds));
+      const response = await fetch('/api/notifications/read-all', {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark all notifications as read');
+      }
+
+      // 로컬 상태 업데이트
+      const updated = notifications.map((notif) => ({ ...notif, read: true }));
+      setNotifications(updated);
+      setUnreadCount(0);
     } catch (error) {
-      console.error('Failed to save notification read status:', error);
+      console.error('Failed to mark all notifications as read:', error);
     }
   };
+
+  // 로그인하지 않은 경우 표시하지 않음
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   return (
     <DropdownMenu>
