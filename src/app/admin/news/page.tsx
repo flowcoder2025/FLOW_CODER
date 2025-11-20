@@ -208,7 +208,7 @@ export default function AdminNewsPage() {
             뉴스 게시글 작성 및 관리
           </p>
         </div>
-        <Button onClick={() => router.push('/community/new?type=NEWS')}>
+        <Button onClick={() => router.push('/admin/news/new')}>
           <Plus className="h-4 w-4 mr-2" />
           새 뉴스 작성
         </Button>

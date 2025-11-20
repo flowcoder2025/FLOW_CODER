@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Eye, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -79,21 +79,18 @@ export default function AdminExternalTermsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="space-y-6">
         <p className="text-center text-muted-foreground">로딩 중...</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="space-y-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <FileText className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold">외부 약관 관리</h1>
-          </div>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">외부 약관 관리</h2>
           <p className="text-muted-foreground">
             외부 서비스 이용약관을 생성하고 관리합니다.
           </p>
