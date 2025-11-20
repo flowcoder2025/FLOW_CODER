@@ -1,10 +1,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { memo, useMemo } from 'react';
-import { ArrowUp, ArrowDown, MessageSquare, Eye } from 'lucide-react';
+import { MessageSquare, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { VoteButtons } from '@/components/VoteButtons';
 import type { PostWithAuthor } from '@/lib/types';
+
+/**
+ * HTML 태그를 제거하고 텍스트만 추출
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
 
 /**
  * 게시글 카드 컴포넌트 (성능 최적화됨)
@@ -43,7 +51,6 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
   } = post;
 
   // 성능 최적화: 계산된 값 메모이제이션
-  const score = useMemo(() => upvotes - downvotes, [upvotes, downvotes]);
   const postUrl = useMemo(() => `/community/${category.slug}/${id}`, [category.slug, id]);
   const formattedDate = useMemo(() =>
     new Date(createdAt).toLocaleDateString('ko-KR', {
@@ -60,25 +67,12 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
         <CardContent className={variant === 'compact' ? 'p-4' : 'p-6'}>
           <div className="flex items-start gap-4">
             {/* 좌측: 투표 섹션 */}
-            <div className="flex flex-col items-center gap-1 min-w-[40px]">
-              <button
-                className="p-1 rounded hover:bg-accent transition-colors"
-                aria-label="추천"
-                type="button"
-              >
-                <ArrowUp className="h-5 w-5 text-muted-foreground hover:text-primary" />
-              </button>
-              <span className={`text-lg font-bold ${score > 0 ? 'text-primary' : score < 0 ? 'text-destructive' : ''}`}>
-                {score}
-              </span>
-              <button
-                className="p-1 rounded hover:bg-accent transition-colors"
-                aria-label="비추천"
-                type="button"
-              >
-                <ArrowDown className="h-5 w-5 text-muted-foreground hover:text-destructive" />
-              </button>
-            </div>
+            <VoteButtons
+              targetType="post"
+              targetId={id}
+              upvotes={upvotes}
+              downvotes={downvotes}
+            />
 
             {/* 우측: 콘텐츠 섹션 */}
             <div className="flex-1 min-w-0">
@@ -113,7 +107,7 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
               {/* 본문 미리보기 */}
               {variant === 'default' && (
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                  {content}
+                  {stripHtml(content)}
                 </p>
               )}
 
