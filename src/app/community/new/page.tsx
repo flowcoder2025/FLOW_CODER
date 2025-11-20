@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ImageUploader, type UploadedImage } from '@/components/ImageUploader';
 
 interface Category {
   id: string;
@@ -53,6 +54,7 @@ export default function NewPostPage() {
   const [content, setContent] = useState('<p></p>');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [images, setImages] = useState<UploadedImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 카테고리 목록 가져오기
@@ -110,9 +112,10 @@ export default function NewPostPage() {
     setIsSubmitting(true);
 
     try {
-      // API 호출: 게시글 생성
-      const response = await fetch('/api/posts', {
+      // 1. 게시글 먼저 생성
+      const postResponse = await fetch('/api/posts', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -125,11 +128,56 @@ export default function NewPostPage() {
         }),
       });
 
-      const data = await response.json();
+      const postData = await postResponse.json();
 
-      if (!response.ok) {
-        // API 에러 처리
-        throw new Error(data.error || '게시글 작성에 실패했습니다.');
+      if (!postResponse.ok) {
+        throw new Error(postData.error || '게시글 작성에 실패했습니다.');
+      }
+
+      const postId = postData.data.post.id;
+
+      // 2. 이미지가 있으면 업로드 및 DB 저장
+      if (images.length > 0) {
+        const uploadedImageUrls: Array<{ url: string; isFeatured: boolean; order: number }> = [];
+
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          if (!image.file) continue; // 이미 업로드된 이미지는 스킵
+
+          // 이미지 업로드
+          const formData = new FormData();
+          formData.append('file', image.file);
+          formData.append('postId', postId);
+
+          const uploadResponse = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const uploadData = await uploadResponse.json();
+
+          if (uploadResponse.ok && uploadData.url) {
+            uploadedImageUrls.push({
+              url: uploadData.url,
+              isFeatured: image.isFeatured,
+              order: i,
+            });
+          }
+        }
+
+        // 3. PostImage 레코드 생성
+        if (uploadedImageUrls.length > 0) {
+          await fetch('/api/posts/images', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              postId,
+              images: uploadedImageUrls,
+            }),
+          });
+        }
       }
 
       // 성공 - 생성된 게시글의 카테고리로 리다이렉트
@@ -247,6 +295,9 @@ export default function NewPostPage() {
             {tags.length}/5개
           </p>
         </div>
+
+        {/* 이미지 업로드 */}
+        <ImageUploader onChange={setImages} maxImages={10} />
 
         {/* 액션 버튼 */}
         <div className="flex justify-end gap-3 pt-6 border-t">
