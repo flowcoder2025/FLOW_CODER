@@ -46,8 +46,8 @@ export default function EditPostPage() {
         const response = await fetch(`/api/posts/${postId}`);
         const data = await response.json();
 
-        if (data.success && data.data) {
-          const post = data.data;
+        if (data.success && data.data.post) {
+          const post = data.data.post;
           setTitle(post.title);
           setContent(post.content);
           setTags(post.tags || []);
