@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -15,7 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { mockCategories } from '@/lib/mock-data';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  postCount: number;
+}
 
 // Dynamic import for Tiptap Editor (heavy dependency)
 const Editor = dynamic(() => import('@/components/Editor').then(mod => ({ default: mod.Editor })), {
@@ -37,12 +46,32 @@ export default function NewPostPage() {
   const router = useRouter();
 
   // 폼 상태
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('<p></p>');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 카테고리 목록 가져오기
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.data.categories);
+        }
+      } catch (error) {
+        console.error('카테고리 로딩 실패:', error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // 태그 추가
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -104,7 +133,7 @@ export default function NewPostPage() {
       }
 
       // 성공 - 생성된 게시글의 카테고리로 리다이렉트
-      const selectedCategory = mockCategories.find((c) => c.id === category);
+      const selectedCategory = categories.find((c) => c.id === category);
       if (selectedCategory) {
         router.push(`/community/${selectedCategory.slug}`);
       } else {
@@ -139,12 +168,12 @@ export default function NewPostPage() {
         {/* 카테고리 선택 */}
         <div className="space-y-2">
           <Label htmlFor="category">카테고리 *</Label>
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={setCategory} disabled={isLoadingCategories}>
             <SelectTrigger id="category">
-              <SelectValue placeholder="카테고리를 선택하세요" />
+              <SelectValue placeholder={isLoadingCategories ? "로딩 중..." : "카테고리를 선택하세요"} />
             </SelectTrigger>
             <SelectContent>
-              {mockCategories.map((cat) => (
+              {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   <span className="flex items-center gap-2">
                     <span>{cat.icon}</span>

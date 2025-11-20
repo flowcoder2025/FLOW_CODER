@@ -64,7 +64,8 @@ export function Header() {
               alt="FlowCoder"
               width={120}
               height={40}
-              className="h-10 w-auto"
+              style={{ height: 'auto' }}
+              className="w-[120px]"
               priority
             />
           )}

@@ -15,14 +15,16 @@ export function Footer() {
                 alt="FlowCoder"
                 width={120}
                 height={40}
-                className="h-10 w-auto dark:hidden"
+                style={{ height: 'auto' }}
+                className="w-[120px] dark:hidden"
               />
               <Image
                 src="/FlowCoder_Dark_-removebg-preview.png"
                 alt="FlowCoder"
                 width={120}
                 height={40}
-                className="h-10 w-auto hidden dark:block"
+                style={{ height: 'auto' }}
+                className="w-[120px] hidden dark:block"
               />
               <span className="text-lg font-semibold">FlowCoder</span>
             </Link>

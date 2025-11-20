@@ -56,6 +56,8 @@ export function Editor({
         heading: {
           levels: [1, 2],
         },
+        // StarterKit에 포함된 link 비활성화 (별도 Link extension 사용)
+        link: false,
       }),
       Link.configure({
         openOnClick: false,
