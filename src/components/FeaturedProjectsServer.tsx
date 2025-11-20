@@ -2,6 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { FeaturedProjectsClient } from './FeaturedProjectsClient';
 
 /**
+ * HTML 태그를 제거하고 텍스트만 추출
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
  * FeaturedProjects Server Component
  *
  * DB에서 isFeatured=true인 게시물을 조회하여
@@ -37,16 +44,19 @@ export async function FeaturedProjectsServer() {
   });
 
   // 프로젝트 데이터 변환
-  const projects = posts.map((post, index) => ({
-    id: post.id,
-    title: post.title,
-    description: post.content.substring(0, 150),
-    image: post.images[0]?.url || post.coverImageUrl || getDefaultProjectThumbnail(),
-    techs: post.tags,
-    stars: post.upvotes,
-    forks: Math.floor(post.upvotes * 0.2), // 임시로 upvotes의 20%를 fork로 계산
-    featured: index === 0, // 첫 번째 프로젝트를 featured로 설정
-  }));
+  const projects = posts.map((post, index) => {
+    const plainText = stripHtml(post.content);
+    return {
+      id: post.id,
+      title: post.title,
+      description: plainText.substring(0, 150) + (plainText.length > 150 ? '...' : ''),
+      image: post.images[0]?.url || post.coverImageUrl || getDefaultProjectThumbnail(),
+      techs: post.tags,
+      stars: post.upvotes,
+      forks: Math.floor(post.upvotes * 0.2), // 임시로 upvotes의 20%를 fork로 계산
+      featured: index === 0, // 첫 번째 프로젝트를 featured로 설정
+    };
+  });
 
   return <FeaturedProjectsClient projects={projects} />;
 }
