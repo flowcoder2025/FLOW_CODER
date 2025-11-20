@@ -37,10 +37,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHubProvider({
       clientId: getRequiredEnv('GITHUB_ID'),
       clientSecret: getRequiredEnv('GITHUB_SECRET'),
+      // 동일 이메일로 여러 계정 연결 허용
+      allowDangerousEmailAccountLinking: true,
     }),
     GoogleProvider({
       clientId: getRequiredEnv('GOOGLE_ID'),
       clientSecret: getRequiredEnv('GOOGLE_SECRET'),
+      // 동일 이메일로 여러 계정 연결 허용
+      allowDangerousEmailAccountLinking: true,
     }),
     // 로컬 개발 환경에서만 이메일/비밀번호 로그인 지원
     ...(process.env.NODE_ENV === 'development'
