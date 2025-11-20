@@ -4,15 +4,16 @@ import { FeaturedProjectsClient } from './FeaturedProjectsClient';
 /**
  * FeaturedProjects Server Component
  *
- * DB에서 isPinned=true인 SHOWCASE 타입 게시물을 조회하여
+ * DB에서 isFeatured=true인 SHOWCASE 타입 게시물을 조회하여
  * Client Component로 전달
  */
 export async function FeaturedProjectsServer() {
-  // isPinned=true이고 SHOWCASE 타입인 게시물 조회 (최신순, 최대 3개)
+  // isFeatured=true이고 SHOWCASE 타입인 게시물 조회 (최신순, 최대 3개)
   const posts = await prisma.post.findMany({
     where: {
-      isPinned: true,
+      isFeatured: true,
       postType: 'SHOWCASE',
+      deletedAt: null,
     },
     orderBy: {
       createdAt: 'desc',
@@ -20,8 +21,8 @@ export async function FeaturedProjectsServer() {
     take: 3,
     include: {
       images: {
-        where: {
-          isFeatured: true,
+        orderBy: {
+          order: 'asc', // order 순으로 정렬하여 첫 번째 이미지 가져오기
         },
         select: {
           url: true,
