@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Pin, PinOff, Edit, Trash2, Search, Eye, RotateCcw } from 'lucide-react';
+import { Pin, PinOff, Trash2, Search, Eye, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 

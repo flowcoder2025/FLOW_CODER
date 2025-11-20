@@ -121,7 +121,7 @@ model Post {
   isPinned      Boolean  @default(false)
   isLocked      Boolean  @default(false)
   tags          String[]
-  coverImageUrl String?
+  coverImageUrl String?  // 레거시 필드 (하위 호환성)
   deletedAt     DateTime? // Soft delete
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -132,12 +132,31 @@ model Post {
   comments      Comment[]
   answers       Answer[]
   votes         Vote[]
+  images        PostImage[] // 다중 이미지 지원
 
   @@index([categoryId])
   @@index([authorId])
   @@index([createdAt(sort: Desc)])
   @@index([postType])
   @@index([deletedAt])
+}
+
+// 게시글 이미지 (다중 이미지 첨부 지원)
+model PostImage {
+  id         String   @id @default(cuid())
+  postId     String
+  url        String   // Supabase Storage URL
+  alt        String?  // 대체 텍스트 (접근성)
+  order      Int      @default(0) // 표시 순서
+  isFeatured Boolean  @default(false) // 대표 이미지 (캐루셀/미리보기용)
+  createdAt  DateTime @default(now())
+
+  // Relations
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([postId, isFeatured]) // 대표 이미지 조회 최적화
+  @@index([postId, order]) // 순서대로 조회 최적화
 }
 
 // 댓글 (스레드 형식 지원)

@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { NewsCard } from '@/components/NewsCard';
 import { getNewsPosts, getAllCategories } from '@/lib/data-access';
-import { PostType } from '@/generated/prisma';
 
 /**
  * 뉴스 목록 페이지 (Server Component)

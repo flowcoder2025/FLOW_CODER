@@ -66,6 +66,25 @@ export interface Category {
 }
 
 /**
+ * 게시글 이미지
+ *
+ * 게시글에 첨부된 이미지 (다중 이미지 지원)
+ */
+export interface PostImage {
+  id: string;
+  postId: string;
+  /** 이미지 URL (Supabase Storage) */
+  url: string;
+  /** 대체 텍스트 (접근성) */
+  alt?: string;
+  /** 표시 순서 */
+  order: number;
+  /** 대표 이미지 여부 (캐루셀/미리보기용) */
+  isFeatured: boolean;
+  createdAt: string;
+}
+
+/**
  * 게시글
  *
  * 커뮤니티, Q&A, 뉴스 등 모든 콘텐츠의 기본 단위
@@ -87,7 +106,7 @@ export interface Post {
   isLocked: boolean;
   /** 태그 목록 (최대 5개) */
   tags: string[];
-  /** 커버 이미지 URL (NEWS 타입 게시글용) */
+  /** 커버 이미지 URL (레거시, 하위 호환성) */
   coverImageUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -153,6 +172,8 @@ export interface Vote {
 export interface PostWithAuthor extends Post {
   author: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'reputation'>;
   category: Pick<Category, 'id' | 'name' | 'slug' | 'icon' | 'color'>;
+  /** 게시글 이미지 목록 */
+  images?: PostImage[];
   /** 댓글 수 */
   commentCount: number;
 }

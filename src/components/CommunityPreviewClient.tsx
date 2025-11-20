@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
@@ -11,6 +12,7 @@ import { Button } from "./ui/button";
 type PostItem = {
   type: 'post';
   id: string;
+  categorySlug: string;
   author: {
     name: string;
     avatar: string;
@@ -84,7 +86,8 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
               {duplicatedPosts.map((item, index) => (
                 <div key={index} className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0 pr-6">
                   {item.type === "post" ? (
-                    <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative min-h-[400px]">
+                    <Link href={`/community/${item.categorySlug}/${item.id}`} className="block h-full">
+                      <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative min-h-[400px]">
                       {/* 배경 이미지 */}
                       <div
                         className="absolute inset-0 bg-cover bg-center"
@@ -145,6 +148,7 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
                         </div>
                       </CardContent>
                     </Card>
+                    </Link>
                   ) : (
                     <Card className={`h-full bg-gradient-to-br ${item.gradient} text-white border-0`}>
                       <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full min-h-[400px]">

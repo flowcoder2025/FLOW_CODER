@@ -94,6 +94,11 @@ export async function GET(
             { upvotes: 'desc' },
           ],
         },
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
         _count: {
           select: {
             comments: true,

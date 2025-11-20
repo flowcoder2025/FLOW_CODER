@@ -34,6 +34,20 @@ export async function CommunityPreviewServer() {
           role: true,
         },
       },
+      category: {
+        select: {
+          slug: true,
+        },
+      },
+      images: {
+        where: {
+          isFeatured: true,
+        },
+        select: {
+          url: true,
+        },
+        take: 1,
+      },
       _count: {
         select: {
           comments: true,
@@ -49,6 +63,7 @@ export async function CommunityPreviewServer() {
     return {
       type: 'post' as const,
       id: post.id,
+      categorySlug: post.category.slug,
       author: {
         name: post.author.displayName || post.author.username || '익명',
         avatar: post.author.image || '/api/placeholder/32/32',
@@ -61,7 +76,7 @@ export async function CommunityPreviewServer() {
       comments: post._count.comments,
       timeAgo: getTimeAgo(post.createdAt),
       trending: post.upvotes > 50, // 추천 50개 이상이면 trending
-      thumbnail: post.coverImageUrl || getDefaultThumbnail(),
+      thumbnail: post.images[0]?.url || post.coverImageUrl || getDefaultThumbnail(),
     };
   });
 

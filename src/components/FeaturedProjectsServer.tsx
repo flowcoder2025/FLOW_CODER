@@ -19,6 +19,15 @@ export async function FeaturedProjectsServer() {
     },
     take: 3,
     include: {
+      images: {
+        where: {
+          isFeatured: true,
+        },
+        select: {
+          url: true,
+        },
+        take: 1,
+      },
       _count: {
         select: {
           votes: true,
@@ -32,7 +41,7 @@ export async function FeaturedProjectsServer() {
     id: post.id,
     title: post.title,
     description: post.content.substring(0, 150),
-    image: post.coverImageUrl || getDefaultProjectThumbnail(),
+    image: post.images[0]?.url || post.coverImageUrl || getDefaultProjectThumbnail(),
     techs: post.tags,
     stars: post.upvotes,
     forks: Math.floor(post.upvotes * 0.2), // 임시로 upvotes의 20%를 fork로 계산
