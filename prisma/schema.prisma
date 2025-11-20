@@ -84,21 +84,29 @@ model ExternalTerms {
 
 // ===== 커뮤니티 플랫폼 모델 =====
 
+// 카테고리 타입 enum
+enum CategoryType {
+  COMMUNITY  // 커뮤니티 게시판 (자유, Q&A, 쇼케이스)
+  NEWS       // 뉴스 카테고리 (공지, IT소식, 컬럼, 가이드)
+}
+
 // 카테고리 (게시판 분류)
 model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
-  description String?  @db.Text
-  icon        String?
-  color       String?
-  postCount   Int      @default(0)
-  createdAt   DateTime @default(now())
+  id           String       @id @default(cuid())
+  name         String       @unique
+  slug         String       @unique
+  description  String?      @db.Text
+  icon         String?
+  color        String?
+  categoryType CategoryType @default(COMMUNITY)
+  postCount    Int          @default(0)
+  createdAt    DateTime     @default(now())
 
   // Relations
-  posts       Post[]
+  posts        Post[]
 
   @@index([slug])
+  @@index([categoryType])
 }
 
 // 게시글 타입 enum

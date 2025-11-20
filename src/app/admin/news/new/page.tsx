@@ -40,9 +40,9 @@ export default function NewNewsPage() {
     isFeatured: false,
   });
 
-  // 카테고리 목록 로드
+  // 카테고리 목록 로드 (NEWS 타입만)
   useState(() => {
-    fetch('/api/categories')
+    fetch('/api/categories?categoryType=NEWS')
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
