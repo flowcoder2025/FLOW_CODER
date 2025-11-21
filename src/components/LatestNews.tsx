@@ -26,6 +26,15 @@ export async function LatestNews() {
           name: true,
         },
       },
+      images: {
+        where: {
+          isFeatured: true, // 대표 이미지만
+        },
+        take: 1,
+        orderBy: {
+          order: 'asc',
+        },
+      },
     },
   });
 
@@ -37,7 +46,8 @@ export async function LatestNews() {
     category: post.category.name,
     date: post.createdAt.toLocaleDateString('ko-KR'),
     trending: post.upvotes > 50, // 추천 50개 이상이면 trending
-    thumbnail: post.coverImageUrl || getDefaultNewsThumbnail(),
+    // 대표 이미지 우선, 없으면 랜덤 기본 이미지
+    thumbnail: post.images[0]?.url || getDefaultNewsThumbnail(),
   }));
   return (
     <section className="py-16">

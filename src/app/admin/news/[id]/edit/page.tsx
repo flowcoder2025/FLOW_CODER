@@ -22,14 +22,7 @@ import {
 } from '@/components/ui/select';
 import { ImageUploader, type UploadedImage } from '@/components/ImageUploader';
 
-// 뉴스 전용 카테고리 (태그 개념)
-const NEWS_CATEGORIES = [
-  '공지',
-  'IT 소식',
-  '바이브코딩',
-  '컬럼',
-  '가이드',
-] as const;
+import { NEWS_CATEGORIES } from '@/lib/news-categories';
 
 export default function EditNewsPage() {
   const router = useRouter();
@@ -145,19 +138,57 @@ export default function EditNewsPage() {
 
         // 이미지 처리 (새 이미지가 있으면)
         if (images.length > 0) {
-          await fetch(`/api/posts/images`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              postId,
-              images: images.map((img, idx) => ({
+          // 1. 먼저 모든 이미지를 Supabase Storage에 업로드
+          const uploadedImages = [];
+
+          for (const img of images) {
+            // file 객체가 있으면 업로드, 없으면 이미 업로드된 URL
+            if (img.file) {
+              const formData = new FormData();
+              formData.append('file', img.file);
+              formData.append('postId', postId);
+
+              const uploadResponse = await fetch('/api/upload/image', {
+                method: 'POST',
+                body: formData,
+              });
+
+              const uploadData = await uploadResponse.json();
+              if (uploadData.success) {
+                uploadedImages.push({
+                  url: uploadData.url,
+                  alt: img.alt,
+                  isFeatured: img.isFeatured,
+                });
+              } else {
+                console.error('이미지 업로드 실패:', uploadData.error);
+              }
+            } else {
+              // 이미 업로드된 이미지 (수정 시)
+              uploadedImages.push({
                 url: img.url,
                 alt: img.alt,
-                order: idx,
                 isFeatured: img.isFeatured,
-              })),
-            }),
-          });
+              });
+            }
+          }
+
+          // 2. 업로드된 URL들을 PostImage 테이블에 저장
+          if (uploadedImages.length > 0) {
+            await fetch(`/api/posts/images`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                postId,
+                images: uploadedImages.map((img, idx) => ({
+                  url: img.url,
+                  alt: img.alt,
+                  order: idx,
+                  isFeatured: img.isFeatured,
+                })),
+              }),
+            });
+          }
         }
 
         router.push('/admin/news');

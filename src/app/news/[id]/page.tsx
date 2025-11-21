@@ -8,6 +8,7 @@ import { NewsCard } from '@/components/NewsCard';
 import { getPostById, getNewsPosts } from '@/lib/data-access';
 import { PostType } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
+import { getNewsCategory } from '@/lib/news-categories';
 
 /**
  * 뉴스 상세 페이지
@@ -169,19 +170,9 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           <div className="flex items-center gap-2 mb-4">
             <Badge
               variant="secondary"
-              className={`text-sm ${
-                news.category.color === 'blue'
-                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                  : news.category.color === 'green'
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                    : news.category.color === 'purple'
-                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                      : news.category.color === 'orange'
-                        ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
-                        : ''
-              }`}
+              className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
             >
-              {news.category.icon} {news.category.name}
+              📰 {getNewsCategory(news.tags)}
             </Badge>
             {news.isPinned && (
               <Badge
