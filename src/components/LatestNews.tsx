@@ -67,7 +67,7 @@ export async function LatestNews() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {newsItems.map((news, index) => (
             <Link key={index} href={`/community/${news.categorySlug}/${news.id}`}>
-            <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative min-h-[320px]">
+            <Card className="h-[380px] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative">
               {/* 배경 이미지 */}
               <div
                 className="absolute inset-0 bg-cover bg-center"

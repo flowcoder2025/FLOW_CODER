@@ -87,7 +87,7 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
                 <div key={index} className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0 pr-6">
                   {item.type === "post" ? (
                     <Link href={`/community/${item.categorySlug}/${item.id}`} className="block h-full">
-                      <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative min-h-[400px]">
+                      <Card className="h-[480px] hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative">
                       {/* 배경 이미지 */}
                       <div
                         className="absolute inset-0 bg-cover bg-center"
@@ -150,8 +150,8 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
                     </Card>
                     </Link>
                   ) : (
-                    <Card className={`h-full bg-gradient-to-br ${item.gradient} text-white border-0`}>
-                      <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
+                    <Card className={`h-[480px] bg-gradient-to-br ${item.gradient} text-white border-0`}>
+                      <CardContent className="p-8 flex flex-col items-center justify-center text-center h-full">
                         <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
                         <p className="text-white/90 mb-6">{item.description}</p>
                         <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
