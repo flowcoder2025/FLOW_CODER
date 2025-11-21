@@ -72,8 +72,8 @@ export function FeaturedProjectsClient({ projects }: FeaturedProjectsClientProps
 
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-semibold">{project.title}</h3>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <h3 className="text-xl font-semibold line-clamp-2 flex-1 pr-4">{project.title}</h3>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground flex-shrink-0">
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4" />
                       {project.stars}
@@ -85,12 +85,12 @@ export function FeaturedProjectsClient({ projects }: FeaturedProjectsClientProps
                   </div>
                 </div>
 
-                <p className="text-muted-foreground mb-4 leading-relaxed">
+                <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-3">
                   {project.description}
                 </p>
 
-                <div className="flex flex-wrap gap-2">
-                  {project.techs.map((tech, techIndex) => (
+                <div className="flex flex-wrap gap-2 h-[60px] overflow-hidden">
+                  {project.techs.slice(0, 4).map((tech, techIndex) => (
                     <Badge key={techIndex} variant="outline">
                       {tech}
                     </Badge>

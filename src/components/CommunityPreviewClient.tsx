@@ -117,14 +117,14 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
                             </div>
 
                             <div className="text-xs text-white/70 mb-2">{item.author.role}</div>
-                            <h3 className="font-semibold mb-2 leading-tight text-white text-lg">{item.title}</h3>
+                            <h3 className="font-semibold mb-2 leading-tight text-white text-lg line-clamp-2">{item.title}</h3>
                             <p className="text-sm text-white/80 mb-3 line-clamp-2">
                               {item.excerpt}
                             </p>
 
                             <div className="flex items-center justify-between">
-                              <div className="flex flex-wrap gap-1">
-                                {item.tags.map((tag, tagIndex) => (
+                              <div className="flex flex-wrap gap-1 h-[52px] overflow-hidden">
+                                {item.tags.slice(0, 3).map((tag, tagIndex) => (
                                   <Badge key={tagIndex} variant="secondary" className="text-xs bg-white/20 text-white border-0 backdrop-blur-sm">
                                     {tag}
                                   </Badge>

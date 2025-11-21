@@ -89,11 +89,11 @@ export async function LatestNews() {
                   )}
                 </div>
 
-                <h3 className="text-lg font-semibold mb-2 leading-tight text-white">
+                <h3 className="text-lg font-semibold mb-2 leading-tight text-white line-clamp-2">
                   {news.title}
                 </h3>
 
-                <p className="text-sm text-white/80 mb-4">
+                <p className="text-sm text-white/80 mb-4 line-clamp-2">
                   {news.excerpt}
                 </p>
 
