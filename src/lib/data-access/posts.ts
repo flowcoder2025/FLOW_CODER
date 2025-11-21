@@ -365,10 +365,54 @@ export async function getPostsByType(
 }
 
 /**
- * 뉴스 게시글 목록 조회
+ * 뉴스 게시글 목록 조회 (삭제되지 않은 게시글만)
  */
 export async function getNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
-  return await getPostsByType(PostType.NEWS, limit);
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        postType: PostType.NEWS,
+        deletedAt: null, // 삭제되지 않은 게시글만
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            image: true,
+            reputation: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true,
+            color: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+            votes: true,
+            answers: true,
+          },
+        },
+      },
+      orderBy: [
+        { isPinned: 'desc' },
+        { createdAt: 'desc' },
+      ],
+      take: limit,
+    });
+
+    return posts || [];
+  } catch (error) {
+    console.error('[DAL] getNewsPosts error:', error);
+    throw new Error('뉴스 게시글 조회 중 오류가 발생했습니다');
+  }
 }
 
 /**

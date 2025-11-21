@@ -28,6 +28,7 @@ async function getRelatedNews(currentPostId: string, categoryId: string, limit: 
       id: { not: currentPostId },
       postType: PostType.NEWS,
       categoryId: categoryId,
+      deletedAt: null, // 삭제되지 않은 게시글만
     },
     include: {
       author: {
@@ -68,6 +69,7 @@ async function getRelatedNews(currentPostId: string, categoryId: string, limit: 
         id: { not: currentPostId },
         postType: PostType.NEWS,
         categoryId: { not: categoryId },
+        deletedAt: null, // 삭제되지 않은 게시글만
       },
       include: {
         author: {
@@ -118,10 +120,16 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
   const news = await getPostById(id);
 
-  // NEWS가 아니거나 존재하지 않으면 404
-  if (!news || news.postType !== PostType.NEWS) {
+  // NEWS가 아니거나 존재하지 않으면 404 (삭제된 게시글도 404)
+  if (!news || news.postType !== PostType.NEWS || news.deletedAt) {
     notFound();
   }
+
+  // 게시글 이미지 로드
+  const newsImages = await prisma.postImage.findMany({
+    where: { postId: id },
+    orderBy: { order: 'asc' },
+  });
 
   const relatedNews = await getRelatedNews(news.id, news.categoryId);
 
@@ -243,6 +251,23 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
         {/* 구분선 */}
         <hr className="my-8 border-border" />
+
+        {/* 게시글 이미지 */}
+        {newsImages.length > 0 && (
+          <div className="mb-8 space-y-4">
+            {newsImages.map((image, index) => (
+              <div key={image.id} className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+                <Image
+                  src={image.url}
+                  alt={image.alt || `이미지 ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 본문 콘텐츠 */}
         <article className="prose prose-slate dark:prose-invert max-w-none">

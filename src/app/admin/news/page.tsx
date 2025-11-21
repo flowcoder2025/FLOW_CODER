@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Pin, PinOff, Trash2, Search, Eye, RotateCcw, Star, Plus } from 'lucide-react';
+import { Pin, PinOff, Trash2, Search, Eye, RotateCcw, Star, Plus, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -366,6 +366,14 @@ export default function AdminNewsPage() {
                     <div className="flex gap-2">
                       {!post.deletedAt ? (
                         <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/admin/news/${post.id}/edit`)}
+                            title="수정"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
