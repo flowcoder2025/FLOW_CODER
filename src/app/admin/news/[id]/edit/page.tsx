@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,35 +31,82 @@ const NEWS_CATEGORIES = [
   '가이드',
 ] as const;
 
-export default function NewNewsPage() {
+export default function EditNewsPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [defaultCategoryId, setDefaultCategoryId] = useState<string>('');
+  const params = useParams();
+  const postId = params.id as string;
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    newsCategory: '', // 뉴스 카테고리 (태그로 저장됨)
+    newsCategory: '',
     tags: '',
     isPinned: false,
     isFeatured: false,
   });
   const [images, setImages] = useState<UploadedImage[]>([]);
 
-  // 기본 카테고리 ID 가져오기 (Post.categoryId는 필수이므로)
+  // 기존 게시글 데이터 로드
   useEffect(() => {
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data.categories.length > 0) {
-          setDefaultCategoryId(data.data.categories[0].id);
+    async function fetchPost() {
+      try {
+        const response = await fetch(`/api/posts/${postId}`);
+        const data = await response.json();
+
+        if (data.success && data.data.post) {
+          const post = data.data.post;
+
+          // 뉴스 카테고리는 tags의 첫 번째 요소 (NEWS_CATEGORIES 중 하나)
+          const newsCategory = post.tags?.find((tag: string) =>
+            NEWS_CATEGORIES.includes(tag as any)
+          ) || '';
+
+          // 나머지 태그들
+          const otherTags = post.tags?.filter((tag: string) =>
+            !NEWS_CATEGORIES.includes(tag as any)
+          ) || [];
+
+          setFormData({
+            title: post.title,
+            content: post.content,
+            newsCategory,
+            tags: otherTags.join(', '),
+            isPinned: post.isPinned || false,
+            isFeatured: post.isFeatured || false,
+          });
+
+          // 기존 이미지 로드
+          if (post.images && post.images.length > 0) {
+            const existingImages: UploadedImage[] = post.images.map((img: any) => ({
+              url: img.url,
+              isFeatured: img.isFeatured,
+              alt: img.alt,
+            }));
+            setImages(existingImages);
+          }
+        } else {
+          alert('게시글을 불러올 수 없습니다.');
+          router.push('/admin/news');
         }
-      })
-      .catch((error) => console.error('Failed to fetch default category:', error));
-  }, []);
+      } catch (error) {
+        console.error('게시글 로딩 실패:', error);
+        alert('게시글을 불러오는 중 오류가 발생했습니다.');
+        router.push('/admin/news');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (postId) {
+      fetchPost();
+    }
+  }, [postId, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       // 뉴스 카테고리를 tags 배열에 포함
@@ -72,14 +119,13 @@ export default function NewNewsPage() {
         ? [formData.newsCategory, ...additionalTags]
         : additionalTags;
 
-      const response = await fetch('/api/posts', {
-        method: 'POST',
+      // 게시글 업데이트
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: formData.title,
           content: formData.content,
-          postType: 'NEWS',
-          categoryId: defaultCategoryId, // 기본 카테고리 사용
           tags,
         }),
       });
@@ -87,19 +133,15 @@ export default function NewNewsPage() {
       const data = await response.json();
 
       if (data.success) {
-        const postId = data.data.post.id;
-
-        // isPinned 또는 isFeatured 설정이 있으면 추가 PATCH 요청
-        if (formData.isPinned || formData.isFeatured) {
-          await fetch(`/api/admin/posts/${postId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              isPinned: formData.isPinned,
-              isFeatured: formData.isFeatured,
-            }),
-          });
-        }
+        // isPinned 또는 isFeatured 설정 업데이트
+        await fetch(`/api/admin/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            isPinned: formData.isPinned,
+            isFeatured: formData.isFeatured,
+          }),
+        });
 
         // 이미지 처리 (새 이미지가 있으면)
         if (images.length > 0) {
@@ -120,15 +162,26 @@ export default function NewNewsPage() {
 
         router.push('/admin/news');
       } else {
-        alert(data.error || '생성에 실패했습니다.');
-        setLoading(false);
+        alert(data.error || '수정에 실패했습니다.');
+        setSubmitting(false);
       }
     } catch (error) {
-      console.error('Failed to create news:', error);
-      alert('생성 중 오류가 발생했습니다.');
-      setLoading(false);
+      console.error('Failed to update news:', error);
+      alert('수정 중 오류가 발생했습니다.');
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">게시글 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -140,9 +193,9 @@ export default function NewNewsPage() {
           </Button>
         </Link>
         <div>
-          <h2 className="text-3xl font-bold">새 뉴스 작성</h2>
+          <h2 className="text-3xl font-bold">뉴스 수정</h2>
           <p className="text-muted-foreground">
-            뉴스 게시글을 작성합니다.
+            뉴스 게시글을 수정합니다.
           </p>
         </div>
       </div>
@@ -152,7 +205,7 @@ export default function NewNewsPage() {
         <Card>
           <CardHeader>
             <CardTitle>기본 정보</CardTitle>
-            <CardDescription>뉴스의 기본 정보를 입력하세요.</CardDescription>
+            <CardDescription>뉴스의 기본 정보를 수정하세요.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -308,12 +361,12 @@ export default function NewNewsPage() {
         {/* 저장 버튼 */}
         <div className="flex justify-end gap-4">
           <Link href="/admin/news">
-            <Button type="button" variant="outline" disabled={loading}>
+            <Button type="button" variant="outline" disabled={submitting}>
               취소
             </Button>
           </Link>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
+          <Button type="submit" disabled={submitting}>
+            {submitting ? (
               '저장 중...'
             ) : (
               <>
