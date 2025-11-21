@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { Category, CategoryType, Prisma } from '@/generated/prisma';
+import { Category, Prisma } from '@/generated/prisma';
 
 /**
  * 반환 타입 정의
@@ -22,10 +22,9 @@ export type CategoryWithCount = Prisma.CategoryGetPayload<{
 /**
  * 모든 카테고리 조회
  */
-export async function getAllCategories(categoryType?: CategoryType): Promise<Category[]> {
+export async function getAllCategories(): Promise<Category[]> {
   try {
     const categories = await prisma.category.findMany({
-      where: categoryType ? { categoryType } : undefined,
       orderBy: {
         postCount: 'desc',
       },

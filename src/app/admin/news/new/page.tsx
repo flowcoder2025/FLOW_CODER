@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,46 +21,54 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-};
+// 뉴스 전용 카테고리 (태그 개념)
+const NEWS_CATEGORIES = [
+  '공지',
+  'IT 소식',
+  '바이브코딩',
+  '컬럼',
+  '가이드',
+] as const;
 
 export default function NewNewsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [defaultCategoryId, setDefaultCategoryId] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    categoryId: '',
+    newsCategory: '', // 뉴스 카테고리 (태그로 저장됨)
     tags: '',
     isPinned: false,
     isFeatured: false,
   });
 
-  // 카테고리 목록 로드 (NEWS 타입만)
-  useState(() => {
-    fetch('/api/categories?categoryType=NEWS')
+  // 기본 카테고리 ID 가져오기 (Post.categoryId는 필수이므로)
+  useEffect(() => {
+    fetch('/api/categories')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) {
-          setCategories(data.data.categories);
+        if (data.success && data.data.categories.length > 0) {
+          setDefaultCategoryId(data.data.categories[0].id);
         }
       })
-      .catch((error) => console.error('Failed to fetch categories:', error));
-  });
+      .catch((error) => console.error('Failed to fetch default category:', error));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const tags = formData.tags
+      // 뉴스 카테고리를 tags 배열에 포함
+      const additionalTags = formData.tags
         .split(',')
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
+
+      const tags = formData.newsCategory
+        ? [formData.newsCategory, ...additionalTags]
+        : additionalTags;
 
       const response = await fetch('/api/posts', {
         method: 'POST',
@@ -69,7 +77,7 @@ export default function NewNewsPage() {
           title: formData.title,
           content: formData.content,
           postType: 'NEWS',
-          categoryId: formData.categoryId,
+          categoryId: defaultCategoryId, // 기본 카테고리 사용
           tags,
         }),
       });
@@ -143,39 +151,42 @@ export default function NewNewsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="categoryId">카테고리 *</Label>
+              <Label htmlFor="newsCategory">뉴스 카테고리 *</Label>
               <Select
-                value={formData.categoryId}
+                value={formData.newsCategory}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, categoryId: value })
+                  setFormData({ ...formData, newsCategory: value })
                 }
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="카테고리를 선택하세요" />
+                  <SelectValue placeholder="뉴스 카테고리를 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                  {NEWS_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                선택한 카테고리는 태그로 자동 추가됩니다
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tags">태그 (선택)</Label>
+              <Label htmlFor="tags">추가 태그 (선택)</Label>
               <Input
                 id="tags"
-                placeholder="태그를 쉼표로 구분하여 입력 (예: AI, 개발, 소식)"
+                placeholder="추가 태그를 쉼표로 구분하여 입력 (예: AI, 개발, 튜토리얼)"
                 value={formData.tags}
                 onChange={(e) =>
                   setFormData({ ...formData, tags: e.target.value })
                 }
               />
               <p className="text-xs text-muted-foreground">
-                최대 5개, 각 태그는 20자 이내
+                뉴스 카테고리 외 추가 태그 (최대 5개, 각 태그는 20자 이내)
               </p>
             </div>
 
