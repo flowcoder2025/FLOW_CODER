@@ -58,7 +58,6 @@ export function ImageWithFallback({
       className={className}
       onError={handleError}
       priority={priority}
-      unoptimized // Unsplash 외부 이미지이므로 최적화 비활성화
     />
   );
 }

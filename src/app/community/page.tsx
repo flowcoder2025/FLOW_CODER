@@ -11,7 +11,8 @@ import {
 import type { PostWithAuthor as PostCardData } from '@/lib/types';
 import { PostCard } from '@/components/PostCard';
 
-export const dynamic = 'force-dynamic';
+// 60초마다 재검증 (캐싱 활성화)
+export const revalidate = 60;
 
 /**
  * 커뮤니티 메인 페이지 (Server Component)
