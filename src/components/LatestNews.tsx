@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -24,6 +25,7 @@ export async function LatestNews() {
       category: {
         select: {
           name: true,
+          slug: true,
         },
       },
       images: {
@@ -44,6 +46,7 @@ export async function LatestNews() {
     title: post.title,
     excerpt: post.content.substring(0, 100),
     category: post.category.name,
+    categorySlug: post.category.slug,
     date: post.createdAt.toLocaleDateString('ko-KR'),
     trending: post.upvotes > 50, // 추천 50개 이상이면 trending
     // 대표 이미지 우선, 없으면 랜덤 기본 이미지
@@ -63,7 +66,8 @@ export async function LatestNews() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {newsItems.map((news, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative min-h-[320px]">
+            <Link key={index} href={`/community/${news.categorySlug}/${news.id}`}>
+            <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative min-h-[320px]">
               {/* 배경 이미지 */}
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -99,6 +103,7 @@ export async function LatestNews() {
                 </div>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
       </div>

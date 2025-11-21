@@ -29,6 +29,11 @@ export async function FeaturedProjectsServer() {
     },
     take: 3,
     include: {
+      category: {
+        select: {
+          slug: true,
+        },
+      },
       images: {
         orderBy: {
           order: 'asc', // order 순으로 정렬하여 첫 번째 이미지 가져오기
@@ -51,6 +56,7 @@ export async function FeaturedProjectsServer() {
     const plainText = stripHtml(post.content);
     return {
       id: post.id,
+      categorySlug: post.category.slug,
       title: post.title,
       description: plainText.substring(0, 150) + (plainText.length > 150 ? '...' : ''),
       image: post.images[0]?.url || post.coverImageUrl || getDefaultProjectThumbnail(),

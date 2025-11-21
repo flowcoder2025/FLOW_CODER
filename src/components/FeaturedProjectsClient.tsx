@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -8,6 +9,7 @@ import { Github, ExternalLink, Star, GitFork } from "lucide-react";
 
 type Project = {
   id: string;
+  categorySlug: string;
   title: string;
   description: string;
   image: string;
@@ -36,7 +38,8 @@ export function FeaturedProjectsClient({ projects }: FeaturedProjectsClientProps
 
         <div className="grid lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <Card key={index} className={`group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${project.featured ? 'lg:col-span-2 lg:row-span-1' : ''}`}>
+            <Link key={index} href={`/community/${project.categorySlug}/${project.id}`}>
+            <Card className={`group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${project.featured ? 'lg:col-span-2 lg:row-span-1' : ''}`}>
               <div className="relative overflow-hidden">
                 <ImageWithFallback
                   src={project.image}
@@ -95,6 +98,7 @@ export function FeaturedProjectsClient({ projects }: FeaturedProjectsClientProps
                 </div>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
 
