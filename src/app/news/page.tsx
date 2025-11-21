@@ -109,7 +109,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                 ...news,
                 createdAt: news.createdAt.toISOString(),
                 updatedAt: news.updatedAt.toISOString(),
-                coverImageUrl: news.coverImageUrl || undefined,
+                coverImageUrl: (news as any).images?.[0]?.url || news.coverImageUrl || undefined,
                 author: {
                   id: news.author.id,
                   username: news.author.username || '',

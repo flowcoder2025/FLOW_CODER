@@ -393,6 +393,15 @@ export async function getNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
             color: true,
           },
         },
+        images: {
+          where: {
+            isFeatured: true, // 대표 이미지만
+          },
+          take: 1,
+          orderBy: {
+            order: 'asc',
+          },
+        },
         _count: {
           select: {
             comments: true,
