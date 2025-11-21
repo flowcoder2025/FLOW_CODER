@@ -54,20 +54,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // PostImage 레코드 생성
-    const createdImages = await prisma.postImage.createMany({
-      data: images.map((img) => ({
-        postId,
-        url: img.url,
-        isFeatured: img.isFeatured,
-        order: img.order,
-      })),
+    // 기존 이미지 삭제 후 새 이미지 생성 (트랜잭션으로 처리)
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. 기존 PostImage 레코드 모두 삭제
+      await tx.postImage.deleteMany({
+        where: { postId },
+      });
+
+      // 2. 새 PostImage 레코드 생성
+      const createdImages = await tx.postImage.createMany({
+        data: images.map((img) => ({
+          postId,
+          url: img.url,
+          isFeatured: img.isFeatured,
+          order: img.order,
+        })),
+      });
+
+      return createdImages;
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        count: createdImages.count,
+        count: result.count,
       },
     });
   } catch (error) {
