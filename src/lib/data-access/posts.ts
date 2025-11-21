@@ -172,6 +172,9 @@ export async function getPostsByCategory(
     const posts = await prisma.post.findMany({
     where: {
       category: { slug: categorySlug },
+      postType: {
+        in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+      },
     },
     include: {
       author: {
@@ -532,6 +535,11 @@ export async function getRecentPostsPaginated(
   try {
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
+        where: {
+          postType: {
+            in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+          },
+        },
         include: {
           author: {
             select: {
@@ -564,7 +572,13 @@ export async function getRecentPostsPaginated(
         skip,
         take,
       }),
-      prisma.post.count(),
+      prisma.post.count({
+        where: {
+          postType: {
+            in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+          },
+        },
+      }),
     ]);
 
     return {
