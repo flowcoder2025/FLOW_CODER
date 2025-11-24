@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@/generated/prisma';
@@ -242,6 +243,10 @@ export async function POST(request: NextRequest) {
       postType: post.postType,
       tags: post.tags,
     }).catch((err) => console.error('Webhook trigger failed:', err));
+
+    // 캐시 재검증: 게시글 목록, 카테고리별 목록
+    revalidatePath('/api/posts');
+    revalidatePath(`/api/posts?category=${post.category.slug}`);
 
     return successResponse({ post }, 201);
   } catch (error) {

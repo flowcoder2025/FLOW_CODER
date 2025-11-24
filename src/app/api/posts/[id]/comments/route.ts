@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import {
@@ -192,6 +193,10 @@ export async function POST(
 
       return newComment;
     });
+
+    // 캐시 재검증: 댓글 목록, 게시글 상세
+    revalidatePath(`/api/posts/${id}/comments`);
+    revalidatePath(`/api/posts/${id}`);
 
     return successResponse({ comment }, 201);
   } catch (error) {

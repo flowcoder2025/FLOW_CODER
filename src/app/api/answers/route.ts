@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { check } from '@/lib/permissions';
@@ -108,6 +109,9 @@ export async function POST(request: NextRequest) {
 
       return newAnswer;
     });
+
+    // 캐시 재검증: 게시글 상세 (답변 목록 포함)
+    revalidatePath(`/api/posts/${questionId}`);
 
     return NextResponse.json({ answer }, { status: 201 });
   } catch (error) {
@@ -235,6 +239,9 @@ export async function PATCH(request: NextRequest) {
         },
       },
     });
+
+    // 캐시 재검증: 게시글 상세 (답변 목록 포함)
+    revalidatePath(`/api/posts/${questionId}`);
 
     return NextResponse.json({ answer: acceptedAnswer });
   } catch (error) {

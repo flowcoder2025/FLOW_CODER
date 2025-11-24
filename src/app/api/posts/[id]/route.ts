@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { requirePermission } from '@/lib/permissions';
@@ -192,6 +193,10 @@ export async function PATCH(
       },
     });
 
+    // 캐시 재검증: 게시글 목록, 게시글 상세
+    revalidatePath('/api/posts');
+    revalidatePath(`/api/posts/${id}`);
+
     return successResponse({ post });
   } catch (error: any) {
     console.error(`PATCH /api/posts/${(await context.params).id} error:`, error);
@@ -249,6 +254,9 @@ export async function DELETE(
         },
       },
     });
+
+    // 캐시 재검증: 게시글 목록
+    revalidatePath('/api/posts');
 
     return successResponse({ success: true });
   } catch (error: any) {
