@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +11,6 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
 import {
   Select,
@@ -23,6 +22,25 @@ import {
 import { ImageUploader, type UploadedImage } from '@/components/ImageUploader';
 
 import { NEWS_CATEGORIES } from '@/lib/news-categories';
+
+// 동적 Import: react-markdown과 remark-gfm은 무겁기 때문에 lazy load
+const ReactMarkdown = dynamic(
+  () => import('react-markdown'),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-20 text-muted-foreground">
+        마크다운 렌더러 로딩 중...
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+// remark-gfm은 default export가 아니므로 별도 처리
+const remarkGfm = dynamic(
+  () => import('remark-gfm').then((mod) => mod.default),
+  { ssr: false }
+) as any;
 
 export default function EditNewsPage() {
   const router = useRouter();
