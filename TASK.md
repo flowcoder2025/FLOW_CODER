@@ -9,7 +9,7 @@
 
 ## 📋 작업 개요
 
-총 12개 개선 항목을 3개 Phase로 나누어 진행합니다.
+총 11개 개선 항목을 3개 Phase로 나누어 진행합니다.
 
 - **Phase 1 (P0)**: 보안 및 안정성 강화 (1-2주, 필수)
 - **Phase 2 (P1)**: 성능 및 품질 개선 (2-4주, 권장)
@@ -49,41 +49,11 @@
 
 ---
 
-### Task 1.2: Rate Limiting 추가 ⚡ 3-4시간
-
-**위치**: `src/lib/rate-limit.ts` (신규), API 라우트 전체
-
-- [ ] **1.2.1** Upstash Redis 설정
-  ```bash
-  npm install @upstash/ratelimit @upstash/redis
-  ```
-  - Upstash 계정 생성 및 Redis 인스턴스 생성
-  - `.env`에 `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` 추가
-
-- [ ] **1.2.2** Rate Limit 미들웨어 생성 (`src/lib/rate-limit.ts`)
-  - `authRateLimit`: 5회/분 (로그인, 회원가입)
-  - `apiRateLimit`: 100회/분 (일반 API)
-  - `postRateLimit`: 3회/분 (게시글 작성)
-
-- [ ] **1.2.3** 인증 API에 Rate Limiting 적용
-  - `src/app/api/auth/signin/route.ts`
-  - `src/app/api/auth/signup/route.ts`
-
-- [ ] **1.2.4** 게시글 작성 API에 Rate Limiting 적용
-  - `src/app/api/posts/route.ts` (POST)
-  - `src/app/api/comments/route.ts` (POST)
-
-- [ ] **1.2.5** 테스트: 연속 요청 시 429 에러 확인
-
-**산출물**: DDoS 공격 방어, 무차별 대입 공격 차단
-
----
-
-### Task 1.3: 관리자 권한 체크 완성 ⚡ 1시간
+### Task 1.2: 관리자 권한 체크 완성 ⚡ 1시간
 
 **위치**: `src/app/admin/layout.tsx:35`
 
-- [ ] **1.3.1** TODO 제거 및 Zanzibar check() 호출
+- [ ] **1.2.1** TODO 제거 및 Zanzibar check() 호출
   ```typescript
   const isAdmin = await check(session.user.id, 'system', 'global', 'admin');
   if (!isAdmin) {
@@ -91,21 +61,21 @@
   }
   ```
 
-- [ ] **1.3.2** 403 페이지 생성 (`src/app/403/page.tsx`)
+- [ ] **1.2.2** 403 페이지 생성 (`src/app/403/page.tsx`)
   - "접근 권한이 없습니다" 메시지
   - 홈으로 돌아가기 버튼
 
-- [ ] **1.3.3** 테스트: 일반 사용자로 `/admin` 접근 시 403 페이지 표시
+- [ ] **1.2.3** 테스트: 일반 사용자로 `/admin` 접근 시 403 페이지 표시
 
 **산출물**: 관리자 패널 접근 제어 완료
 
 ---
 
-### Task 1.4: API 통합 테스트 작성 ⚡ 8-10시간
+### Task 1.3: API 통합 테스트 작성 ⚡ 8-10시간
 
 **위치**: `__tests__/api/` (신규)
 
-- [ ] **1.4.1** Jest 설정
+- [ ] **1.3.1** Jest 설정
   ```bash
   npm install --save-dev jest @types/jest ts-jest
   npm install --save-dev @testing-library/react @testing-library/jest-dom
@@ -113,28 +83,28 @@
   - `jest.config.js` 생성
   - `tsconfig.json`에 테스트 경로 추가
 
-- [ ] **1.4.2** Posts API 테스트 (`__tests__/api/posts.test.ts`)
+- [ ] **1.3.2** Posts API 테스트 (`__tests__/api/posts.test.ts`)
   - GET /api/posts (목록 조회)
   - POST /api/posts (인증 필요)
   - PUT /api/posts/[id] (권한 체크)
   - DELETE /api/posts/[id] (소유자만)
 
-- [ ] **1.4.3** Auth API 테스트 (`__tests__/api/auth.test.ts`)
+- [ ] **1.3.3** Auth API 테스트 (`__tests__/api/auth.test.ts`)
   - POST /api/auth/signup (회원가입)
   - 로그인 플로우 (NextAuth)
 
-- [ ] **1.4.4** Permissions 테스트 (`__tests__/lib/permissions.test.ts`)
+- [ ] **1.3.4** Permissions 테스트 (`__tests__/lib/permissions.test.ts`)
   - Zanzibar check() 상속 테스트
   - 시스템 admin 권한 테스트
 
-- [ ] **1.4.5** Comments API 테스트 (`__tests__/api/comments.test.ts`)
+- [ ] **1.3.5** Comments API 테스트 (`__tests__/api/comments.test.ts`)
   - POST /api/posts/[id]/comments
   - DELETE /api/comments/[id]
 
-- [ ] **1.4.6** Votes API 테스트 (`__tests__/api/votes.test.ts`)
+- [ ] **1.3.6** Votes API 테스트 (`__tests__/api/votes.test.ts`)
   - POST /api/posts/[id]/vote
 
-- [ ] **1.4.7** CI/CD 통합 (`.github/workflows/test.yml`)
+- [ ] **1.3.7** CI/CD 통합 (`.github/workflows/test.yml`)
   ```yaml
   - run: npm run test
   - run: npm run test:e2e
@@ -397,11 +367,10 @@
 
 ## 📊 진행 상황 추적
 
-### Phase 1 진행률: 0% (0/4 완료)
+### Phase 1 진행률: 0% (0/3 완료)
 - [ ] Task 1.1: 비밀번호 해싱 구현
-- [ ] Task 1.2: Rate Limiting 추가
-- [ ] Task 1.3: 관리자 권한 체크 완성
-- [ ] Task 1.4: API 통합 테스트 작성
+- [ ] Task 1.2: 관리자 권한 체크 완성
+- [ ] Task 1.3: API 통합 테스트 작성
 
 ### Phase 2 진행률: 0% (0/4 완료)
 - [ ] Task 2.1: Next.js 캐싱 전략 구현
@@ -421,9 +390,9 @@
 
 ### 보안 지표
 - [ ] 비밀번호 해싱 100% 적용
-- [ ] Rate Limiting API 커버리지 100%
 - [ ] 권한 체크 통과율 100%
 - [ ] OAuth 설정 검증 통과
+- [ ] API 통합 테스트 커버리지 60% 이상
 
 ### 성능 지표
 - [ ] 페이지 로딩 속도 30-50% 향상 (캐싱)
@@ -472,13 +441,10 @@ git commit -m "docs: TASK.md Task 1.1 완료 체크"
 ```bash
 # Day 1-2
 - Task 1.1: 비밀번호 해싱
-- Task 1.2: Rate Limiting
+- Task 1.2: 관리자 권한 체크
 
-# Day 3
-- Task 1.3: 관리자 권한 체크
-
-# Day 4-5
-- Task 1.4: API 통합 테스트
+# Day 3-5
+- Task 1.3: API 통합 테스트
 ```
 
 ### Week 2: Phase 2 시작 (성능 개선)

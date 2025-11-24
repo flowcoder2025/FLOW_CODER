@@ -36,6 +36,9 @@ model User {
   reputation    Int       @default(0)
   role          UserRole  @default(USER)
 
+  // 로컬 개발 환경 이메일/비밀번호 로그인 (optional, OAuth 기본)
+  password      String?
+
   // Relations
   accounts      Account[]
   posts         Post[]
