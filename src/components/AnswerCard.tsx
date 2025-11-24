@@ -30,7 +30,7 @@ export function AnswerCard({ answer }: AnswerCardProps) {
         {/* 채택 배지 */}
         {answer.isAccepted && (
           <div className="flex items-center gap-2 mb-4 pb-4 border-b border-green-500/20">
-            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 fill-green-600 dark:fill-green-400" />
+            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
               채택된 답변
             </Badge>

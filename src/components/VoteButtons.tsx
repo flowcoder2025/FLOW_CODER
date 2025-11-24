@@ -215,7 +215,7 @@ export function VoteButtons({
           <ArrowUp
             className={`${size === 'lg' ? 'h-6 w-6' : 'h-5 w-5'} ${
               userVote === 'up'
-                ? 'text-primary fill-primary'
+                ? 'text-primary'
                 : 'text-muted-foreground hover:text-primary'
             }`}
           />
@@ -237,7 +237,7 @@ export function VoteButtons({
           <ArrowDown
             className={`${size === 'lg' ? 'h-6 w-6' : 'h-5 w-5'} ${
               userVote === 'down'
-                ? 'text-destructive fill-destructive'
+                ? 'text-destructive'
                 : 'text-muted-foreground hover:text-destructive'
             }`}
           />
@@ -258,7 +258,7 @@ export function VoteButtons({
       >
         <ArrowUp
           className={`h-3 w-3 ${
-            userVote === 'up' ? 'text-primary fill-primary' : ''
+            userVote === 'up' ? 'text-primary' : ''
           }`}
         />
       </Button>
@@ -278,7 +278,7 @@ export function VoteButtons({
       >
         <ArrowDown
           className={`h-3 w-3 ${
-            userVote === 'down' ? 'text-destructive fill-destructive' : ''
+            userVote === 'down' ? 'text-destructive' : ''
           }`}
         />
       </Button>

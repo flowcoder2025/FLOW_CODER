@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QuestionCard } from '@/components/QuestionCard';
 import { getQuestionPosts } from '@/lib/data-access';
@@ -54,7 +54,10 @@ export default async function HelpPage({ searchParams }: HelpPageProps) {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Help me</h1>
+          <h1 className="flex items-center gap-3 text-4xl font-bold mb-2">
+            <HelpCircle className="h-8 w-8" />
+            Help me
+          </h1>
           <p className="text-muted-foreground">
             커뮤니티에 질문하고 답변을 받으세요
           </p>

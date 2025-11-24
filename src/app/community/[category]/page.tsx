@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { TrendingUp, Clock, MessageSquare, PenSquare } from 'lucide-react';
+import { TrendingUp, Clock, MessageSquare, PenSquare, Lightbulb, Palette, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PostCard } from '@/components/PostCard';
 import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
@@ -11,6 +11,17 @@ import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
  * 동적 라우트: /community/[category]
  * URL search params로 정렬, 페이지네이션 처리
  */
+
+// 카테고리 slug에 따른 아이콘 매핑
+const getCategoryIcon = (slug: string) => {
+  const iconMap: Record<string, React.ReactNode> = {
+    'tips': <Lightbulb className="h-8 w-8" />,
+    'showcase': <Palette className="h-8 w-8" />,
+    'free-board': <MessageSquare className="h-8 w-8" />,
+    'vibe-coding': <Code className="h-8 w-8" />,
+  };
+  return iconMap[slug];
+};
 
 type SortOption = 'popular' | 'recent' | 'comments';
 
@@ -73,14 +84,12 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     <div className="container mx-auto px-4 py-8">
       {/* 카테고리 헤더 */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-5xl">{category.icon}</span>
-          <div>
-            <h1 className="text-4xl font-bold">{category.name}</h1>
-            <p className="text-muted-foreground mt-1">{category.description}</p>
-          </div>
-        </div>
-        <div className="mt-4 text-sm text-muted-foreground">
+        <h1 className="flex items-center gap-3 text-4xl font-bold mb-2">
+          {getCategoryIcon(categorySlug)}
+          {category.name}
+        </h1>
+        <p className="text-muted-foreground mb-4">{category.description}</p>
+        <div className="text-sm text-muted-foreground">
           총 <span className="font-semibold text-foreground">{allPosts.length}개</span>의 게시글
         </div>
       </div>

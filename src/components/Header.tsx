@@ -14,10 +14,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Menu, X, LogOut, User, Settings } from "lucide-react";
+import { Menu, X, LogOut, User, Settings, Home, Users, HelpCircle, Newspaper, Lightbulb, Palette, MessageSquare, Code } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 
 interface Category {
   id: string;
@@ -37,6 +38,18 @@ export function Header({ categories }: HeaderProps) {
   const { data: session, status } = useSession();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  // 카테고리 slug에 따른 아이콘 매핑
+  const getCategoryIcon = (slug: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      'tips': <Lightbulb className="h-4 w-4" />,
+      'showcase': <Palette className="h-4 w-4" />,
+      'free-board': <MessageSquare className="h-4 w-4" />,
+      'vibe-coding': <Code className="h-4 w-4" />,
+    };
+    return iconMap[slug];
+  };
 
   // 클라이언트에서만 테마 이미지 렌더링
   useEffect(() => {
@@ -62,27 +75,71 @@ export function Header({ categories }: HeaderProps) {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4">
-          <Link href="/" className="hover:text-primary transition-colors">홈</Link>
-          <Link href="/community" className="hover:text-primary transition-colors">커뮤니티</Link>
+        <nav className="hidden md:flex items-center gap-6">
+          <Link
+            href="/"
+            className={`flex items-center gap-2 transition-colors pb-1 ${
+              pathname === "/"
+                ? "text-foreground font-bold border-b-2 border-current"
+                : "hover:text-primary"
+            }`}
+          >
+            <Home className="h-4 w-4" />
+            홈
+          </Link>
+          <Link
+            href="/community"
+            className={`flex items-center gap-2 transition-colors pb-1 ${
+              pathname === "/community"
+                ? "text-foreground font-bold border-b-2 border-current"
+                : "hover:text-primary"
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            커뮤니티
+          </Link>
 
           {/* 카테고리별 개별 버튼 */}
           {categories.map((category) => (
             <Link
               key={category.id}
               href={`/community/${category.slug}`}
-              className="hover:text-primary transition-colors"
+              className={`flex items-center gap-2 transition-colors pb-1 ${
+                pathname.startsWith(`/community/${category.slug}`)
+                  ? "text-foreground font-bold border-b-2 border-current"
+                  : "hover:text-primary"
+              }`}
             >
-              {category.icon && <span className="mr-1">{category.icon}</span>}
+              {getCategoryIcon(category.slug)}
               {category.name}
             </Link>
           ))}
 
-          <Link href="/help" className="hover:text-primary transition-colors">Help me</Link>
-          <Link href="/news" className="hover:text-primary transition-colors">뉴스</Link>
+          <Link
+            href="/help"
+            className={`flex items-center gap-2 transition-colors pb-1 ${
+              pathname.startsWith("/help")
+                ? "text-foreground font-bold border-b-2 border-current"
+                : "hover:text-primary"
+            }`}
+          >
+            <HelpCircle className="h-4 w-4" />
+            Help me
+          </Link>
+          <Link
+            href="/news"
+            className={`flex items-center gap-2 transition-colors pb-1 ${
+              pathname.startsWith("/news")
+                ? "text-foreground font-bold border-b-2 border-current"
+                : "hover:text-primary"
+            }`}
+          >
+            <Newspaper className="h-4 w-4" />
+            뉴스
+          </Link>
         </nav>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-6">
           <ThemeToggle />
           {status === "authenticated" && session?.user && <NotificationBell />}
           {status === "authenticated" && session?.user ? (
@@ -145,19 +202,29 @@ export function Header({ categories }: HeaderProps) {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden bg-background border-b">
-          <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
+          <nav className="container mx-auto px-4 py-4 flex flex-col gap-6">
             <Link
               href="/"
-              className="hover:text-primary transition-colors"
+              className={`flex items-center gap-2 transition-colors pl-3 ${
+                pathname === "/"
+                  ? "text-foreground font-bold border-l-2 border-current"
+                  : "hover:text-primary"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
+              <Home className="h-4 w-4" />
               홈
             </Link>
             <Link
               href="/community"
-              className="hover:text-primary transition-colors"
+              className={`flex items-center gap-2 transition-colors pl-3 ${
+                pathname === "/community"
+                  ? "text-foreground font-bold border-l-2 border-current"
+                  : "hover:text-primary"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
+              <Users className="h-4 w-4" />
               커뮤니티
             </Link>
 
@@ -166,25 +233,39 @@ export function Header({ categories }: HeaderProps) {
               <Link
                 key={category.id}
                 href={`/community/${category.slug}`}
-                className="hover:text-primary transition-colors"
+                className={`flex items-center gap-2 transition-colors pl-3 ${
+                  pathname.startsWith(`/community/${category.slug}`)
+                    ? "text-foreground font-bold border-l-2 border-current"
+                    : "hover:text-primary"
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                {category.icon && <span className="mr-2">{category.icon}</span>}
+                {getCategoryIcon(category.slug)}
                 {category.name}
               </Link>
             ))}
             <Link
               href="/help"
-              className="hover:text-primary transition-colors"
+              className={`flex items-center gap-2 transition-colors pl-3 ${
+                pathname.startsWith("/help")
+                  ? "text-foreground font-bold border-l-2 border-current"
+                  : "hover:text-primary"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
+              <HelpCircle className="h-4 w-4" />
               Help me
             </Link>
             <Link
               href="/news"
-              className="hover:text-primary transition-colors"
+              className={`flex items-center gap-2 transition-colors pl-3 ${
+                pathname.startsWith("/news")
+                  ? "text-foreground font-bold border-l-2 border-current"
+                  : "hover:text-primary"
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
+              <Newspaper className="h-4 w-4" />
               뉴스
             </Link>
             <div className="flex flex-col gap-2 mt-4">

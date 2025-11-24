@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PenSquare } from 'lucide-react';
+import { PenSquare, Users, Lightbulb, Palette, MessageSquare, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAllCategories } from '@/lib/data-access/categories';
 import {
@@ -21,6 +21,17 @@ export const revalidate = 60;
  * - 카테고리 카드 표시 (DB 연동)
  * - 최근 게시글 목록 표시 (DB 연동)
  */
+
+// 카테고리 slug에 따른 아이콘 매핑
+const getCategoryIcon = (slug: string) => {
+  const iconMap: Record<string, React.ReactNode> = {
+    'tips': <Lightbulb className="h-8 w-8" />,
+    'showcase': <Palette className="h-8 w-8" />,
+    'free-board': <MessageSquare className="h-8 w-8" />,
+    'vibe-coding': <Code className="h-8 w-8" />,
+  };
+  return iconMap[slug];
+};
 
 function mapPostToCardData(post: DalPost): PostCardData {
   return {
@@ -78,11 +89,14 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
   const currentPage = pagination.page;
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-16">
+    <div className="container mx-auto px-4 py-8">
       {/* 페이지 헤더 */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-2">커뮤니티</h1>
+          <h1 className="flex items-center gap-3 text-4xl font-bold mb-2">
+            <Users className="h-8 w-8" />
+            커뮤니티
+          </h1>
           <p className="text-muted-foreground">
             바이브코딩 사용자들과 자유롭게 소통하고 지식을 공유하세요
           </p>
@@ -107,10 +121,12 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
               <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">{category.icon}</span>
+                    <div className="flex items-center gap-2">
+                      {getCategoryIcon(category.slug)}
+                      <CardTitle className="text-xl m-0">{category.name}</CardTitle>
+                    </div>
                     <Badge variant="secondary">{category.postCount}개 글</Badge>
                   </div>
-                  <CardTitle className="text-xl">{category.name}</CardTitle>
                   <CardDescription>{category.description}</CardDescription>
                 </CardHeader>
                 <CardContent>

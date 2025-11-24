@@ -221,7 +221,7 @@ export function ImageUploader({
                 {/* 대표 이미지 배지 */}
                 {image.isFeatured && (
                   <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-current" />
+                    <Star className="h-3 w-3" />
                     대표
                   </div>
                 )}

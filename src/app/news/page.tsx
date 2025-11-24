@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { NewsCard } from '@/components/NewsCard';
 import { getNewsPosts, getAllCategories } from '@/lib/data-access';
+import { Newspaper } from 'lucide-react';
 
 /**
  * 뉴스 목록 페이지 (Server Component)
@@ -43,7 +44,10 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     <div className="container mx-auto px-4 py-8">
       {/* 헤더 섹션 */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">뉴스</h1>
+        <h1 className="flex items-center gap-3 text-4xl font-bold mb-2">
+          <Newspaper className="h-8 w-8" />
+          뉴스
+        </h1>
         <p className="text-muted-foreground">
           바이브코딩의 최신 소식을 확인하세요
         </p>
@@ -61,7 +65,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
               }
               className="cursor-pointer hover:bg-primary/90 transition-colors px-4 py-2"
             >
-              📰 전체 ({allNews.length})
+              전체 ({allNews.length})
             </Badge>
           </Link>
           {newsCategories.map((category) => {
@@ -91,7 +95,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                               : ''
                   }`}
                 >
-                  {category.icon} {category.name} ({count})
+                  {category.name} ({count})
                 </Badge>
               </Link>
             );
