@@ -47,6 +47,7 @@ model User {
   votes         Vote[]
   notifications Notification[] @relation("UserNotifications")
   triggeredNotifications Notification[] @relation("NotificationActor")
+  auditLogs     AuditLog[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -333,4 +334,27 @@ model WebhookSubscription {
 
   @@index([isActive])
   @@map("webhook_subscriptions")
+}
+
+// ===== 감사 로그 시스템 (Audit Trail) =====
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?  // 작업 수행한 사용자 (null이면 시스템)
+  action      String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT 등
+  entityType  String   // Post, Comment, User, Category 등
+  entityId    String?  // 영향받은 엔티티 ID
+  metadata    Json?    // 추가 정보 (변경 전/후 값, 요청 본문 등)
+  ipAddress   String?  // 요청 IP 주소
+  userAgent   String?  // 요청 User-Agent
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
