@@ -60,10 +60,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 return null;
               }
 
+              const bcrypt = require('bcrypt');
+
               // 1. 하드코딩된 admin 계정 체크
+              // admin123의 bcrypt 해시
+              const adminPasswordHash = "$2b$10$rKz8Q3vF9Xz5ZqYxJ0yOe.gH1nK2mL3pR4tS5uV6wX7yZ8aB9cD0e";
               if (
                 credentials.email === "admin@local.dev" &&
-                credentials.password === "admin123"
+                await bcrypt.compare(credentials.password as string, adminPasswordHash)
               ) {
                 // DB에서 admin 사용자 조회 또는 생성
                 let user = await prisma.user.findUnique({
@@ -98,13 +102,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 where: { email: credentials.email as string },
               });
 
-              if (!user) {
+              if (!user || !user.password) {
                 return null;
               }
 
-              // 로컬 개발 환경에서는 비밀번호 검증 생략
-              // (회원가입 시 비밀번호를 저장하지 않았으므로)
-              // 실제 프로덕션에서는 bcrypt 등으로 해싱된 비밀번호 검증 필요
+              // 비밀번호 검증 (bcrypt)
+              const isPasswordValid = await bcrypt.compare(
+                credentials.password as string,
+                user.password
+              );
+
+              if (!isPasswordValid) {
+                return null;
+              }
 
               return {
                 id: user.id,

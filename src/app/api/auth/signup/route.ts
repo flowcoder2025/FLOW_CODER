@@ -65,13 +65,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 사용자 생성 (비밀번호는 평문으로 저장 - 로컬 개발용)
-    // 실제 프로덕션에서는 bcrypt 등으로 해싱 필요
+    // 비밀번호 해싱 (bcrypt)
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 사용자 생성 (해싱된 비밀번호 저장)
     const user = await prisma.user.create({
       data: {
         email,
         username,
         displayName: displayName || username,
+        password: hashedPassword,
         reputation: 10, // 신규 사용자 기본 평판
       },
     });
