@@ -31,9 +31,8 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   try {
     await requireAdmin();
   } catch (error: any) {
-    // 권한 없으면 홈으로 리다이렉트
-    // TODO: 에러 페이지 또는 접근 거부 페이지로 이동
-    redirect('/');
+    // 권한 없으면 403 페이지로 리다이렉트
+    redirect('/403');
   }
 
   return (
