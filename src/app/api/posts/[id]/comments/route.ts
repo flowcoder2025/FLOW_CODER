@@ -157,25 +157,40 @@ export async function POST(
       }
     }
 
-    // 댓글 생성
-    const comment = await prisma.comment.create({
-      data: {
-        content,
-        authorId: session.user.id,
-        postId: id,
-        parentId: parentId || null,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            image: true,
-            reputation: true,
+    // 댓글 생성 + Reputation 보상 (+2)
+    const comment = await prisma.$transaction(async (tx) => {
+      // 댓글 생성
+      const newComment = await tx.comment.create({
+        data: {
+          content,
+          authorId: session.user.id,
+          postId: id,
+          parentId: parentId || null,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              image: true,
+              reputation: true,
+            },
           },
         },
-      },
+      });
+
+      // 작성자에게 reputation 보상
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: {
+          reputation: {
+            increment: 2,
+          },
+        },
+      });
+
+      return newComment;
     });
 
     return successResponse({ comment }, 201);

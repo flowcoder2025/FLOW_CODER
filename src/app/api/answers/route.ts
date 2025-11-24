@@ -74,24 +74,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 답변 생성
-    const answer = await prisma.answer.create({
-      data: {
-        content,
-        questionId,
-        authorId: session.user.id,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            image: true,
-            reputation: true,
+    // 답변 생성 + Reputation 보상 (+15)
+    const answer = await prisma.$transaction(async (tx) => {
+      // 답변 생성
+      const newAnswer = await tx.answer.create({
+        data: {
+          content,
+          questionId,
+          authorId: session.user.id,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              image: true,
+              reputation: true,
+            },
           },
         },
-      },
+      });
+
+      // 작성자에게 reputation 보상
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: {
+          reputation: {
+            increment: 15,
+          },
+        },
+      });
+
+      return newAnswer;
     });
 
     return NextResponse.json({ answer }, { status: 201 });
@@ -211,7 +226,7 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
-    // TODO: 답변 작성자에게 reputation 보상 (+15)
+    // 답변 작성자에게 reputation 보상 (+15)
     await prisma.user.update({
       where: { id: acceptedAnswer.author.id },
       data: {

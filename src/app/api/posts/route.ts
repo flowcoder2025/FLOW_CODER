@@ -219,6 +219,16 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // 4. 작성자에게 reputation 보상 (+5)
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: {
+          reputation: {
+            increment: 5,
+          },
+        },
+      });
+
       return newPost;
     });
 
