@@ -183,6 +183,114 @@ Note: The development server is configured to automatically open in the browser 
 ### 테마 시스템
 `:root`/`.dark` 에 CSS 변수 정의 | `var(--background)`, `var(--primary)` 등 사용 | ❌ 색상 하드코딩 금지
 
+## 개선 작업 관리 (Improvement Task Management) 🔴
+
+### TASK.md 기반 개발 워크플로우
+
+**위치**: `./TASK.md` (프로젝트 루트)
+**목적**: 프로젝트 개선 작업을 Phase 단위로 체계적 관리
+
+#### TASK.md 구조
+```
+TASK.md
+├── Phase 1 (P0): 보안 및 안정성 강화 (즉시 개선)
+│   ├── Task 1.1: 비밀번호 해싱 구현
+│   ├── Task 1.2: Rate Limiting 추가
+│   ├── Task 1.3: 관리자 권한 체크 완성
+│   └── Task 1.4: API 통합 테스트 작성
+├── Phase 2 (P1): 성능 및 품질 개선 (단기 개선)
+│   ├── Task 2.1: Next.js 캐싱 전략 구현
+│   ├── Task 2.2: API 에러 핸들링 통일
+│   ├── Task 2.3: Zod 입력 검증 통일
+│   └── Task 2.4: Reputation 시스템 완성
+└── Phase 3 (P2): 최적화 및 확장성 (장기 개선)
+    ├── Task 3.1: Full-Text Search 구현
+    ├── Task 3.2: 동적 Import 최적화
+    ├── Task 3.3: Audit Trail 시스템
+    └── Task 3.4: 컴포넌트 테스트 작성
+```
+
+#### 작업 우선순위
+
+**🔴 P0 (Phase 1)**: 프로덕션 배포 전 **필수** 보안 취약점 해결
+**🟡 P1 (Phase 2)**: 사용자 경험 향상 및 코드 품질 개선 (**권장**)
+**🟢 P2 (Phase 3)**: 확장 가능한 아키텍처 구축 (**선택적**)
+
+#### 작업 규칙
+
+**체크리스트 표기법**:
+- `[ ]` 미완료 항목
+- `[x]` 완료 항목
+- `[~]` 진행 중 항목 (선택 사항)
+- `[-]` 스킵 항목 (선택 사항)
+
+**커밋 메시지 규칙**:
+```bash
+# Task 단위 커밋
+git commit -m "feat(auth): 비밀번호 해싱 구현 (Task 1.1)"
+
+# Sub-task 단위 커밋
+git commit -m "feat(auth): bcrypt 패키지 설치 및 설정 (Task 1.1.1)"
+
+# TASK.md 업데이트
+git commit -m "docs: TASK.md Task 1.1 완료 체크"
+```
+
+**브랜치 전략**:
+- `main`: 프로덕션 배포 브랜치
+- `Y1`: 개선 작업 메인 브랜치
+- `Y1-task-X.Y`: 개별 Task 브랜치 (선택 사항)
+
+#### 각 Task 완료 시 필수 절차
+
+1. **Sub-task 체크**: TASK.md의 모든 Sub-task `[x]` 표시
+2. **코드 검증**:
+   ```bash
+   npx tsc --noEmit    # 타입 체크
+   npm run build       # 빌드 테스트
+   npm run test        # 테스트 실행 (Phase 1 이후)
+   ```
+3. **TASK.md 업데이트**: Task 체크박스 `[x]` 표시
+4. **커밋**: Task 단위로 커밋 (🚨 push는 Phase 완료 시)
+5. **문서화**: 필요 시 관련 문서 업데이트
+
+**체크리스트**: ✅ Sub-tasks 완료 → ✅ 코드 검증 → ✅ TASK.md 체크 → ✅ Commit → ✅ 문서화
+
+#### Phase 완료 기준
+
+**Phase 1 완료 조건**:
+- ✅ 모든 Task 1.X 체크박스 완료
+- ✅ API 통합 테스트 60% 커버리지 달성
+- ✅ 보안 취약점 0개 (OWASP Top 10 기준)
+- ✅ 타입 체크 및 빌드 통과
+
+**Phase 2 완료 조건**:
+- ✅ 모든 Task 2.X 체크박스 완료
+- ✅ Lighthouse 점수 90+ 달성
+- ✅ TODO 코멘트 0개
+- ✅ 에러 핸들링 100% 통일
+
+**Phase 3 완료 조건**:
+- ✅ 선택한 Task 3.X 완료
+- ✅ 테스트 커버리지 80% 달성 (선택 시)
+- ✅ 성능 지표 목표 달성
+
+#### 진행 상황 추적
+
+TASK.md 하단의 "📊 진행 상황 추적" 섹션에서 실시간 확인:
+- Phase별 진행률 (%)
+- 완료/미완료 Task 목록
+- KPI 달성 현황
+
+#### 참고 문서
+
+- **TASK.md**: 개선 작업 로드맵 (체크리스트)
+- **docs/TASKS.md**: 기존 PRD 기반 구현 로드맵 (13주)
+- **docs/PRD.md**: 제품 요구사항 문서
+- **docs/ANALYSIS_REPORT.md**: 프로젝트 분석 보고서
+
+---
+
 ## Task 기반 개발 워크플로우 🔴
 
 특별한 요구사항이 없으면 `docs/TASKS.md` 기준으로 순차 개발 (P0 → P1 → P2)
