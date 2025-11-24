@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Eye, MessageSquare, Calendar } from 'lucide-react';
@@ -24,6 +25,8 @@ export interface NewsCardProps {
 }
 
 export function NewsCard({ news }: NewsCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-0">
@@ -33,13 +36,14 @@ export function NewsCard({ news }: NewsCardProps) {
             href={`/news/${news.id}`}
             className="relative aspect-video md:aspect-[4/3] md:w-72 overflow-hidden rounded-t-lg md:rounded-l-lg md:rounded-tr-none shrink-0 group"
           >
-            {news.coverImageUrl ? (
+            {news.coverImageUrl && !imageError ? (
               <Image
                 src={news.coverImageUrl}
                 alt={news.title}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="(max-width: 768px) 100vw, 288px"
+                onError={() => setImageError(true)}
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">

@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
         hostname: 'hybcfzamnhvmkvgkepzo.supabase.co',
       },
     ],
+    // SVG 이미지 허용 (아바타 생성 서비스용)
+    dangerouslyAllowSVG: true,
+    // SVG XSS 공격 방지 (다운로드 강제)
+    contentDispositionType: 'attachment',
   },
 };
 

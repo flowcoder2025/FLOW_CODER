@@ -28,9 +28,12 @@ interface Category {
   postCount: number;
 }
 
-export function Header() {
+interface HeaderProps {
+  categories: Category[];
+}
+
+export function Header({ categories }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
   const { data: session, status } = useSession();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -38,20 +41,6 @@ export function Header() {
   // 클라이언트에서만 테마 이미지 렌더링
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // 카테고리 목록 로드
-  useEffect(() => {
-    fetch('/api/categories')
-      .then((res) => res.json())
-      .then((response) => {
-        if (response.success && response.data?.categories) {
-          setCategories(response.data.categories);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load categories:', err);
-      });
   }, []);
 
   return (

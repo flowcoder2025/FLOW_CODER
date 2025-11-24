@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { SessionProvider } from "@/components/SessionProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { getAllCategories } from "@/lib/data-access";
 import "./globals.css";
 
 const inter = Inter({
@@ -57,17 +58,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 서버에서 카테고리 데이터 가져오기 (FOUC 방지)
+  const categories = await getAllCategories();
+
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <SessionProvider>
           <ThemeProvider>
-            <Header />
+            <Header categories={categories} />
             <main className="min-h-screen pt-20">{children}</main>
             <Footer />
           </ThemeProvider>

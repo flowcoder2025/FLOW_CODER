@@ -1,9 +1,15 @@
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 /**
- * Sentry 클라이언트 설정
- * 브라우저에서 발생하는 에러를 추적합니다.
+ * Client-Side Instrumentation
+ *
+ * React hydration 전에 실행되어 클라이언트 사이드 모니터링을 초기화합니다.
+ * sentry.client.config.ts를 대체합니다 (Turbopack 호환성).
+ *
+ * @see https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation
  */
+
+// Sentry 클라이언트 초기화
 Sentry.init({
   // Sentry DSN (Sentry 프로젝트 설정에서 가져옴)
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -42,7 +48,7 @@ Sentry.init({
         /Network request failed/i,
       ];
 
-      if (ignoredPatterns.some(pattern => pattern.test(message))) {
+      if (ignoredPatterns.some((pattern) => pattern.test(message))) {
         return null;
       }
     }
@@ -59,3 +65,18 @@ Sentry.init({
     }),
   ],
 });
+
+// 성능 모니터링 마커
+if (typeof performance !== 'undefined') {
+  performance.mark('sentry-client-initialized');
+}
+
+/**
+ * Router Transition Hook
+ *
+ * Next.js 라우터 전환을 추적하여 네비게이션 성능과 에러를 모니터링합니다.
+ * 이 hook은 사용자가 페이지 간 이동할 때마다 Sentry에 breadcrumb를 추가합니다.
+ *
+ * @see https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation
+ */
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
