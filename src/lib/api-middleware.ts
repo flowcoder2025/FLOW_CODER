@@ -62,8 +62,8 @@ const PRISMA_ERROR_MAP: Record<
  * Zod 검증 에러를 사용자 친화적 메시지로 변환
  */
 function formatZodError(error: ZodError): string {
-  const firstError = error.errors[0];
-  return firstError?.message || '입력 데이터 검증에 실패했습니다';
+  const firstIssue = error.issues[0];
+  return firstIssue?.message || '입력 데이터 검증에 실패했습니다';
 }
 
 /**
@@ -118,7 +118,7 @@ function createErrorResponse(
       {
         error: formatZodError(error),
         code: 'VALIDATION_ERROR',
-        details: error.errors,
+        details: error.issues,
         timestamp,
       },
       { status: 400 }

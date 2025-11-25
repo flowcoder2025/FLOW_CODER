@@ -1,20 +1,7 @@
 import { requireModerator } from '@/lib/admin-middleware';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, AlertCircle, Clock, Users } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// 동적 Import: recharts 라이브러리는 무겁기 때문에 lazy load
-const PerformanceChart = dynamic(
-  () => import('@/components/admin/PerformanceChart'),
-  {
-    loading: () => (
-      <div className="w-full h-[400px] flex items-center justify-center text-muted-foreground">
-        차트 로딩 중...
-      </div>
-    ),
-    ssr: false, // 차트는 클라이언트에서만 렌더링
-  }
-);
+import PerformanceChartWrapper from '@/components/admin/PerformanceChartWrapper';
 
 /**
  * 어드민 모니터링 대시보드
@@ -180,7 +167,7 @@ export default async function MonitoringPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PerformanceChart data={timeline} />
+          <PerformanceChartWrapper data={timeline} />
         </CardContent>
       </Card>
 

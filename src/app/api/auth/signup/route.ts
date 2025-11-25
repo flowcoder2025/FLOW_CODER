@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/prisma';
 
 /**
@@ -66,7 +67,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 비밀번호 해싱 (bcrypt)
-    const bcrypt = require('bcrypt');
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 사용자 생성 (해싱된 비밀번호 저장)

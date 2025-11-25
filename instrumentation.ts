@@ -48,7 +48,6 @@ export const onRequestError: Instrumentation.onRequestError = async (
           },
           render: {
             source: context.renderSource,
-            type: context.renderType,
             revalidate: context.revalidateReason,
           },
         },

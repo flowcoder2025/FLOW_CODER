@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
 import { prisma } from "./prisma";
 import { grantSystemAdmin } from "./permissions";
 
@@ -59,8 +60,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               if (!credentials?.email || !credentials?.password) {
                 return null;
               }
-
-              const bcrypt = require('bcrypt');
 
               // 1. 하드코딩된 admin 계정 체크
               // admin123의 bcrypt 해시

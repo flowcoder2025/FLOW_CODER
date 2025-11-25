@@ -93,7 +93,7 @@ export async function logAudit(params: LogAuditParams) {
         action,
         entityType,
         entityId: entityId || null,
-        metadata: metadata || null,
+        metadata: metadata ?? undefined,
         ipAddress: finalIpAddress,
         userAgent: finalUserAgent,
       },

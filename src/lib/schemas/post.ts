@@ -21,7 +21,7 @@ export const createPostSchema = z.object({
 
   postType: z
     .enum(['DISCUSSION', 'QUESTION', 'SHOWCASE', 'TUTORIAL', 'NEWS'], {
-      errorMap: () => ({ message: '올바른 게시글 타입을 선택해주세요' }),
+      message: '올바른 게시글 타입을 선택해주세요',
     })
     .optional()
     .default('DISCUSSION'),
@@ -70,7 +70,7 @@ export const updatePostSchema = z.object({
 
   postType: z
     .enum(['DISCUSSION', 'QUESTION', 'SHOWCASE', 'TUTORIAL', 'NEWS'], {
-      errorMap: () => ({ message: '올바른 게시글 타입을 선택해주세요' }),
+      message: '올바른 게시글 타입을 선택해주세요',
     })
     .optional(),
 
