@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // 검색 및 필터 조건
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     // 검색어 필터
     if (search) {
@@ -89,15 +89,16 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('GET /api/admin/users error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Unauthorized')) {
-      return unauthorizedResponse(error.message);
+    if (errorMessage.includes('Unauthorized')) {
+      return unauthorizedResponse(errorMessage);
     }
-    if (error.message?.includes('Forbidden')) {
-      return forbiddenResponse(error.message);
+    if (errorMessage.includes('Forbidden')) {
+      return forbiddenResponse(errorMessage);
     }
 
     return serverErrorResponse('사용자 목록 조회 중 오류가 발생했습니다', error);

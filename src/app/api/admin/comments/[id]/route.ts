@@ -75,12 +75,13 @@ export async function PATCH(
     }
 
     return validationErrorResponse('restore 필드가 필요합니다');
-  } catch (error: any) {
+  } catch (error) {
     console.error(`PATCH /api/admin/comments/${(await context.params).id} error:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('댓글 복구 중 오류가 발생했습니다', error);
@@ -125,12 +126,13 @@ export async function DELETE(
     });
 
     return successResponse({ success: true, message: '댓글이 삭제되었습니다' });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`DELETE /api/admin/comments/${(await context.params).id} error:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('댓글 삭제 중 오류가 발생했습니다', error);

@@ -49,11 +49,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     });
 
     return successResponse({ subscription: updated });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`PATCH /api/admin/webhooks/outbound/${(await context.params).id} error:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('웹훅 업데이트 중 오류가 발생했습니다', error);
@@ -83,11 +84,12 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     });
 
     return successResponse({ success: true, message: '웹훅이 삭제되었습니다' });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`DELETE /api/admin/webhooks/outbound/${(await context.params).id} error:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('웹훅 삭제 중 오류가 발생했습니다', error);

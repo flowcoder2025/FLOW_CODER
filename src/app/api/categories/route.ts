@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { getAllCategories } from '@/lib/data-access/categories';
 import {
   successResponse,
@@ -9,7 +8,7 @@ import {
  * GET /api/categories
  * 카테고리 목록 조회
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const categories = await getAllCategories();
     return successResponse({ categories });

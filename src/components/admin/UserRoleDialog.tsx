@@ -92,9 +92,9 @@ export function UserRoleDialog({
 
       onOpenChange(false);
       onRoleChanged?.();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Role change error:', error);
-      setError(error.message || '역할 변경 중 오류가 발생했습니다.');
+      setError(error instanceof Error ? error.message : '역할 변경 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }

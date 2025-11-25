@@ -99,6 +99,7 @@ export default function AdminCommentsPage() {
 
   useEffect(() => {
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, includeDeleted]);
 
   const handleDelete = async (commentId: string, content: string) => {

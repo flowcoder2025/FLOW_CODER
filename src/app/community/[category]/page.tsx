@@ -56,7 +56,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const regularPosts = allPosts.filter((p) => !p.isPinned);
 
   // 정렬
-  const sortFn = (a: any, b: any) => {
+  const sortFn = (a: typeof allPosts[number], b: typeof allPosts[number]) => {
     switch (sortOption) {
       case 'popular':
         const aVotes = (a._count?.votes || 0);

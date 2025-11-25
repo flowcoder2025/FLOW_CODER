@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import {
@@ -11,7 +10,7 @@ import {
  * PATCH /api/notifications/read-all
  * 모든 알림을 읽음 처리 (인증 필요)
  */
-export async function PATCH(request: NextRequest) {
+export async function PATCH() {
   try {
     // 인증 확인
     const session = await auth();

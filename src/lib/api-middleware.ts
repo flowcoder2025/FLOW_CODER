@@ -8,14 +8,14 @@ import { Prisma } from '@/generated/prisma';
 export interface ApiErrorResponse {
   error: string;
   code?: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
 }
 
 /**
  * API 성공 응답 형식
  */
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;
   timestamp: string;
@@ -26,7 +26,7 @@ export interface ApiSuccessResponse<T = any> {
  */
 export type ApiHandler = (
   request: NextRequest,
-  context?: any
+  context?: { params: Promise<Record<string, string>> }
 ) => Promise<NextResponse>;
 
 /**
@@ -196,7 +196,7 @@ function createErrorResponse(
  * ```
  */
 export function withErrorHandling(handler: ApiHandler): ApiHandler {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: { params: Promise<Record<string, string>> }) => {
     try {
       return await handler(request, context);
     } catch (error) {

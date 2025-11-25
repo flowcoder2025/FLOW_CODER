@@ -119,6 +119,7 @@ export default function AdminNewsPage() {
 
   useEffect(() => {
     fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pinnedFilter, featuredFilter, includeDeleted]);
 
   const handleTogglePin = async (postId: string, currentPinned: boolean) => {

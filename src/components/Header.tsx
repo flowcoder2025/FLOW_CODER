@@ -36,7 +36,7 @@ interface HeaderProps {
 export function Header({ categories }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
-  const { theme, resolvedTheme } = useTheme();
+  useTheme(); // 테마 훅 초기화
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 

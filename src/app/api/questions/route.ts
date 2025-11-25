@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // 필터 조건: postType은 항상 QUESTION
-    const where: any = {
+    const where: Record<string, unknown> = {
       postType: 'QUESTION',
     };
 
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 정렬 조건 구성
-    let orderBy: any = {};
+    let orderBy: Record<string, unknown> = {};
     switch (sort) {
       case 'popular':
         orderBy = { upvotes: 'desc' };

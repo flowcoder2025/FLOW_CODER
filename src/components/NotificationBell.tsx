@@ -92,7 +92,7 @@ export function NotificationBell() {
   const { data: session, status } = useSession();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   // API에서 알림 목록 가져오기
   const fetchNotifications = async () => {
@@ -131,6 +131,7 @@ export function NotificationBell() {
       setUnreadCount(0);
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session?.user]);
 
   // 알림을 읽음 처리

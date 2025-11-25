@@ -810,6 +810,7 @@ export const mockNotifications: Notification[] = [
 /**
  * 사용자의 모든 알림 조회
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getUserNotifications(userId: string): Notification[] {
   // Mock: 모든 알림 반환 (실제로는 userId로 필터링)
   return mockNotifications;
@@ -818,6 +819,7 @@ export function getUserNotifications(userId: string): Notification[] {
 /**
  * 읽지 않은 알림 개수 조회
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getUnreadNotificationCount(userId: string): number {
   return mockNotifications.filter((n) => !n.read).length;
 }

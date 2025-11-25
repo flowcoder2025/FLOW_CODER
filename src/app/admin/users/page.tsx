@@ -93,6 +93,7 @@ export default function AdminUsersPage() {
   // 검색/필터/페이지 변경 시 재조회
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, roleFilter]);
 
   // 검색 입력 디바운스

@@ -29,11 +29,12 @@ export async function GET(request: NextRequest) {
     if (!publishedOnly) {
       try {
         await requireModerator();
-      } catch (error: any) {
-        if (error.message?.includes('Unauthorized')) {
-          return unauthorizedResponse(error.message);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (errorMessage.includes('Unauthorized')) {
+          return unauthorizedResponse(errorMessage);
         }
-        return forbiddenResponse(error.message);
+        return forbiddenResponse(errorMessage);
       }
     }
 
@@ -68,11 +69,12 @@ export async function POST(request: NextRequest) {
     // 관리자 권한 확인
     try {
       await requireAdmin();
-    } catch (error: any) {
-      if (error.message?.includes('Unauthorized')) {
-        return unauthorizedResponse(error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Unauthorized')) {
+        return unauthorizedResponse(errorMessage);
       }
-      return forbiddenResponse(error.message);
+      return forbiddenResponse(errorMessage);
     }
 
     const body = await request.json();

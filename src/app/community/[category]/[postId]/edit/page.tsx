@@ -54,7 +54,7 @@ export default function EditPostPage() {
 
           // 기존 이미지가 있으면 로드
           if (post.images && post.images.length > 0) {
-            const existingImages: UploadedImage[] = post.images.map((img: any, index: number) => ({
+            const existingImages: UploadedImage[] = post.images.map((img: { url: string; isFeatured?: boolean; alt?: string }) => ({
               url: img.url,
               isFeatured: img.isFeatured,
               alt: img.alt,

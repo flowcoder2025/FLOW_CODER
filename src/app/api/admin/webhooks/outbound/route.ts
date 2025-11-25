@@ -12,7 +12,7 @@ import crypto from 'crypto';
  * GET /api/admin/webhooks/outbound
  * 관리자 전용 웹훅 구독 목록 조회
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await requireAdmin();
 
@@ -21,11 +21,12 @@ export async function GET(request: NextRequest) {
     });
 
     return successResponse({ subscriptions });
-  } catch (error: any) {
+  } catch (error) {
     console.error('GET /api/admin/webhooks/outbound error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('웹훅 목록 조회 중 오류가 발생했습니다', error);
@@ -85,11 +86,12 @@ export async function POST(request: NextRequest) {
     });
 
     return successResponse({ subscription }, 201);
-  } catch (error: any) {
+  } catch (error) {
     console.error('POST /api/admin/webhooks/outbound error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('웹훅 생성 중 오류가 발생했습니다', error);

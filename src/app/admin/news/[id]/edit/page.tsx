@@ -40,6 +40,7 @@ const ReactMarkdown = dynamic(
 const remarkGfm = dynamic(
   () => import('remark-gfm').then((mod) => mod.default),
   { ssr: false }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as any;
 
 export default function EditNewsPage() {
@@ -71,12 +72,12 @@ export default function EditNewsPage() {
 
           // 뉴스 카테고리는 tags의 첫 번째 요소 (NEWS_CATEGORIES 중 하나)
           const newsCategory = post.tags?.find((tag: string) =>
-            NEWS_CATEGORIES.includes(tag as any)
+            (NEWS_CATEGORIES as readonly string[]).includes(tag)
           ) || '';
 
           // 나머지 태그들
           const otherTags = post.tags?.filter((tag: string) =>
-            !NEWS_CATEGORIES.includes(tag as any)
+            !(NEWS_CATEGORIES as readonly string[]).includes(tag)
           ) || [];
 
           setFormData({
@@ -90,7 +91,7 @@ export default function EditNewsPage() {
 
           // 기존 이미지 로드
           if (post.images && post.images.length > 0) {
-            const existingImages: UploadedImage[] = post.images.map((img: any) => ({
+            const existingImages: UploadedImage[] = post.images.map((img: { url: string; isFeatured?: boolean; alt?: string }) => ({
               url: img.url,
               isFeatured: img.isFeatured,
               alt: img.alt,

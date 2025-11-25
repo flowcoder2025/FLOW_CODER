@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { Prisma } from '@/generated/prisma';
 import { headers } from 'next/headers';
 
 /**
@@ -47,7 +48,7 @@ export interface LogAuditParams {
   action: string;
   entityType: string;
   entityId?: string | null;
-  metadata?: Record<string, any>;
+  metadata?: Prisma.InputJsonValue;
   ipAddress?: string;
   userAgent?: string;
 }

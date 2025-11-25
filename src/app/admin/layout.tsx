@@ -30,7 +30,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   // 관리자 권한 확인
   try {
     await requireAdmin();
-  } catch (error: any) {
+  } catch {
     // 권한 없으면 403 페이지로 리다이렉트
     redirect('/403');
   }

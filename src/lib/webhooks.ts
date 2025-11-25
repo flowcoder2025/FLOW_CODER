@@ -12,7 +12,7 @@ export interface WebhookPayload {
     content?: string;
     authorId?: string;
     categoryId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

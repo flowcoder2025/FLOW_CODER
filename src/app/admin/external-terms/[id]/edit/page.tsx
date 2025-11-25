@@ -31,6 +31,7 @@ const ReactMarkdown = dynamic(
 const remarkGfm = dynamic(
   () => import('remark-gfm').then((mod) => mod.default),
   { ssr: false }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as any;
 
 type PageProps = {
@@ -52,6 +53,7 @@ export default function EditExternalTermsPage({ params }: PageProps) {
 
   useEffect(() => {
     fetchTerm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchTerm = async () => {

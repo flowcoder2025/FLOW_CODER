@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { requireModerator } from '@/lib/admin-middleware';
 import { prisma } from '@/lib/prisma';
 import {
@@ -18,7 +17,7 @@ import {
  * - totalComments: 총 댓글 수
  * - newUsersToday: 오늘의 신규 가입자 (최근 24시간)
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 모더레이터 이상 권한 확인
     await requireModerator();
@@ -57,15 +56,16 @@ export async function GET(request: NextRequest) {
         newUsersToday,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('GET /api/admin/stats error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Unauthorized')) {
-      return unauthorizedResponse(error.message);
+    if (errorMessage.includes('Unauthorized')) {
+      return unauthorizedResponse(errorMessage);
     }
-    if (error.message?.includes('Forbidden')) {
-      return forbiddenResponse(error.message);
+    if (errorMessage.includes('Forbidden')) {
+      return forbiddenResponse(errorMessage);
     }
 
     return serverErrorResponse('관리자 통계 조회 중 오류가 발생했습니다', error);

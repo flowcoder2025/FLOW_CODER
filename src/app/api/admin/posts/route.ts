@@ -140,12 +140,13 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('GET /api/admin/posts error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Unauthorized') || error.message?.includes('Forbidden')) {
-      return validationErrorResponse(error.message);
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+      return validationErrorResponse(errorMessage);
     }
 
     return serverErrorResponse('게시글 목록 조회 중 오류가 발생했습니다', error);

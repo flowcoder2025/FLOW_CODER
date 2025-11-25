@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@/generated/prisma';
 import { grantPostOwnership } from '@/lib/permissions';
 import { triggerWebhooks } from '@/lib/webhooks';
 import {

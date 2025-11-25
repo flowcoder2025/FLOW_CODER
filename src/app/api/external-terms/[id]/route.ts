@@ -27,11 +27,12 @@ export async function GET(
     // 모더레이터 이상 권한 확인
     try {
       await requireModerator();
-    } catch (error: any) {
-      if (error.message?.includes('Unauthorized')) {
-        return unauthorizedResponse(error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Unauthorized')) {
+        return unauthorizedResponse(errorMessage);
       }
-      return forbiddenResponse(error.message);
+      return forbiddenResponse(errorMessage);
     }
 
     const { id } = await context.params;
@@ -64,11 +65,12 @@ export async function PUT(
     // 관리자 권한 확인
     try {
       await requireAdmin();
-    } catch (error: any) {
-      if (error.message?.includes('Unauthorized')) {
-        return unauthorizedResponse(error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Unauthorized')) {
+        return unauthorizedResponse(errorMessage);
       }
-      return forbiddenResponse(error.message);
+      return forbiddenResponse(errorMessage);
     }
 
     const { id } = await context.params;
@@ -127,11 +129,12 @@ export async function DELETE(
     // 관리자 권한 확인
     try {
       await requireAdmin();
-    } catch (error: any) {
-      if (error.message?.includes('Unauthorized')) {
-        return unauthorizedResponse(error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Unauthorized')) {
+        return unauthorizedResponse(errorMessage);
       }
-      return forbiddenResponse(error.message);
+      return forbiddenResponse(errorMessage);
     }
 
     const { id } = await context.params;

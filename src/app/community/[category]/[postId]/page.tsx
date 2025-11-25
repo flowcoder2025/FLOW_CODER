@@ -214,6 +214,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
       </Card>
 
       {/* 댓글 섹션 */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <CommentList comments={allComments as any} commentCount={post._count.comments} />
     </div>
   );

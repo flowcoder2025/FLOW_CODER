@@ -162,7 +162,7 @@ export async function PATCH(
     const { title, content, tags, coverImageUrl } = body;
 
     // 수정할 필드만 포함
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
     if (content !== undefined) updateData.content = content;
     if (tags !== undefined) updateData.tags = tags;
@@ -198,12 +198,13 @@ export async function PATCH(
     revalidatePath(`/api/posts/${id}`);
 
     return successResponse({ post });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`PATCH /api/posts/${(await context.params).id} error:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Forbidden') || error.message?.includes('권한')) {
-      return forbiddenResponse(error.message);
+    if (errorMessage.includes('Forbidden') || errorMessage.includes('권한')) {
+      return forbiddenResponse(errorMessage);
     }
 
     return serverErrorResponse('게시글 수정 중 오류가 발생했습니다', error);
@@ -259,12 +260,13 @@ export async function DELETE(
     revalidatePath('/api/posts');
 
     return successResponse({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`DELETE /api/posts/${(await context.params).id} error:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // 권한 에러 처리
-    if (error.message?.includes('Forbidden') || error.message?.includes('권한')) {
-      return forbiddenResponse(error.message);
+    if (errorMessage.includes('Forbidden') || errorMessage.includes('권한')) {
+      return forbiddenResponse(errorMessage);
     }
 
     return serverErrorResponse('게시글 삭제 중 오류가 발생했습니다', error);

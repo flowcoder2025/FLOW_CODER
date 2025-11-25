@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { requireModerator } from '@/lib/admin-middleware';
 
 /**
@@ -100,7 +100,7 @@ function generateMockPerformanceData(): PerformanceStats {
   };
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 모더레이터 권한 확인
     await requireModerator();
@@ -112,18 +112,20 @@ export async function GET(request: NextRequest) {
       success: true,
       data: performanceData,
     });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
     // 권한 에러 처리
-    if (error.message.includes('Unauthorized') || error.message.includes('권한')) {
+    if (errorMessage.includes('Unauthorized') || errorMessage.includes('권한')) {
       return NextResponse.json(
-        { error: error.message },
+        { error: errorMessage },
         { status: 401 }
       );
     }
 
-    if (error.message.includes('Forbidden') || error.message.includes('moderator')) {
+    if (errorMessage.includes('Forbidden') || errorMessage.includes('moderator')) {
       return NextResponse.json(
-        { error: error.message },
+        { error: errorMessage },
         { status: 403 }
       );
     }

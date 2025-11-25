@@ -80,7 +80,7 @@ export async function isAdmin(): Promise<boolean> {
       'global',
       'admin'
     );
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -103,7 +103,7 @@ export async function isModerator(): Promise<boolean> {
       'global',
       'moderator'
     );
-  } catch (error) {
+  } catch {
     return false;
   }
 }

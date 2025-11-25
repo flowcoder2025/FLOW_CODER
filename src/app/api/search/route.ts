@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     // 필터 조건 구성
     const whereConditions: string[] = ['p."deletedAt" IS NULL'];
-    const queryParams: any[] = [];
+    const queryParams: unknown[] = [];
     let paramIndex = 1;
 
     if (category) {
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
       WHERE ${whereConditions.join(' AND ')}
         AND to_tsvector('simple', p.title || ' ' || p.content) @@ to_tsquery('simple', $${paramIndex})
     `;
-    const countResult: any = await prisma.$queryRawUnsafe(countSql, ...queryParams.slice(0, -2), tsquery);
+    const countResult = await prisma.$queryRawUnsafe(countSql, ...queryParams.slice(0, -2), tsquery) as { count: string }[];
     const total = parseInt(countResult[0]?.count || '0');
 
     return successResponse({
