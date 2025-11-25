@@ -35,6 +35,32 @@ const nextConfig: NextConfig = {
     // SVG XSS 공격 방지 (다운로드 강제)
     contentDispositionType: 'attachment',
   },
+  // 성능 최적화
+  experimental: {
+    // PPR (Partial Prerendering) - 정적/동적 콘텐츠 최적화
+    ppr: false,
+    // 서버 액션 최적화
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    // 클라이언트 추적 메타데이터 (Sentry 연동)
+    clientTraceMetadata: ['baggage', 'sentry-trace'],
+  },
+  // 개발 모드 성능 최적화
+  reactStrictMode: false, // 개발 시 이중 렌더링 방지
+  // 로깅 최소화
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+  // 컴파일러 최적화
+  compiler: {
+    // 프로덕션에서 console.log 제거
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
 };
 
 // Sentry 설정 옵션

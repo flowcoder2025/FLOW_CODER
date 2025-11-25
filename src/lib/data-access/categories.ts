@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { Category, Prisma } from '@/generated/prisma';
+import { unstable_cache } from 'next/cache';
 
 /**
  * 반환 타입 정의
@@ -20,10 +21,9 @@ export type CategoryWithCount = Prisma.CategoryGetPayload<{
 }>;
 
 /**
- * 모든 카테고리 조회
- * 빌드 시 DB 연결 실패 시 빈 배열 반환 (정적 페이지 생성 지원)
+ * 내부 카테고리 조회 함수 (캐싱 없음)
  */
-export async function getAllCategories(): Promise<Category[]> {
+async function fetchAllCategories(): Promise<Category[]> {
   try {
     const categories = await prisma.category.findMany({
       orderBy: {
@@ -42,6 +42,19 @@ export async function getAllCategories(): Promise<Category[]> {
     throw new Error('카테고리 목록 조회 중 오류가 발생했습니다');
   }
 }
+
+/**
+ * 모든 카테고리 조회 (5분 캐싱)
+ * Layout에서 매 요청마다 호출되므로 캐싱으로 성능 최적화
+ */
+export const getAllCategories = unstable_cache(
+  fetchAllCategories,
+  ['all-categories'],
+  {
+    revalidate: 300, // 5분마다 재검증
+    tags: ['categories'],
+  }
+);
 
 /**
  * slug로 카테고리 조회
