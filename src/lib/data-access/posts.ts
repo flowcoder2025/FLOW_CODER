@@ -420,6 +420,11 @@ export async function getNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
     return posts || [];
   } catch (error) {
     console.error('[DAL] getNewsPosts error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 배열 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getNewsPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      return [];
+    }
     throw new Error('뉴스 게시글 조회 중 오류가 발생했습니다');
   }
 }
@@ -476,6 +481,11 @@ export async function getQuestionPosts(
     return posts || [];
   } catch (error) {
     console.error('[DAL] getQuestionPosts error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 배열 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getQuestionPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      return [];
+    }
     throw new Error('Q&A 게시글 조회 중 오류가 발생했습니다');
   }
 }
@@ -523,6 +533,11 @@ export async function getRecentPosts(
     return posts || [];
   } catch (error) {
     console.error('[DAL] getRecentPosts error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 배열 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getRecentPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      return [];
+    }
     throw new Error('최신 게시글 조회 중 오류가 발생했습니다');
   }
 }
@@ -645,6 +660,14 @@ export async function getRecentPostsPaginated(
     };
   } catch (error) {
     console.error('[DAL] getRecentPostsPaginated error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 결과 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getRecentPostsPaginated: 빌드 중 DB 연결 실패, 빈 결과 반환');
+      return {
+        posts: [],
+        pagination: { total: 0, page: 1, limit: 20, totalPages: 0 },
+      };
+    }
     throw new Error('최신 게시글 페이지네이션 조회 중 오류가 발생했습니다');
   }
 }

@@ -137,6 +137,11 @@ export async function getTopUsersByReputation(
     return users || [];
   } catch (error) {
     console.error('[DAL] getTopUsersByReputation error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 배열 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getTopUsersByReputation: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      return [];
+    }
     throw new Error('평판 순위 TOP 사용자 조회 중 오류가 발생했습니다');
   }
 }

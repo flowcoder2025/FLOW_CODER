@@ -21,6 +21,7 @@ export type CategoryWithCount = Prisma.CategoryGetPayload<{
 
 /**
  * 모든 카테고리 조회
+ * 빌드 시 DB 연결 실패 시 빈 배열 반환 (정적 페이지 생성 지원)
  */
 export async function getAllCategories(): Promise<Category[]> {
   try {
@@ -33,6 +34,11 @@ export async function getAllCategories(): Promise<Category[]> {
     return categories || [];
   } catch (error) {
     console.error('[DAL] getAllCategories error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 배열 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getAllCategories: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      return [];
+    }
     throw new Error('카테고리 목록 조회 중 오류가 발생했습니다');
   }
 }
@@ -92,6 +98,11 @@ export async function getCategoriesWithPostCount(): Promise<CategoryWithCount[]>
     return categories || [];
   } catch (error) {
     console.error('[DAL] getCategoriesWithPostCount error:', error);
+    // 빌드 시 DB 연결 실패 시 빈 배열 반환
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn('[DAL] getCategoriesWithPostCount: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      return [];
+    }
     throw new Error('카테고리별 게시글 수 조회 중 오류가 발생했습니다');
   }
 }

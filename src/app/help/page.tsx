@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { QuestionCard } from '@/components/QuestionCard';
 import { getQuestionPosts } from '@/lib/data-access';
 
+// Q&A는 항상 최신 데이터가 필요하므로 동적 렌더링
+export const dynamic = 'force-dynamic';
+
 /**
  * Help me - Q&A 목록 페이지 (Server Component)
  *

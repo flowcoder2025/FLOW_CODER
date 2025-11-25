@@ -255,7 +255,7 @@ export default function AdminCommentsPage() {
                       target="_blank"
                     >
                       <span className="line-clamp-2">{comment.post.title}</span>
-                      <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                      <ExternalLink className="h-3 w-3 shrink-0" />
                     </Link>
                   </TableCell>
                   <TableCell className="text-sm">
