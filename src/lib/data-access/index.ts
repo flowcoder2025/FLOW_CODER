@@ -42,3 +42,12 @@ export {
   getAnswersByUser,
   getAnswerById,
 } from './answers';
+
+// Home Page (병렬 페칭 + 캐싱)
+export {
+  getHomePageData,
+  type HomePageData,
+  type FeaturedPost,
+  type NewsItem,
+  type Project,
+} from './home';

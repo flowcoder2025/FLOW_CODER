@@ -32,6 +32,10 @@ export const prisma =
         url: getDatabaseUrl(),
       },
     },
+    // 프로덕션 환경에서 로깅 비활성화 (성능 최적화)
+    log: process.env.NODE_ENV === 'production'
+      ? []
+      : ['warn', 'error'],
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
