@@ -4,43 +4,47 @@ import * as Sentry from "@sentry/nextjs";
  * Sentry 서버 설정
  * Node.js 서버에서 발생하는 에러를 추적합니다.
  */
-Sentry.init({
-  // Sentry DSN (Sentry 프로젝트 설정에서 가져옴)
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // 환경 설정
-  environment: process.env.NODE_ENV,
+// DSN이 없으면 Sentry 초기화 건너뛰기 (개발 환경 로그 방지)
+if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  Sentry.init({
+    // Sentry DSN (Sentry 프로젝트 설정에서 가져옴)
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // 샘플링 비율 설정
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    // 환경 설정
+    environment: process.env.NODE_ENV,
 
-  // 디버그 모드 (개발 환경에서만)
-  debug: process.env.NODE_ENV === 'development',
+    // 샘플링 비율 설정
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
-  // 에러 필터링
-  beforeSend(event, hint) {
-    // 개발 환경에서는 콘솔에만 출력
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Sentry Server Error:', hint.originalException || hint.syntheticException);
-      return null;
-    }
+    // 디버그 모드 비활성화 (불필요한 콘솔 로그 방지)
+    debug: false,
 
-    // Prisma 에러 정보 향상
-    const error = hint.originalException;
-    if (error && typeof error === 'object' && 'code' in error) {
-      event.tags = {
-        ...event.tags,
-        error_code: String(error.code),
-      };
-    }
+    // 에러 필터링
+    beforeSend(event, hint) {
+      // 개발 환경에서는 콘솔에만 출력
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Sentry Server Error:', hint.originalException || hint.syntheticException);
+        return null;
+      }
 
-    return event;
-  },
+      // Prisma 에러 정보 향상
+      const error = hint.originalException;
+      if (error && typeof error === 'object' && 'code' in error) {
+        event.tags = {
+          ...event.tags,
+          error_code: String(error.code),
+        };
+      }
 
-  // 서버 에러 컨텍스트 추가
-  initialScope: {
-    tags: {
-      runtime: 'node',
+      return event;
     },
-  },
-});
+
+    // 서버 에러 컨텍스트 추가
+    initialScope: {
+      tags: {
+        runtime: 'node',
+      },
+    },
+  });
+}
