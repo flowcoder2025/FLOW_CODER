@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { QuestionCard } from '@/components/QuestionCard';
 import { getQuestionPosts } from '@/lib/data-access';
 
-// Q&A는 항상 최신 데이터가 필요하므로 동적 렌더링
-export const dynamic = 'force-dynamic';
+// ISR: 1분마다 재검증 (Q&A는 실시간성 요구)
+export const revalidate = 60;
 
 /**
  * Help me - Q&A 목록 페이지 (Server Component)
@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
  * - 질문 목록 표시
  * - 필터링: 전체 / 미답변 / 채택됨 (URL search params)
  * - 질문하기 버튼
+ * - 1분 캐싱으로 성능과 실시간성 균형
  *
  * 라우트: /help
  */

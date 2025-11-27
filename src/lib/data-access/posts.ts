@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { PostType, Prisma, VoteType } from '@/generated/prisma';
+import { unstable_cache } from 'next/cache';
 
 /**
  * 반환 타입 정의
@@ -365,9 +366,9 @@ export async function getPostsByType(
 }
 
 /**
- * 뉴스 게시글 목록 조회 (삭제되지 않은 게시글만)
+ * 내부 함수: 뉴스 게시글 목록 조회
  */
-export async function getNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
+async function fetchNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
   try {
     const posts = await prisma.post.findMany({
       where: {
@@ -419,10 +420,10 @@ export async function getNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
 
     return posts || [];
   } catch (error) {
-    console.error('[DAL] getNewsPosts error:', error);
+    console.error('[DAL] fetchNewsPosts error:', error);
     // 빌드 시 DB 연결 실패 시 빈 배열 반환
     if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
-      console.warn('[DAL] getNewsPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      console.warn('[DAL] fetchNewsPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
       return [];
     }
     throw new Error('뉴스 게시글 조회 중 오류가 발생했습니다');
@@ -430,9 +431,21 @@ export async function getNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
 }
 
 /**
- * Q&A 게시글 목록 조회 (답변 정보 포함)
+ * 뉴스 게시글 목록 조회 (3분 캐싱)
  */
-export async function getQuestionPosts(
+export const getNewsPosts = unstable_cache(
+  fetchNewsPosts,
+  ['news-posts'],
+  {
+    revalidate: 180, // 3분마다 재검증
+    tags: ['news', 'posts'],
+  }
+);
+
+/**
+ * 내부 함수: Q&A 게시글 목록 조회
+ */
+async function fetchQuestionPosts(
   limit?: number
 ): Promise<PostWithAnswers[]> {
   try {
@@ -480,15 +493,27 @@ export async function getQuestionPosts(
 
     return posts || [];
   } catch (error) {
-    console.error('[DAL] getQuestionPosts error:', error);
+    console.error('[DAL] fetchQuestionPosts error:', error);
     // 빌드 시 DB 연결 실패 시 빈 배열 반환
     if (process.env.NODE_ENV === 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
-      console.warn('[DAL] getQuestionPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
+      console.warn('[DAL] fetchQuestionPosts: 빌드 중 DB 연결 실패, 빈 배열 반환');
       return [];
     }
     throw new Error('Q&A 게시글 조회 중 오류가 발생했습니다');
   }
 }
+
+/**
+ * Q&A 게시글 목록 조회 (1분 캐싱 - Q&A는 자주 갱신 필요)
+ */
+export const getQuestionPosts = unstable_cache(
+  fetchQuestionPosts,
+  ['question-posts'],
+  {
+    revalidate: 60, // 1분마다 재검증 (Q&A는 실시간성 요구)
+    tags: ['questions', 'posts'],
+  }
+);
 
 /**
  * 최신 게시글 조회 (메인 페이지용)

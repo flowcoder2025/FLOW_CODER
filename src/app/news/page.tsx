@@ -5,6 +5,9 @@ import { NewsCard } from '@/components/NewsCard';
 import { getNewsPosts, getAllCategories } from '@/lib/data-access';
 import { Newspaper } from 'lucide-react';
 
+// ISR: 3분마다 재검증
+export const revalidate = 180;
+
 /**
  * 뉴스 목록 페이지 (Server Component)
  *
@@ -12,6 +15,7 @@ import { Newspaper } from 'lucide-react';
  * - NEWS 타입 게시글 목록 표시
  * - 카테고리별 필터링 (URL search params 사용)
  * - 날짜 내림차순 정렬
+ * - 3분 캐싱으로 성능 최적화
  */
 
 interface NewsPageProps {
@@ -23,16 +27,16 @@ interface NewsPageProps {
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const { category: selectedCategory } = await searchParams;
 
-  // 모든 카테고리 가져오기
-  const allCategories = await getAllCategories();
+  // 병렬로 데이터 가져오기 (성능 최적화)
+  const [allCategories, allNews] = await Promise.all([
+    getAllCategories(),
+    getNewsPosts(),
+  ]);
 
   // NEWS 카테고리만 필터링
   const newsCategories = allCategories.filter((cat) =>
     cat.slug.startsWith('news-')
   );
-
-  // NEWS 타입 게시글 가져오기
-  const allNews = await getNewsPosts();
 
   // 카테고리로 필터링된 뉴스
   const filteredNews =
