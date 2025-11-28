@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>FlowCoder 뉴스레터</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Reset */
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+
+    /* Base */
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+      .email-wrapper {
+        background-color: #1a1a1a !important;
+      }
+      .email-container {
+        background-color: #262626 !important;
+      }
+      .email-header {
+        background-color: #1a1a1a !important;
+        border-bottom-color: #333333 !important;
+      }
+      .email-content h1,
+      .email-content h2,
+      .email-content h3,
+      .email-content p,
+      .section-title {
+        color: #fafafa !important;
+      }
+      .muted-text {
+        color: #a3a3a3 !important;
+      }
+      .article-card {
+        background-color: #333333 !important;
+        border-color: #404040 !important;
+      }
+      .article-title {
+        color: #fafafa !important;
+      }
+      .article-excerpt {
+        color: #a3a3a3 !important;
+      }
+      .article-meta {
+        color: #737373 !important;
+      }
+      .tip-box {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+      }
+      .email-footer {
+        background-color: #1a1a1a !important;
+        border-top-color: #333333 !important;
+      }
+      .footer-text {
+        color: #737373 !important;
+      }
+      .divider {
+        border-color: #333333 !important;
+      }
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 1000px) {
+      .email-container {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .responsive-padding {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+      }
+      .mobile-center {
+        text-align: center !important;
+      }
+      .article-stack {
+        display: block !important;
+      }
+      .article-stack td {
+        display: block !important;
+        width: 100% !important;
+        padding-right: 0 !important;
+        padding-bottom: 16px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5;">
+  <!-- Email Wrapper -->
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-wrapper" style="background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+
+        <!-- Email Container -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="1000" class="email-container" style="max-width: 1000px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+
+          <!-- Header -->
+          <tr>
+            <td class="email-header" style="padding: 32px 40px; text-align: center; border-bottom: 1px solid #e5e5e5;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <!-- 로고 -->
+                    <img src="{{LOGO_URL}}" alt="FlowCoder" width="40" height="40" style="display: block; margin: 0 auto 12px;">
+                    <span style="font-size: 20px; font-weight: 600; color: #1a1a1a;">FlowCoder</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 12px;">
+                    <span style="font-size: 14px; color: #737373;">{{NEWSLETTER_DATE}}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Hero Section -->
+          <tr>
+            <td class="email-content responsive-padding" style="padding: 40px 40px 32px;">
+              <h1 style="margin: 0 0 16px; font-size: 28px; font-weight: 700; color: #1a1a1a; text-align: center; line-height: 1.3;">
+                {{NEWSLETTER_TITLE}}
+              </h1>
+              <p class="muted-text" style="margin: 0; font-size: 16px; color: #525252; line-height: 1.6; text-align: center;">
+                {{NEWSLETTER_SUBTITLE}}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Featured Article -->
+          <tr>
+            <td class="responsive-padding" style="padding: 0 40px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="background-color: #fafafa; border-radius: 12px; overflow: hidden;">
+                    <!-- Featured Image -->
+                    <a href="{{FEATURED_URL}}" target="_blank" style="text-decoration: none;">
+                      <img src="{{FEATURED_IMAGE}}" alt="{{FEATURED_TITLE}}" width="920" style="display: block; width: 100%; height: auto; border-radius: 12px 12px 0 0;">
+                    </a>
+                    <div style="padding: 24px;">
+                      <span style="display: inline-block; padding: 4px 12px; background-color: #1a1a1a; color: #ffffff; font-size: 12px; font-weight: 500; border-radius: 20px; margin-bottom: 12px;">
+                        {{FEATURED_CATEGORY}}
+                      </span>
+                      <h2 style="margin: 0 0 12px; font-size: 20px; font-weight: 600; color: #1a1a1a; line-height: 1.4;">
+                        <a href="{{FEATURED_URL}}" target="_blank" style="color: #1a1a1a; text-decoration: none;">
+                          {{FEATURED_TITLE}}
+                        </a>
+                      </h2>
+                      <p class="muted-text" style="margin: 0 0 16px; font-size: 14px; color: #525252; line-height: 1.6;">
+                        {{FEATURED_EXCERPT}}
+                      </p>
+                      <a href="{{FEATURED_URL}}" target="_blank" style="font-size: 14px; font-weight: 500; color: #1a1a1a; text-decoration: none;">
+                        자세히 읽기 &rarr;
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr>
+            <td class="responsive-padding" style="padding: 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td class="divider" style="border-bottom: 1px solid #e5e5e5;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Recent Articles Section -->
+          <tr>
+            <td class="responsive-padding" style="padding: 32px 40px;">
+              <h3 class="section-title" style="margin: 0 0 24px; font-size: 18px; font-weight: 600; color: #1a1a1a;">
+                이번 주 인기 게시글
+              </h3>
+
+              <!-- Article 1 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="article-card" style="margin-bottom: 20px; border: 1px solid #e5e5e5; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr class="article-stack">
+                        <td width="80" style="padding-right: 16px; vertical-align: top;">
+                          <img src="{{ARTICLE_1_IMAGE}}" alt="" width="80" height="80" style="display: block; border-radius: 8px; object-fit: cover;">
+                        </td>
+                        <td style="vertical-align: top;">
+                          <h4 class="article-title" style="margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #1a1a1a; line-height: 1.4;">
+                            <a href="{{ARTICLE_1_URL}}" target="_blank" style="color: inherit; text-decoration: none;">
+                              {{ARTICLE_1_TITLE}}
+                            </a>
+                          </h4>
+                          <p class="article-excerpt muted-text" style="margin: 0 0 8px; font-size: 14px; color: #525252; line-height: 1.5;">
+                            {{ARTICLE_1_EXCERPT}}
+                          </p>
+                          <span class="article-meta" style="font-size: 12px; color: #737373;">
+                            {{ARTICLE_1_AUTHOR}} · {{ARTICLE_1_DATE}}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Article 2 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="article-card" style="margin-bottom: 20px; border: 1px solid #e5e5e5; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr class="article-stack">
+                        <td width="80" style="padding-right: 16px; vertical-align: top;">
+                          <img src="{{ARTICLE_2_IMAGE}}" alt="" width="80" height="80" style="display: block; border-radius: 8px; object-fit: cover;">
+                        </td>
+                        <td style="vertical-align: top;">
+                          <h4 class="article-title" style="margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #1a1a1a; line-height: 1.4;">
+                            <a href="{{ARTICLE_2_URL}}" target="_blank" style="color: inherit; text-decoration: none;">
+                              {{ARTICLE_2_TITLE}}
+                            </a>
+                          </h4>
+                          <p class="article-excerpt muted-text" style="margin: 0 0 8px; font-size: 14px; color: #525252; line-height: 1.5;">
+                            {{ARTICLE_2_EXCERPT}}
+                          </p>
+                          <span class="article-meta" style="font-size: 12px; color: #737373;">
+                            {{ARTICLE_2_AUTHOR}} · {{ARTICLE_2_DATE}}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Article 3 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="article-card" style="border: 1px solid #e5e5e5; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr class="article-stack">
+                        <td width="80" style="padding-right: 16px; vertical-align: top;">
+                          <img src="{{ARTICLE_3_IMAGE}}" alt="" width="80" height="80" style="display: block; border-radius: 8px; object-fit: cover;">
+                        </td>
+                        <td style="vertical-align: top;">
+                          <h4 class="article-title" style="margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #1a1a1a; line-height: 1.4;">
+                            <a href="{{ARTICLE_3_URL}}" target="_blank" style="color: inherit; text-decoration: none;">
+                              {{ARTICLE_3_TITLE}}
+                            </a>
+                          </h4>
+                          <p class="article-excerpt muted-text" style="margin: 0 0 8px; font-size: 14px; color: #525252; line-height: 1.5;">
+                            {{ARTICLE_3_EXCERPT}}
+                          </p>
+                          <span class="article-meta" style="font-size: 12px; color: #737373;">
+                            {{ARTICLE_3_AUTHOR}} · {{ARTICLE_3_DATE}}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- View All Button -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{COMMUNITY_URL}}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: transparent; color: #1a1a1a; font-size: 14px; font-weight: 500; text-decoration: none; border: 1px solid #e5e5e5; border-radius: 8px;">
+                      모든 게시글 보기
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr>
+            <td class="responsive-padding" style="padding: 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td class="divider" style="border-bottom: 1px solid #e5e5e5;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Tips Section -->
+          <tr>
+            <td class="responsive-padding" style="padding: 32px 40px;">
+              <h3 class="section-title" style="margin: 0 0 20px; font-size: 18px; font-weight: 600; color: #1a1a1a;">
+                이번 주 개발 팁
+              </h3>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="tip-box" style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td width="40" style="vertical-align: top;">
+                          <!-- Lightbulb Icon -->
+                          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMjg0YzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMTRjLjItMSAuNy0xLjcgMS41LTIuNSAxLS45IDEuNS0yLjIgMS41LTMuNUE2IDYgMCAwIDAgNiA4YzAgMS0uMiAyLjEtLjkgMy0uNy45LTEuMSAyLTEuMSAzIi8+PHBhdGggZD0iTTkgMThoNiIvPjxwYXRoIGQ9Ik0xMCAyMmg0Ii8+PC9zdmc+" alt="Tip" width="24" height="24">
+                        </td>
+                        <td style="padding-left: 12px;">
+                          <h4 style="margin: 0 0 8px; font-size: 15px; font-weight: 600; color: #0369a1;">
+                            {{TIP_TITLE}}
+                          </h4>
+                          <p style="margin: 0; font-size: 14px; color: #0c4a6e; line-height: 1.6;">
+                            {{TIP_CONTENT}}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr>
+            <td class="responsive-padding" style="padding: 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td class="divider" style="border-bottom: 1px solid #e5e5e5;"></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Community Stats -->
+          <tr>
+            <td class="responsive-padding" style="padding: 32px 40px;">
+              <h3 class="section-title" style="margin: 0 0 20px; font-size: 18px; font-weight: 600; color: #1a1a1a; text-align: center;">
+                이번 주 커뮤니티 현황
+              </h3>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="33%" align="center" style="padding: 16px;">
+                    <div style="font-size: 28px; font-weight: 700; color: #1a1a1a;">{{STAT_NEW_MEMBERS}}</div>
+                    <div style="font-size: 13px; color: #737373; margin-top: 4px;">신규 멤버</div>
+                  </td>
+                  <td width="33%" align="center" style="padding: 16px; border-left: 1px solid #e5e5e5; border-right: 1px solid #e5e5e5;">
+                    <div style="font-size: 28px; font-weight: 700; color: #1a1a1a;">{{STAT_NEW_POSTS}}</div>
+                    <div style="font-size: 13px; color: #737373; margin-top: 4px;">새 게시글</div>
+                  </td>
+                  <td width="33%" align="center" style="padding: 16px;">
+                    <div style="font-size: 28px; font-weight: 700; color: #1a1a1a;">{{STAT_COMMENTS}}</div>
+                    <div style="font-size: 13px; color: #737373; margin-top: 4px;">댓글</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA Section -->
+          <tr>
+            <td class="responsive-padding" style="padding: 0 40px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #1a1a1a; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 32px; text-align: center;">
+                    <h3 style="margin: 0 0 12px; font-size: 20px; font-weight: 600; color: #ffffff;">
+                      커뮤니티에 참여하세요
+                    </h3>
+                    <p style="margin: 0 0 20px; font-size: 14px; color: #a3a3a3; line-height: 1.6;">
+                      다른 개발자들과 함께 성장하고, 영감을 나누세요.
+                    </p>
+                    <a href="{{COMMUNITY_URL}}" target="_blank" style="display: inline-block; padding: 14px 32px; background-color: #ffffff; color: #1a1a1a; font-size: 15px; font-weight: 500; text-decoration: none; border-radius: 8px;">
+                      커뮤니티 방문하기
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="email-footer responsive-padding" style="padding: 32px 40px; background-color: #fafafa; border-top: 1px solid #e5e5e5; border-radius: 0 0 12px 12px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <!-- 소셜 링크 -->
+                <tr>
+                  <td align="center" style="padding-bottom: 20px;">
+                    <a href="{{GITHUB_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMjJ2LTRhNC44IDQuOCAwIDAgMC0xLTMuNWMzIDAgNi0yIDYtNS41LjA4LTEuMjUtLjI3LTIuNDgtMS0zLjUuMjgtMS4xNS4yOC0yLjM1IDAtMy41IDAgMC0xIDAtMyAxLjUtMi42NC0uNS01LjM2LS41LTggMEM2IDIgNSAyIDUgMmMtLjMgMS4xNS0uMyAyLjM1IDAgMy41QTUuNDAzIDUuNDAzIDAgMCAwIDQgOWMwIDMuNSAzIDUuNSA2IDUuNS0uMzkuNDktLjY4IDEuMDUtLjg1IDEuNjUtLjE3LjYtLjIyIDEuMjMtLjE1IDEuODV2NCIvPjxwYXRoIGQ9Ik05IDE4Yy00LjUxIDItNS0yLTctMiIvPjwvc3ZnPg==" alt="GitHub" width="20" height="20">
+                    </a>
+                    <a href="{{TWITTER_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjIgNHMtLjcgMi4xLTIgMy40YzEuNiAxMC05LjQgMTcuMy0xOCAxMS42IDIuMi4xIDQuNC0uNiA2LTJDMyAxNS41LjUgOS42IDMgNWMyLjIgMi42IDUuNiA0LjEgOSA0LS45LTQuMiA0LTYuNiA3LTMuOCAxLjEgMCAzLTEuMiAzLTEuMnoiLz48L3N2Zz4=" alt="Twitter" width="20" height="20">
+                    </a>
+                    <a href="{{LINKEDIN_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgOGE2IDYgMCAwIDEgNiA2djdoLTR2LTdhMiAyIDAgMCAwLTItMiAyIDIgMCAwIDAtMiAydjdoLTR2LTdhNiA2IDAgMCAxIDYtNnoiLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIxMiIgeD0iMiIgeT0iOSIvPjxjaXJjbGUgY3g9IjQiIGN5PSI0IiByPSIyIi8+PC9zdmc+" alt="LinkedIn" width="20" height="20">
+                    </a>
+                    <a href="{{DISCORD_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTUuNWE4LjM4IDguMzggMCAwIDEtMiAzLjA3IDE2LjkgMTYuOSAwIDAgMS04IDRjLTMgMC01LjUtMS4yNS04LTQgMC0uNzggMi0yLjMzIDQtM2ExMC40NiAxMC40NiAwIDAgMS0uNjgtMy41bC0uMzItMi41IDE0LS4wMi0uMzIgMi41Yy0uMTcgMS4yMi0uMzMgMi4zOC0uNjggMy41IDEuOTMuNjcgNCAyLjIyIDQgMyIvPjxjaXJjbGUgY3g9IjkiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgY3g9IjE1IiBjeT0iMTIiIHI9IjEiLz48L3N2Zz4=" alt="Discord" width="20" height="20">
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- 저작권 -->
+                <tr>
+                  <td align="center">
+                    <p class="footer-text" style="margin: 0 0 8px; font-size: 13px; color: #737373;">
+                      &copy; 2025 FlowCoder. All rights reserved.
+                    </p>
+                    <p class="footer-text" style="margin: 0; font-size: 12px; color: #a3a3a3;">
+                      개발자들을 위한 영감이 넘치는 공간
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- 알림 설정 링크 -->
+                <tr>
+                  <td align="center" style="padding-top: 20px;">
+                    <a href="{{SETTINGS_URL}}" style="font-size: 12px; color: #737373; text-decoration: underline;">구독 설정 변경</a>
+                    <span style="color: #d4d4d4; margin: 0 8px;">|</span>
+                    <a href="{{UNSUBSCRIBE_URL}}" style="font-size: 12px; color: #737373; text-decoration: underline;">구독 취소</a>
+                    <span style="color: #d4d4d4; margin: 0 8px;">|</span>
+                    <a href="{{BROWSER_URL}}" style="font-size: 12px; color: #737373; text-decoration: underline;">브라우저에서 보기</a>
+                  </td>
+                </tr>
+
+                <!-- 법적 고지 -->
+                <tr>
+                  <td align="center" style="padding-top: 16px;">
+                    <p class="footer-text" style="margin: 0; font-size: 11px; color: #a3a3a3; line-height: 1.5;">
+                      이 이메일은 FlowCoder 뉴스레터 구독자에게 발송됩니다.<br>
+                      더 이상 수신을 원하지 않으시면 <a href="{{UNSUBSCRIBE_URL}}" style="color: #737373;">구독을 취소</a>해 주세요.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Email Container -->
+
+      </td>
+    </tr>
+  </table>
+  <!-- /Email Wrapper -->
+</body>
+</html>

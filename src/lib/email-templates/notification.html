@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>FlowCoder 알림</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Reset */
+    body, table, td, p, a, li, blockquote {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+
+    /* Base */
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+      .email-wrapper {
+        background-color: #1a1a1a !important;
+      }
+      .email-container {
+        background-color: #262626 !important;
+      }
+      .email-header {
+        background-color: #1a1a1a !important;
+        border-bottom-color: #333333 !important;
+      }
+      .email-content h1,
+      .email-content h2,
+      .email-content p {
+        color: #fafafa !important;
+      }
+      .muted-text {
+        color: #a3a3a3 !important;
+      }
+      .email-footer {
+        background-color: #1a1a1a !important;
+        border-top-color: #333333 !important;
+      }
+      .footer-text {
+        color: #737373 !important;
+      }
+      .divider {
+        border-color: #333333 !important;
+      }
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 1000px) {
+      .email-container {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .responsive-padding {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+      }
+      .mobile-center {
+        text-align: center !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5;">
+  <!-- Email Wrapper -->
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-wrapper" style="background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+
+        <!-- Email Container -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="1000" class="email-container" style="max-width: 1000px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+
+          <!-- Header -->
+          <tr>
+            <td class="email-header" style="padding: 32px 40px; text-align: center; border-bottom: 1px solid #e5e5e5;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <!-- 로고 이미지 (Base64 또는 호스팅 URL 사용 권장) -->
+                    <img src="{{LOGO_URL}}" alt="FlowCoder" width="40" height="40" style="display: block; margin: 0 auto 12px;">
+                    <span style="font-size: 20px; font-weight: 600; color: #1a1a1a;">FlowCoder</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td class="email-content responsive-padding" style="padding: 40px;">
+              <!-- 알림 아이콘 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <div style="width: 64px; height: 64px; background-color: #f0f9ff; border-radius: 50%; display: inline-block; line-height: 64px; text-align: center;">
+                      <!-- Bell Icon SVG -->
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSIyOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxYTFhMWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNiA4YTYgNiAwIDAgMSAxMiAwYzAgNyAzIDkgMyA5SDNzMy0yIDMtOSIvPjxwYXRoIGQ9Ik0xMC4zIDE4YTIuNjggMi42OCAwIDAgMCAzLjQgMCIvPjwvc3ZnPg==" alt="알림" width="28" height="28" style="vertical-align: middle;">
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- 제목 -->
+              <h1 style="margin: 0 0 16px; font-size: 24px; font-weight: 600; color: #1a1a1a; text-align: center; line-height: 1.4;">
+                {{NOTIFICATION_TITLE}}
+              </h1>
+
+              <!-- 본문 -->
+              <p style="margin: 0 0 24px; font-size: 16px; color: #525252; line-height: 1.6; text-align: center;">
+                {{NOTIFICATION_MESSAGE}}
+              </p>
+
+              <!-- 구분선 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td class="divider" style="padding: 16px 0; border-bottom: 1px solid #e5e5e5;"></td>
+                </tr>
+              </table>
+
+              <!-- 상세 정보 박스 (선택적) -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 24px;">
+                <tr>
+                  <td style="background-color: #fafafa; border-radius: 8px; padding: 20px;">
+                    <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #1a1a1a;">
+                      {{DETAIL_LABEL}}
+                    </p>
+                    <p class="muted-text" style="margin: 0; font-size: 14px; color: #737373; line-height: 1.5;">
+                      {{DETAIL_CONTENT}}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA 버튼 -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{CTA_URL}}" target="_blank" style="display: inline-block; padding: 14px 32px; background-color: #1a1a1a; color: #ffffff; font-size: 16px; font-weight: 500; text-decoration: none; border-radius: 8px; transition: background-color 0.2s;">
+                      {{CTA_TEXT}}
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- 보조 링크 -->
+              <p style="margin: 24px 0 0; font-size: 14px; color: #737373; text-align: center;">
+                버튼이 작동하지 않으면 아래 링크를 복사하세요:<br>
+                <a href="{{CTA_URL}}" style="color: #1a1a1a; word-break: break-all;">{{CTA_URL}}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="email-footer responsive-padding" style="padding: 32px 40px; background-color: #fafafa; border-top: 1px solid #e5e5e5; border-radius: 0 0 12px 12px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <!-- 소셜 링크 -->
+                <tr>
+                  <td align="center" style="padding-bottom: 20px;">
+                    <a href="{{GITHUB_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMjJ2LTRhNC44IDQuOCAwIDAgMC0xLTMuNWMzIDAgNi0yIDYtNS41LjA4LTEuMjUtLjI3LTIuNDgtMS0zLjUuMjgtMS4xNS4yOC0yLjM1IDAtMy41IDAgMC0xIDAtMyAxLjUtMi42NC0uNS01LjM2LS41LTggMEM2IDIgNSAyIDUgMmMtLjMgMS4xNS0uMyAyLjM1IDAgMy41QTUuNDAzIDUuNDAzIDAgMCAwIDQgOWMwIDMuNSAzIDUuNSA2IDUuNS0uMzkuNDktLjY4IDEuMDUtLjg1IDEuNjUtLjE3LjYtLjIyIDEuMjMtLjE1IDEuODV2NCIvPjxwYXRoIGQ9Ik05IDE4Yy00LjUxIDItNS0yLTctMiIvPjwvc3ZnPg==" alt="GitHub" width="20" height="20">
+                    </a>
+                    <a href="{{TWITTER_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjIgNHMtLjcgMi4xLTIgMy40YzEuNiAxMC05LjQgMTcuMy0xOCAxMS42IDIuMi4xIDQuNC0uNiA2LTJDMyAxNS41LjUgOS42IDMgNWMyLjIgMi42IDUuNiA0LjEgOSA0LS45LTQuMiA0LTYuNiA3LTMuOCAxLjEgMCAzLTEuMiAzLTEuMnoiLz48L3N2Zz4=" alt="Twitter" width="20" height="20">
+                    </a>
+                    <a href="{{LINKEDIN_URL}}" target="_blank" style="display: inline-block; margin: 0 8px;">
+                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgOGE2IDYgMCAwIDEgNiA2djdoLTR2LTdhMiAyIDAgMCAwLTItMiAyIDIgMCAwIDAtMiAydjdoLTR2LTdhNiA2IDAgMCAxIDYtNnoiLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIxMiIgeD0iMiIgeT0iOSIvPjxjaXJjbGUgY3g9IjQiIGN5PSI0IiByPSIyIi8+PC9zdmc+" alt="LinkedIn" width="20" height="20">
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- 저작권 -->
+                <tr>
+                  <td align="center">
+                    <p class="footer-text" style="margin: 0 0 8px; font-size: 13px; color: #737373;">
+                      &copy; 2025 FlowCoder. All rights reserved.
+                    </p>
+                    <p class="footer-text" style="margin: 0; font-size: 12px; color: #a3a3a3;">
+                      개발자들을 위한 영감이 넘치는 공간
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- 알림 설정 링크 -->
+                <tr>
+                  <td align="center" style="padding-top: 20px;">
+                    <a href="{{SETTINGS_URL}}" style="font-size: 12px; color: #737373; text-decoration: underline;">알림 설정 변경</a>
+                    <span style="color: #d4d4d4; margin: 0 8px;">|</span>
+                    <a href="{{UNSUBSCRIBE_URL}}" style="font-size: 12px; color: #737373; text-decoration: underline;">수신 거부</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Email Container -->
+
+      </td>
+    </tr>
+  </table>
+  <!-- /Email Wrapper -->
+</body>
+</html>
