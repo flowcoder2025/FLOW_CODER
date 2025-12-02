@@ -115,8 +115,13 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
               key={news.id}
               news={{
                 ...news,
-                createdAt: news.createdAt.toISOString(),
-                updatedAt: news.updatedAt.toISOString(),
+                // unstable_cache로 인해 Date 객체가 문자열로 직렬화될 수 있음
+                createdAt: news.createdAt instanceof Date
+                  ? news.createdAt.toISOString()
+                  : String(news.createdAt),
+                updatedAt: news.updatedAt instanceof Date
+                  ? news.updatedAt.toISOString()
+                  : String(news.updatedAt),
                 coverImageUrl: (news as unknown as { images?: { url: string }[] }).images?.[0]?.url || news.coverImageUrl || undefined,
                 author: {
                   id: news.author.id,
