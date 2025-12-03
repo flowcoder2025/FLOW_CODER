@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="x-apple-disable-message-reformatting">
   <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
-  <title>FlowCoder 뉴스레터</title>
+  <title>{{ $json.output.subject }}</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -89,7 +89,7 @@
     }
 
     /* Responsive */
-    @media screen and (max-width: 1000px) {
+    @media screen and (max-width: 600px) {
       .email-container {
         width: 100% !important;
         max-width: 100% !important;
@@ -111,7 +111,7 @@
       <td align="center" style="padding: 40px 20px;">
 
         <!-- Email Container -->
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="1000" class="email-container" style="max-width: 1000px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="email-container" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
 
           <!-- Header -->
           <tr>
@@ -119,8 +119,8 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td align="center">
-                    <a href="{{SITE_URL}}" target="_blank" style="text-decoration: none;">
-                      <img src="{{LOGO_URL}}" alt="FlowCoder" width="32" height="32" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <a href="https://www.flow-coder.com/" target="_blank" style="text-decoration: none;">
+                      <img src="https://www.dropbox.com/scl/fi/sgt911a0fxo94zeob5per/FlowCoder_White_-removebg-preview_notext.png?rlkey=lam5xm2ktfozlxh8go6f6bda0&st=il5n0imo&dl=1" alt="FlowCoder" width="32" height="32" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                       <span style="font-size: 18px; font-weight: 600; color: #1a1a1a; vertical-align: middle;">FlowCoder</span>
                     </a>
                   </td>
@@ -138,7 +138,7 @@
                 <tr>
                   <td align="center" style="padding-bottom: 20px;">
                     <span style="display: inline-block; padding: 6px 14px; background-color: #1a1a1a; color: #ffffff; font-size: 12px; font-weight: 500; border-radius: 20px; letter-spacing: 0.5px;">
-                      {{CONTENT_CATEGORY}}
+                      뉴스레터
                     </span>
                   </td>
                 </tr>
@@ -146,21 +146,17 @@
 
               <!-- Title -->
               <h1 class="content-title" style="margin: 0 0 16px; font-size: 26px; font-weight: 700; color: #1a1a1a; text-align: center; line-height: 1.4;">
-                {{CONTENT_TITLE}}
+                {{ $json.output.subject }}
               </h1>
 
-              <!-- Author Info -->
+              <!-- Info -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
                 <tr>
                   <td align="center">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="vertical-align: middle;">
-                          <img src="{{AUTHOR_IMAGE}}" alt="{{AUTHOR_NAME}}" width="40" height="40" style="display: block; border-radius: 50%; object-fit: cover;">
-                        </td>
-                        <td style="padding-left: 12px; vertical-align: middle;">
-                          <span class="author-name" style="display: block; font-size: 14px; font-weight: 600; color: #1a1a1a;">{{AUTHOR_NAME}}</span>
-                          <span class="author-meta" style="display: block; font-size: 13px; color: #737373;">{{CONTENT_DATE}} · {{CONTENT_READ_TIME}}</span>
+                          <span class="author-meta" style="display: block; font-size: 13px; color: #737373;">{{ $now.format('yyyy년 MM월 dd일') }} · 5분</span>
                         </td>
                       </tr>
                     </table>
@@ -172,34 +168,41 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
                 <tr>
                   <td>
-                    <a href="{{CONTENT_URL}}" target="_blank">
-                      <img src="{{CONTENT_IMAGE}}" alt="{{CONTENT_TITLE}}" width="920" style="display: block; width: 100%; height: auto; border-radius: 12px;">
+                    <a href="{{ $json.output.cta_url }}" target="_blank">
+                      <img src="{{ $json.output.image_url }}" alt="{{ $json.output.image_alt }}" width="520" style="display: block; width: 100%; height: auto; border-radius: 12px;">
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <!-- Excerpt -->
-              <p class="content-excerpt muted-text" style="margin: 0 0 28px; font-size: 16px; color: #525252; line-height: 1.7; text-align: center;">
-                {{CONTENT_EXCERPT}}
-              </p>
+            </td>
+          </tr>
 
+          <!-- Body -->
+          <tr>
+            <td style="padding: 0 40px 40px;">
+              <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                안녕하세요, {{ $json.name }}님!
+              </p>
+              <p style="margin: 0 0 30px; color: #374151; font-size: 16px; line-height: 1.6;">
+                {{ $json.output.body }}
+              </p>
               <!-- CTA Button -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td align="center">
-                    <a href="{{CONTENT_URL}}" target="_blank" style="display: inline-block; padding: 14px 36px; background-color: #1a1a1a; color: #ffffff; font-size: 15px; font-weight: 500; text-decoration: none; border-radius: 8px;">
-                      전체 글 읽기
+                    <a href="{{ $json.output.cta_url }}" target="_blank" style="display: inline-block; padding: 14px 36px; background-color: #1a1a1a; color: #ffffff; font-size: 15px; font-weight: 500; text-decoration: none; border-radius: 8px;">
+                      {{ $json.output.cta_text }}
                     </a>
                   </td>
                 </tr>
               </table>
-
-              <!-- Fallback Link -->
-              <p style="margin: 20px 0 0; font-size: 13px; color: #a3a3a3; text-align: center;">
-                버튼이 작동하지 않으면: <a href="{{CONTENT_URL}}" style="color: #737373; text-decoration: underline;">{{CONTENT_URL}}</a>
+              <p style="margin: 30px 0 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                {{ $json.output.closing }}
               </p>
-
+              <p style="margin: 10px 0 0; color: #374151; font-size: 16px; font-weight: 600;">
+                {{ $json.output.sender_name }}
+              </p>
             </td>
           </tr>
 
@@ -210,13 +213,10 @@
                 <!-- Social Links -->
                 <tr>
                   <td align="center" style="padding-bottom: 16px;">
-                    <a href="{{GITHUB_URL}}" target="_blank" style="display: inline-block; margin: 0 6px;">
-                      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMjJ2LTRhNC44IDQuOCAwIDAgMC0xLTMuNWMzIDAgNi0yIDYtNS41LjA4LTEuMjUtLjI3LTIuNDgtMS0zLjUuMjgtMS4xNS4yOC0yLjM1IDAtMy41IDAgMC0xIDAtMyAxLjUtMi42NC0uNS01LjM2LS41LTggMEM2IDIgNSAyIDUgMmMtLjMgMS4xNS0uMyAyLjM1IDAgMy41QTUuNDAzIDUuNDAzIDAgMCAwIDQgOWMwIDMuNSAzIDUuNSA2IDUuNS0uMzkuNDktLjY4IDEuMDUtLjg1IDEuNjUtLjE3LjYtLjIyIDEuMjMtLjE1IDEuODV2NCIvPjxwYXRoIGQ9Ik05IDE4Yy00LjUxIDItNS0yLTctMiIvPjwvc3ZnPg==" alt="GitHub" width="18" height="18">
-                    </a>
-                    <a href="{{TWITTER_URL}}" target="_blank" style="display: inline-block; margin: 0 6px;">
+                    <a href="https://twitter.com/flowcoder" target="_blank" style="display: inline-block; margin: 0 6px;">
                       <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjIgNHMtLjcgMi4xLTIgMy40YzEuNiAxMC05LjQgMTcuMy0xOCAxMS42IDIuMi4xIDQuNC0uNiA2LTJDMyAxNS41LjUgOS42IDMgNWMyLjIgMi42IDUuNiA0LjEgOSA0LS45LTQuMiA0LTYuNiA3LTMuOCAxLjEgMCAzLTEuMiAzLTEuMnoiLz48L3N2Zz4=" alt="Twitter" width="18" height="18">
                     </a>
-                    <a href="{{LINKEDIN_URL}}" target="_blank" style="display: inline-block; margin: 0 6px;">
+                    <a href="https://linkedin.com/company/flowcoder" target="_blank" style="display: inline-block; margin: 0 6px;">
                       <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3MzczNzMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgOGE2IDYgMCAwIDEgNiA2djdoLTR2LTdhMiAyIDAgMCAwLTItMiAyIDIgMCAwIDAtMiAydjdoLTR2LTdhNiA2IDAgMCAxIDYtNnoiLz48cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIxMiIgeD0iMiIgeT0iOSIvPjxjaXJjbGUgY3g9IjQiIGN5PSI0IiByPSIyIi8+PC9zdmc+" alt="LinkedIn" width="18" height="18">
                     </a>
                   </td>
@@ -234,9 +234,7 @@
                 <!-- Subscription Links -->
                 <tr>
                   <td align="center" style="padding-top: 12px;">
-                    <a href="{{SETTINGS_URL}}" style="font-size: 11px; color: #a3a3a3; text-decoration: underline;">구독 설정</a>
-                    <span style="color: #d4d4d4; margin: 0 6px;">|</span>
-                    <a href="{{UNSUBSCRIBE_URL}}" style="font-size: 11px; color: #a3a3a3; text-decoration: underline;">구독 취소</a>
+                    <a href="https://www.flow-coder.com/unsubscribe" style="font-size: 11px; color: #a3a3a3; text-decoration: underline;">구독 취소</a>
                   </td>
                 </tr>
               </table>

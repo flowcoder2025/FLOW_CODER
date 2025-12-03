@@ -4,6 +4,7 @@ import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileTabs } from '@/components/ProfileTabs';
 import {
   getUserByUsername,
+  getUserById,
   getPostsByUser,
   getCommentsByUser,
 } from '@/lib/data-access';
@@ -13,7 +14,7 @@ import type { PostWithAuthor, CommentWithAuthor } from '@/lib/types';
  * 사용자 프로필 페이지 (Server Component)
  *
  * 기능:
- * - username 기반 동적 라우팅
+ * - username 또는 userId 기반 동적 라우팅
  * - 프로필 헤더 (아바타, 이름, bio, reputation)
  * - 통계 카드 (게시글/댓글/평판)
  * - ProfileTabs (게시글/댓글 탭)
@@ -29,8 +30,13 @@ interface ProfilePageProps {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
 
-  // DB에서 사용자 조회
-  const user = await getUserByUsername(username);
+  // DB에서 사용자 조회 (username으로 먼저 시도, 없으면 userId로 시도)
+  let user = await getUserByUsername(username);
+
+  // username으로 찾지 못하면 userId로 조회 시도
+  if (!user) {
+    user = await getUserById(username);
+  }
 
   // 존재하지 않는 사용자면 404
   if (!user) {
