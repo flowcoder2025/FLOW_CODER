@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { Upload, X, Star } from 'lucide-react';
+import { Upload, X, Star, FileInput } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
@@ -14,6 +14,8 @@ export interface UploadedImage {
   alt?: string;
   isFeatured: boolean;
   file?: File; // 업로드 전 로컬 파일
+  /** 이미 본문에 삽입되었는지 여부 */
+  insertedToContent?: boolean;
 }
 
 interface ImageUploaderProps {
@@ -29,6 +31,11 @@ interface ImageUploaderProps {
    * 최대 업로드 가능 이미지 수
    */
   maxImages?: number;
+  /**
+   * 본문에 이미지 삽입 핸들러
+   * 이 핸들러가 제공되면 "본문에 삽입" 버튼이 표시됨
+   */
+  onInsertToContent?: (url: string, alt?: string) => void;
 }
 
 /**
@@ -39,12 +46,14 @@ interface ImageUploaderProps {
  * - 이미지 미리보기
  * - 대표 이미지 선택 (별표 아이콘)
  * - 개별 이미지 삭제
+ * - 본문에 이미지 삽입
  * - 클라이언트 측 유효성 검증
  */
 export function ImageUploader({
   onChange,
   initialImages = [],
   maxImages = 10,
+  onInsertToContent,
 }: ImageUploaderProps) {
   const [images, setImages] = useState<UploadedImage[]>(initialImages);
   const [isDragging, setIsDragging] = useState(false);
@@ -90,6 +99,7 @@ export function ImageUploader({
             url,
             isFeatured: images.length === 0 && i === 0, // 첫 이미지는 자동으로 대표 이미지
             file,
+            insertedToContent: false,
           });
         }
 
@@ -169,6 +179,24 @@ export function ImageUploader({
     onChange(updatedImages);
   };
 
+  /**
+   * 본문에 이미지 삽입
+   */
+  const handleInsertToContent = (index: number) => {
+    const image = images[index];
+    if (!onInsertToContent) return;
+
+    onInsertToContent(image.url, image.alt || `이미지 ${index + 1}`);
+
+    // 삽입 상태 업데이트
+    const updatedImages = images.map((img, i) => ({
+      ...img,
+      insertedToContent: i === index ? true : img.insertedToContent,
+    }));
+    setImages(updatedImages);
+    onChange(updatedImages);
+  };
+
   return (
     <div className="space-y-4">
       <Label>이미지 (선택사항, 최대 {maxImages}개)</Label>
@@ -226,28 +254,52 @@ export function ImageUploader({
                   </div>
                 )}
 
+                {/* 본문 삽입됨 배지 */}
+                {image.insertedToContent && (
+                  <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                    본문에 삽입됨
+                  </div>
+                )}
+
                 {/* 호버 시 액션 버튼 */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  {!image.isFeatured && (
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                  {/* 본문에 삽입 버튼 */}
+                  {onInsertToContent && (
                     <Button
                       type="button"
                       size="sm"
                       variant="secondary"
-                      onClick={() => handleSetFeatured(index)}
-                      className="gap-1"
+                      onClick={() => handleInsertToContent(index)}
+                      className="gap-1 w-full"
                     >
-                      <Star className="h-3 w-3" />
-                      대표 설정
+                      <FileInput className="h-3 w-3" />
+                      본문에 삽입
                     </Button>
                   )}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleRemove(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+
+                  <div className="flex gap-2 w-full">
+                    {!image.isFeatured && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleSetFeatured(index)}
+                        className="gap-1 flex-1"
+                      >
+                        <Star className="h-3 w-3" />
+                        대표
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleRemove(index)}
+                      className={!image.isFeatured ? '' : 'flex-1'}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -258,6 +310,7 @@ export function ImageUploader({
       {images.length > 0 && (
         <p className="text-xs text-muted-foreground">
           {images.length}/{maxImages}개 이미지 • 별표를 클릭하여 대표 이미지를 설정하세요
+          {onInsertToContent && ' • 이미지를 클릭하여 본문에 삽입하세요'}
         </p>
       )}
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ImageUploader, type UploadedImage } from '@/components/ImageUploader';
+import type { EditorRef } from '@/components/Editor';
 
 interface Category {
   id: string;
@@ -41,10 +42,12 @@ const Editor = dynamic(() => import('@/components/Editor').then(mod => ({ defaul
  * - 제목 입력
  * - 본문 입력 (Tiptap 에디터)
  * - 태그 입력
+ * - 이미지 업로드 및 본문 삽입
  * - localStorage에 저장
  */
 export default function NewPostPage() {
   const router = useRouter();
+  const editorRef = useRef<EditorRef>(null);
 
   // 폼 상태
   const [categories, setCategories] = useState<Category[]>([]);
@@ -90,6 +93,40 @@ export default function NewPostPage() {
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
+
+  // 이미지를 본문에 삽입
+  const handleInsertImageToContent = useCallback((url: string, alt?: string) => {
+    if (editorRef.current) {
+      editorRef.current.insertImageUrl(url, alt);
+    }
+  }, []);
+
+  // 에디터 툴바에서 이미지 업로드 시 처리
+  const handleEditorImageUpload = useCallback((file: File) => {
+    // 최대 이미지 수 확인
+    if (images.length >= 10) {
+      alert('최대 10개의 이미지만 업로드할 수 있습니다.');
+      return;
+    }
+
+    // blob URL 생성
+    const url = URL.createObjectURL(file);
+
+    // ImageUploader 목록에 추가
+    const newImage: UploadedImage = {
+      url,
+      isFeatured: images.length === 0, // 첫 이미지면 대표
+      file,
+      insertedToContent: true, // 이미 본문에 삽입됨
+    };
+    const updatedImages = [...images, newImage];
+    setImages(updatedImages);
+
+    // 에디터에 이미지 삽입
+    if (editorRef.current) {
+      editorRef.current.insertImageUrl(url, file.name);
+    }
+  }, [images]);
 
   // 폼 제출
   const handleSubmit = async (e: React.FormEvent) => {
@@ -253,9 +290,11 @@ export default function NewPostPage() {
         <div className="space-y-2">
           <Label>본문 *</Label>
           <Editor
+            ref={editorRef}
             content={content}
             onChange={setContent}
             placeholder="게시글 내용을 입력하세요 (최소 10자)..."
+            onImageUpload={handleEditorImageUpload}
           />
         </div>
 
@@ -297,7 +336,11 @@ export default function NewPostPage() {
         </div>
 
         {/* 이미지 업로드 */}
-        <ImageUploader onChange={setImages} maxImages={10} />
+        <ImageUploader
+          onChange={setImages}
+          maxImages={10}
+          onInsertToContent={handleInsertImageToContent}
+        />
 
         {/* 액션 버튼 */}
         <div className="flex justify-end gap-3 pt-6 border-t">

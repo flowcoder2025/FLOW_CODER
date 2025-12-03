@@ -8,19 +8,13 @@ import { Button } from '@/components/ui/button';
 import { CommentList } from '@/components/CommentList';
 import { VoteButtons } from '@/components/VoteButtons';
 import { DeletePostButton } from '@/components/DeletePostButton';
+import { SafeHtml } from '@/components/SafeHtml';
 import {
   getPostById,
   getPostVoteSummary,
   getUserVoteForPost,
 } from '@/lib/data-access/posts';
 import { auth } from '@/lib/auth';
-
-/**
- * HTML 태그를 제거하고 텍스트만 추출
- */
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').trim();
-}
 
 /**
  * 게시글 상세 페이지
@@ -194,9 +188,10 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               </div>
 
               {/* 본문 */}
-              <div className="prose prose-neutral dark:prose-invert max-w-none mb-6">
-                <p className="whitespace-pre-wrap text-base leading-relaxed">{stripHtml(post.content)}</p>
-              </div>
+              <SafeHtml
+                html={post.content}
+                className="prose prose-neutral dark:prose-invert max-w-none mb-6"
+              />
 
               {/* 태그 */}
               {post.tags.length > 0 && (
