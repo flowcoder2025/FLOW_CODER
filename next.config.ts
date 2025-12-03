@@ -37,8 +37,9 @@ const nextConfig: NextConfig = {
   },
   // 성능 최적화
   experimental: {
-    // PPR (Partial Prerendering) - 정적/동적 콘텐츠 최적화
-    ppr: false,
+    // PPR (Partial Prerendering) - Next.js canary 버전에서만 사용 가능
+    // 추후 안정 버전 출시 시 활성화 예정
+    // ppr: 'incremental',
     // 서버 액션 최적화
     serverActions: {
       bodySizeLimit: '2mb',

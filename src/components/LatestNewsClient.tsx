@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Clock, TrendingUp } from "lucide-react";
@@ -35,10 +36,15 @@ export function LatestNewsClient({ items }: LatestNewsClientProps) {
           {items.map((news, index) => (
             <Link key={index} href={`/community/${news.categorySlug}/${news.id}`}>
               <Card className="h-[380px] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative">
-                {/* 배경 이미지 */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${news.thumbnail})` }}
+                {/* 배경 이미지 - Next.js Image로 최적화 */}
+                <Image
+                  src={news.thumbnail}
+                  alt={news.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  loading="lazy"
+                  quality={75}
                 />
 
                 {/* 어두운 오버레이 (텍스트 가독성) */}

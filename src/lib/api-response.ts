@@ -9,19 +9,71 @@
 import { NextResponse } from 'next/server';
 
 /**
+ * 캐시 설정 옵션
+ */
+export interface CacheOptions {
+  /** CDN/브라우저 캐시 시간 (초) */
+  maxAge?: number;
+  /** CDN 캐시 시간 (초) - Vercel Edge에서 사용 */
+  sMaxAge?: number;
+  /** stale-while-revalidate 시간 (초) */
+  staleWhileRevalidate?: number;
+  /** private 캐시 (브라우저만) */
+  private?: boolean;
+}
+
+/**
+ * Cache-Control 헤더 생성
+ */
+function buildCacheControl(options: CacheOptions): string {
+  const directives: string[] = [];
+
+  if (options.private) {
+    directives.push('private');
+  } else {
+    directives.push('public');
+  }
+
+  if (options.maxAge !== undefined) {
+    directives.push(`max-age=${options.maxAge}`);
+  }
+
+  if (options.sMaxAge !== undefined) {
+    directives.push(`s-maxage=${options.sMaxAge}`);
+  }
+
+  if (options.staleWhileRevalidate !== undefined) {
+    directives.push(`stale-while-revalidate=${options.staleWhileRevalidate}`);
+  }
+
+  return directives.join(', ');
+}
+
+/**
  * 성공 응답 생성
  *
  * @param data 응답 데이터
  * @param status HTTP 상태 코드 (기본: 200)
+ * @param cacheOptions 캐시 설정 옵션 (선택)
  * @returns NextResponse
  */
-export function successResponse<T>(data: T, status: number = 200) {
+export function successResponse<T>(
+  data: T,
+  status: number = 200,
+  cacheOptions?: CacheOptions
+) {
+  const headers: HeadersInit = {};
+
+  if (cacheOptions) {
+    headers['Cache-Control'] = buildCacheControl(cacheOptions);
+  }
+
   return NextResponse.json(
     {
       success: true,
       data,
     },
-    { status }
+    { status, headers }
   );
 }
 

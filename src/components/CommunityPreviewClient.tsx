@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
@@ -88,10 +89,15 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
                   {item.type === "post" ? (
                     <Link href={`/community/${item.categorySlug}/${item.id}`} className="block h-full">
                       <Card className="h-[480px] hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden relative">
-                      {/* 배경 이미지 */}
-                      <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${item.thumbnail})` }}
+                      {/* 배경 이미지 - Next.js Image로 최적화 */}
+                      <Image
+                        src={item.thumbnail}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        loading="lazy"
+                        quality={75}
                       />
 
                       {/* 어두운 오버레이 (텍스트 가독성) */}
