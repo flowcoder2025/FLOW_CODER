@@ -14,6 +14,19 @@ import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
  */
 export const revalidate = 60;
 
+/**
+ * 빌드 시 주요 카테고리 페이지 사전 생성 (SSG)
+ * Cold start 및 첫 요청 지연 방지
+ */
+export async function generateStaticParams() {
+  // 주요 카테고리 slug 목록 (DB 조회 없이 하드코딩으로 빌드 안정성 확보)
+  const categorySlugs = ['tips', 'showcase', 'free-board', 'flowcoder-feed', 'vibe-coding'];
+
+  return categorySlugs.map((category) => ({
+    category,
+  }));
+}
+
 // 카테고리 slug에 따른 아이콘 매핑
 const getCategoryIcon = (slug: string) => {
   const iconMap: Record<string, React.ReactNode> = {
