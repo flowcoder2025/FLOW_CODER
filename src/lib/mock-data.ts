@@ -194,6 +194,8 @@ export const mockCategories: Category[] = [
     description: '바이브코딩에 대한 자유로운 토론과 대화를 나누는 공간입니다.',
     icon: '💬',
     color: 'blue',
+    route: '/community',
+    hasAnswers: false,
     postCount: 0, // 나중에 계산
     createdAt: '2024-01-01T00:00:00.000Z',
   },
@@ -204,6 +206,8 @@ export const mockCategories: Category[] = [
     description: '유용한 개발 팁과 노하우를 공유하는 공간입니다.',
     icon: '💡',
     color: 'yellow',
+    route: '/community',
+    hasAnswers: false,
     postCount: 0,
     createdAt: '2024-01-01T00:00:00.000Z',
   },
@@ -214,6 +218,8 @@ export const mockCategories: Category[] = [
     description: '여러분이 만든 프로젝트와 작품을 자랑하고 피드백을 받는 공간입니다.',
     icon: '🎨',
     color: 'purple',
+    route: '/community',
+    hasAnswers: false,
     postCount: 0,
     createdAt: '2024-01-01T00:00:00.000Z',
   },
@@ -224,6 +230,20 @@ export const mockCategories: Category[] = [
     description: '커뮤니티 이벤트와 공식 공지사항을 확인하는 공간입니다.',
     icon: '📢',
     color: 'red',
+    route: '/community',
+    hasAnswers: false,
+    postCount: 0,
+    createdAt: '2024-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'mock_category_qna',
+    name: 'Q&A',
+    slug: 'qna',
+    description: '개발 관련 질문과 답변을 주고받는 공간입니다.',
+    icon: '❓',
+    color: 'green',
+    route: '/help',
+    hasAnswers: true,
     postCount: 0,
     createdAt: '2024-01-01T00:00:00.000Z',
   },
@@ -302,8 +322,7 @@ function createMockPost(
   id: string,
   index: number,
   categoryId: string,
-  authorId: string,
-  postType: Post['postType']
+  authorId: string
 ): Post {
   const title = postTitles[index % postTitles.length];
   const content = postContents[index % postContents.length];
@@ -314,7 +333,6 @@ function createMockPost(
     id,
     title,
     content,
-    postType,
     authorId,
     categoryId,
     upvotes: randomInt(0, 50),
@@ -345,8 +363,7 @@ for (let i = 0; i < 30; i++) {
       `mock_post_${postIndex + 1}`,
       postIndex,
       categoryId,
-      authorId,
-      'DISCUSSION'
+      authorId
     )
   );
   postIndex++;
@@ -359,9 +376,8 @@ for (let i = 0; i < 10; i++) {
     createMockPost(
       `mock_post_${postIndex + 1}`,
       postIndex,
-      'mock_category_1',
-      authorId,
-      'QUESTION'
+      'mock_category_qna',
+      authorId
     )
   );
   postIndex++;
@@ -375,8 +391,7 @@ for (let i = 0; i < 8; i++) {
       `mock_post_${postIndex + 1}`,
       postIndex,
       'mock_category_3',
-      authorId,
-      'SHOWCASE'
+      authorId
     )
   );
   postIndex++;
@@ -439,8 +454,7 @@ newsData.forEach((news, i) => {
     `news_post_${i + 1}`,
     postIndex,
     'mock_category_4', // 이벤트&공지 카테고리 사용
-    news.authorId,
-    'NEWS'
+    news.authorId
   );
   post.title = news.title;
   post.content = news.content;
@@ -709,10 +723,12 @@ export const mockAnswers: AnswerWithAuthor[] = rawMockAnswers.map((answer) => {
 // ─────────────────────────────────────────────────────────────────
 
 /**
- * 질문(QUESTION 타입) 게시글 조회
+ * 질문 게시글 조회 (Q&A 카테고리)
  */
 export function getQuestions(): PostWithAuthor[] {
-  return mockPosts.filter((p) => p.postType === 'QUESTION');
+  // Mock에서는 특정 카테고리나 태그로 질문을 구분
+  // 실제로는 category.hasAnswers === true로 필터링
+  return mockPosts.filter((p) => p.categoryId === 'mock_category_1');
 }
 
 /**

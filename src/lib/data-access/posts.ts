@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { PostType, Prisma, VoteType } from '@/generated/prisma';
+import { Prisma, VoteType } from '@/generated/prisma';
 import { unstable_cache } from 'next/cache';
 
 /**
@@ -28,6 +28,8 @@ export type PostWithAuthor = Prisma.PostGetPayload<{
         slug: true;
         icon: true;
         color: true;
+        route: true;
+        hasAnswers: true;
       };
     };
     _count: {
@@ -57,6 +59,8 @@ export type PostWithAnswers = Prisma.PostGetPayload<{
         slug: true;
         icon: true;
         color: true;
+        route: true;
+        hasAnswers: true;
       };
     };
     answers: {
@@ -94,6 +98,8 @@ export type PostWithDetails = Prisma.PostGetPayload<{
         slug: true;
         icon: true;
         color: true;
+        route: true;
+        hasAnswers: true;
       };
     };
     comments: {
@@ -173,9 +179,6 @@ export async function getPostsByCategory(
     const posts = await prisma.post.findMany({
     where: {
       category: { slug: categorySlug },
-      postType: {
-        in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
-      },
     },
     include: {
       author: {
@@ -194,6 +197,8 @@ export async function getPostsByCategory(
           slug: true,
           icon: true,
           color: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       _count: {
@@ -243,6 +248,8 @@ export async function getPostById(
           slug: true,
           icon: true,
           color: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       comments: {
@@ -314,56 +321,6 @@ export async function getPostById(
   }
 }
 
-/**
- * 게시글 타입별 조회 (QUESTION, NEWS, DISCUSSION 등)
- */
-export async function getPostsByType(
-  postType: PostType,
-  limit?: number
-): Promise<PostWithAuthor[]> {
-  try {
-    const posts = await prisma.post.findMany({
-    where: { postType },
-    include: {
-      author: {
-        select: {
-          id: true,
-          username: true,
-          displayName: true,
-          image: true,
-          reputation: true,
-        },
-      },
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          icon: true,
-          color: true,
-        },
-      },
-      _count: {
-        select: {
-          comments: true,
-          votes: true,
-          answers: true,
-        },
-      },
-    },
-    orderBy: [
-      { isPinned: 'desc' },
-      { createdAt: 'desc' },
-    ],
-    take: limit,
-  });
-
-    return posts || [];
-  } catch (error) {
-    console.error('[DAL] getPostsByType error:', error);
-    throw new Error(`게시글 타입별 조회 중 오류가 발생했습니다: ${postType}`);
-  }
-}
 
 /**
  * 내부 함수: 뉴스 게시글 목록 조회
@@ -372,7 +329,7 @@ async function fetchNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
   try {
     const posts = await prisma.post.findMany({
       where: {
-        postType: PostType.NEWS,
+        category: { route: '/news' },
         deletedAt: null, // 삭제되지 않은 게시글만
       },
       include: {
@@ -392,6 +349,8 @@ async function fetchNewsPosts(limit?: number): Promise<PostWithAuthor[]> {
             slug: true,
             icon: true,
             color: true,
+            route: true,
+            hasAnswers: true,
           },
         },
         images: {
@@ -450,7 +409,7 @@ async function fetchQuestionPosts(
 ): Promise<PostWithAnswers[]> {
   try {
     const posts = await prisma.post.findMany({
-    where: { postType: PostType.QUESTION },
+    where: { category: { hasAnswers: true } },
     include: {
       author: {
         select: {
@@ -468,6 +427,8 @@ async function fetchQuestionPosts(
           slug: true,
           icon: true,
           color: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       answers: {
@@ -540,6 +501,8 @@ export async function getRecentPosts(
           slug: true,
           icon: true,
           color: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       _count: {
@@ -593,6 +556,8 @@ export async function getPostsByUser(
           slug: true,
           icon: true,
           color: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       _count: {
@@ -629,8 +594,8 @@ export async function getRecentPostsPaginated(
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where: {
-          postType: {
-            in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+          category: {
+            adminOnly: false,
           },
         },
         include: {
@@ -650,6 +615,8 @@ export async function getRecentPostsPaginated(
               slug: true,
               icon: true,
               color: true,
+              route: true,
+              hasAnswers: true,
             },
           },
           _count: {
@@ -667,8 +634,8 @@ export async function getRecentPostsPaginated(
       }),
       prisma.post.count({
         where: {
-          postType: {
-            in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+          category: {
+            adminOnly: false,
           },
         },
       }),

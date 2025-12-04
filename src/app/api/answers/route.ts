@@ -43,13 +43,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 질문 존재 확인 (postType: QUESTION이어야 함)
+    // 질문 존재 확인 (category.hasAnswers = true이어야 함)
     const question = await prisma.post.findUnique({
       where: { id: questionId },
       select: {
         id: true,
-        postType: true,
         isLocked: true,
+        category: {
+          select: {
+            hasAnswers: true,
+          },
+        },
       },
     });
 
@@ -60,9 +64,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (question.postType !== 'QUESTION') {
+    if (!question.category.hasAnswers) {
       return NextResponse.json(
-        { error: 'Bad Request: 답변은 QUESTION 타입 게시글에만 작성할 수 있습니다.' },
+        { error: 'Bad Request: 답변은 Q&A 카테고리 게시글에만 작성할 수 있습니다.' },
         { status: 400 }
       );
     }

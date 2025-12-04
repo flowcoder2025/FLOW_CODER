@@ -13,7 +13,6 @@ import { Prisma } from '@/generated/prisma';
  * 모더레이터 이상 전용 게시글 목록 조회
  *
  * Query Parameters:
- * - postType: 게시글 타입 필터 (optional)
  * - isPinned: 핀 상태 필터 (true/false, optional)
  * - isFeatured: 주목 프로젝트 필터 (true/false, optional)
  * - category: 카테고리 slug (optional)
@@ -29,7 +28,6 @@ export async function GET(request: NextRequest) {
     await requireModerator();
 
     const { searchParams } = new URL(request.url);
-    const postType = searchParams.get('postType');
     const isPinnedParam = searchParams.get('isPinned');
     const isFeaturedParam = searchParams.get('isFeatured');
     const category = searchParams.get('category');
@@ -42,10 +40,6 @@ export async function GET(request: NextRequest) {
 
     // 필터 조건 구성
     const where: Prisma.PostWhereInput = {};
-
-    if (postType) {
-      where.postType = postType as Prisma.PostWhereInput['postType'];
-    }
 
     if (isPinnedParam !== null) {
       where.isPinned = isPinnedParam === 'true';

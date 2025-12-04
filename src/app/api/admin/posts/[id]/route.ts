@@ -24,7 +24,6 @@ type RouteContext = {
  * - content: string (optional)
  * - tags: string[] (optional)
  * - coverImageUrl: string (optional)
- * - postType: PostType (optional)
  * - categoryId: string (optional)
  * - restore: boolean (optional) - 삭제된 게시글 복구
  */
@@ -56,7 +55,6 @@ export async function PATCH(
       content,
       tags,
       coverImageUrl,
-      postType,
       categoryId,
       restore,
     } = body;
@@ -69,7 +67,6 @@ export async function PATCH(
     if (content !== undefined) updateData.content = content;
     if (tags !== undefined) updateData.tags = tags;
     if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
-    if (postType !== undefined) updateData.postType = postType;
     if (categoryId !== undefined) updateData.categoryId = categoryId;
 
     // 복구 요청 처리

@@ -11,12 +11,14 @@ import { Clock, TrendingUp } from "lucide-react";
  * DB에서 isFeatured=true인 NEWS 타입 게시물을 조회하여 표시
  */
 export async function LatestNews() {
-  // isFeatured=true이고 NEWS 타입인 게시물 조회 (최신순, 최대 3개)
+  // isFeatured=true이고 news 라우트인 게시물 조회 (최신순, 최대 3개)
   const posts = await prisma.post.findMany({
     where: {
       isFeatured: true,
-      postType: 'NEWS',
       deletedAt: null, // 삭제되지 않은 게시글만
+      category: {
+        route: '/news',
+      },
     },
     orderBy: {
       createdAt: 'desc',
@@ -25,8 +27,11 @@ export async function LatestNews() {
     include: {
       category: {
         select: {
+          id: true,
           name: true,
           slug: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       images: {

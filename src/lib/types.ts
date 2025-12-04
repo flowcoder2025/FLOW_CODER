@@ -14,9 +14,6 @@
 /** 사용자 권한 레벨 */
 export type UserRole = 'USER' | 'MODERATOR' | 'ADMIN';
 
-/** 게시글 타입 */
-export type PostType = 'DISCUSSION' | 'QUESTION' | 'SHOWCASE' | 'NEWS';
-
 /** 투표 타입 */
 export type VoteType = 'UP' | 'DOWN';
 
@@ -60,6 +57,10 @@ export interface Category {
   icon?: string;
   /** Tailwind CSS 색상 클래스 (예: "blue") */
   color?: string;
+  /** 카테고리 라우트 (예: "/community", "/news", "/help") */
+  route?: string;
+  /** Q&A 카테고리 여부 (답변 기능 활성화) */
+  hasAnswers?: boolean;
   /** 카테고리 내 게시글 수 */
   postCount: number;
   createdAt: string;
@@ -94,7 +95,6 @@ export interface Post {
   title: string;
   /** Rich Text 콘텐츠 (Tiptap JSON 또는 HTML) */
   content: string;
-  postType: PostType;
   authorId: string;
   categoryId: string;
   upvotes: number;
@@ -171,7 +171,7 @@ export interface Vote {
  */
 export interface PostWithAuthor extends Post {
   author: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'reputation'>;
-  category: Pick<Category, 'id' | 'name' | 'slug' | 'icon' | 'color'>;
+  category: Pick<Category, 'id' | 'name' | 'slug' | 'icon' | 'color' | 'route' | 'hasAnswers'>;
   /** 게시글 이미지 목록 */
   images?: PostImage[];
   /** 댓글 수 */
@@ -250,7 +250,6 @@ export interface CreatePostInput {
   title: string;
   content: string;
   categoryId: string;
-  postType: PostType;
   tags: string[];
 }
 
@@ -304,7 +303,6 @@ export type PostSortOption = 'popular' | 'recent' | 'comments' | 'views';
 export interface PostFilterOptions {
   categoryId?: string;
   tags?: string[];
-  postType?: PostType;
   authorId?: string;
   /** 기간 필터 (일 단위) */
   period?: 'day' | 'week' | 'month' | 'all';

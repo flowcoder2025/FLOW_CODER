@@ -11,7 +11,7 @@ import {
 
 /**
  * GET /api/questions
- * Q&A 질문 목록 조회 (postType: QUESTION)
+ * Q&A 질문 목록 조회 (category.hasAnswers = true)
  *
  * Query Parameters:
  * - sort: recent | popular | unanswered (default: recent)
@@ -28,9 +28,11 @@ export async function GET(request: NextRequest) {
     const tags = searchParams.get('tags')?.split(',').filter(Boolean);
     const skip = (page - 1) * limit;
 
-    // 필터 조건: postType은 항상 QUESTION
+    // 필터 조건: hasAnswers = true 카테고리만 조회
     const where: Record<string, unknown> = {
-      postType: 'QUESTION',
+      category: {
+        hasAnswers: true,
+      },
     };
 
     // 태그 필터
@@ -161,12 +163,16 @@ export async function POST(request: NextRequest) {
       return validationErrorResponse('유효하지 않은 categoryId입니다');
     }
 
-    // 질문 생성 (postType: QUESTION 고정)
+    // 카테고리가 hasAnswers = true인지 확인
+    if (!categoryExists.hasAnswers) {
+      return validationErrorResponse('질문은 Q&A 카테고리에만 작성할 수 있습니다');
+    }
+
+    // 질문 생성
     const question = await prisma.post.create({
       data: {
         title,
         content,
-        postType: 'QUESTION',
         authorId: session.user.id,
         categoryId,
         tags,

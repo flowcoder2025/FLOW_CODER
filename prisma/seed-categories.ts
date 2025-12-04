@@ -12,12 +12,16 @@ async function main() {
   console.log('🌱 Seeding categories...');
 
   const categories = [
+    // /community 페이지 카테고리
     {
       name: '자유게시판',
       slug: 'free-board',
       description: '자유롭게 소통하고 이야기를 나누는 공간입니다',
       icon: '💬',
       color: '#3b82f6',
+      route: '/community',
+      hasAnswers: false,
+      adminOnly: false,
     },
     {
       name: '팁 & 노하우',
@@ -25,6 +29,9 @@ async function main() {
       description: '개발 팁과 노하우를 공유하는 공간입니다',
       icon: '💡',
       color: '#10b981',
+      route: '/community',
+      hasAnswers: false,
+      adminOnly: false,
     },
     {
       name: '작품공유',
@@ -32,6 +39,31 @@ async function main() {
       description: '자신의 프로젝트와 작품을 공유하는 공간입니다',
       icon: '🎨',
       color: '#f59e0b',
+      route: '/community',
+      hasAnswers: false,
+      adminOnly: false,
+    },
+    // /help 페이지 카테고리 (Q&A)
+    {
+      name: 'Q&A',
+      slug: 'qna',
+      description: '개발 관련 질문과 답변을 나누는 공간입니다',
+      icon: '❓',
+      color: '#8b5cf6',
+      route: '/help',
+      hasAnswers: true,
+      adminOnly: false,
+    },
+    // /news 페이지 카테고리 (관리자 전용)
+    {
+      name: '뉴스',
+      slug: 'news',
+      description: '공식 뉴스와 공지사항을 전달하는 공간입니다',
+      icon: '📰',
+      color: '#ef4444',
+      route: '/news',
+      hasAnswers: false,
+      adminOnly: true,
     },
   ];
 
@@ -41,7 +73,16 @@ async function main() {
     });
 
     if (existing) {
-      console.log(`✓ Category "${category.name}" already exists (${category.slug})`);
+      // 기존 카테고리 업데이트 (새 필드 추가)
+      await prisma.category.update({
+        where: { slug: category.slug },
+        data: {
+          route: category.route,
+          hasAnswers: category.hasAnswers,
+          adminOnly: category.adminOnly,
+        },
+      });
+      console.log(`✓ Category "${category.name}" updated (${category.slug})`);
       continue;
     }
 

@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { NewsCard } from '@/components/NewsCard';
 import { getPostById, getNewsPosts } from '@/lib/data-access';
-import { PostType } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { getNewsCategory } from '@/lib/news-categories';
 
@@ -27,7 +26,9 @@ async function getRelatedNews(currentPostId: string, categoryId: string, limit: 
   const sameCategory = await prisma.post.findMany({
     where: {
       id: { not: currentPostId },
-      postType: PostType.NEWS,
+      category: {
+        route: '/news',
+      },
       categoryId: categoryId,
       deletedAt: null, // 삭제되지 않은 게시글만
     },
@@ -48,6 +49,7 @@ async function getRelatedNews(currentPostId: string, categoryId: string, limit: 
           slug: true,
           icon: true,
           color: true,
+          route: true,
         },
       },
       _count: {
@@ -68,7 +70,9 @@ async function getRelatedNews(currentPostId: string, categoryId: string, limit: 
     const otherCategory = await prisma.post.findMany({
       where: {
         id: { not: currentPostId },
-        postType: PostType.NEWS,
+        category: {
+          route: '/news',
+        },
         categoryId: { not: categoryId },
         deletedAt: null, // 삭제되지 않은 게시글만
       },
@@ -89,6 +93,7 @@ async function getRelatedNews(currentPostId: string, categoryId: string, limit: 
             slug: true,
             icon: true,
             color: true,
+            route: true,
           },
         },
         _count: {
@@ -121,8 +126,8 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
   const news = await getPostById(id);
 
-  // NEWS가 아니거나 존재하지 않으면 404 (삭제된 게시글도 404)
-  if (!news || news.postType !== PostType.NEWS || news.deletedAt) {
+  // 뉴스 카테고리가 아니거나 존재하지 않으면 404 (삭제된 게시글도 404)
+  if (!news || news.category.route !== '/news' || news.deletedAt) {
     notFound();
   }
 

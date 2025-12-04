@@ -19,8 +19,7 @@ import {
  * Body:
  * - title: string (필수)
  * - content: string (필수)
- * - postType: PostType (default: DISCUSSION)
- * - categoryId: string (필수)
+ * - categoryId: string (필수) - 카테고리가 게시글 유형을 결정 (Q&A, 뉴스, 커뮤니티 등)
  * - tags: string[]
  * - coverImageUrl: string (optional)
  * - authorId: string (선택 - 없으면 시스템 계정 사용)
@@ -42,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // 요청 본문 파싱
     const body = await request.json();
-    const { title, content, postType, categoryId, tags, coverImageUrl, authorId } = body;
+    const { title, content, categoryId, tags, coverImageUrl, authorId } = body;
 
     // 필수 필드 검증
     if (!title || !content || !categoryId) {
@@ -106,7 +105,6 @@ export async function POST(request: NextRequest) {
         data: {
           title,
           content,
-          postType: postType || 'DISCUSSION',
           authorId: finalAuthorId,
           categoryId,
           tags: tags || [],
@@ -156,7 +154,6 @@ export async function POST(request: NextRequest) {
       content: post.content,
       authorId: post.authorId,
       categoryId: post.categoryId,
-      postType: post.postType,
       tags: post.tags,
       source: 'inbound_webhook',
     }).catch((err) => console.error('Webhook trigger failed:', err));

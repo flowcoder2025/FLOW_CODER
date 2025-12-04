@@ -62,6 +62,19 @@
 
 ---
 
+### Webhooks API (`/api/admin/webhooks/*`)
+
+| Endpoint | Method | 권한 레벨 | 검증 위치 | 비고 |
+|----------|--------|-----------|-----------|------|
+| `/api/admin/webhooks/inbound/posts` | POST | API_KEY | X-Admin-API-Key 헤더 | 외부 포스팅 (ADMIN_API_KEY 환경변수) |
+| `/api/admin/webhooks/outbound` | GET | ADMIN | requireAdmin() | 웹훅 구독 목록 조회 |
+| `/api/admin/webhooks/outbound` | POST | ADMIN | requireAdmin() | 웹훅 구독 생성 |
+| `/api/admin/webhooks/outbound/[id]` | PATCH | ADMIN | requireAdmin() | 웹훅 활성화/비활성화 |
+| `/api/admin/webhooks/outbound/[id]` | DELETE | ADMIN | requireAdmin() | 웹훅 삭제 |
+| `/api/admin/webhooks/test` | POST | ADMIN | requireAdmin() | 웹훅 연결 테스트 |
+
+---
+
 ### External Terms API (`/api/external-terms`)
 
 | Endpoint | Method | 권한 레벨 | 검증 위치 | 비고 |
@@ -109,8 +122,8 @@
 ### 향후 개선 사항
 - [ ] Rate Limiting 구현 (API 남용 방지)
 - [ ] CSRF 보호 추가 (Form submission)
-- [ ] API Key 인증 (외부 서비스 통합 시)
-- [ ] Webhook 서명 검증 (외부 이벤트 수신 시)
+- [x] API Key 인증 (외부 서비스 통합 시) - ✅ Inbound Webhook에 구현됨
+- [x] Webhook 서명 검증 (외부 이벤트 수신 시) - ✅ HMAC-SHA256 구현됨
 
 ---
 
@@ -157,5 +170,5 @@ if (adminCheck) return adminCheck; // 권한 없으면 403 반환
 
 ---
 
-**최종 업데이트**: 2025-11-05
-**검증 상태**: ✅ 모든 API Routes 권한 구현 확인 완료
+**최종 업데이트**: 2025-12-04
+**검증 상태**: ✅ 모든 API Routes 권한 구현 확인 완료 (Webhooks API 추가)

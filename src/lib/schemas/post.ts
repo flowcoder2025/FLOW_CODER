@@ -19,13 +19,6 @@ export const createPostSchema = z.object({
     .string()
     .cuid('올바른 카테고리 ID 형식이 아닙니다'),
 
-  postType: z
-    .enum(['DISCUSSION', 'QUESTION', 'SHOWCASE', 'TUTORIAL', 'NEWS'], {
-      message: '올바른 게시글 타입을 선택해주세요',
-    })
-    .optional()
-    .default('DISCUSSION'),
-
   tags: z
     .array(z.string().trim())
     .max(5, '태그는 최대 5개까지 가능합니다')
@@ -66,12 +59,6 @@ export const updatePostSchema = z.object({
   categoryId: z
     .string()
     .cuid('올바른 카테고리 ID 형식이 아닙니다')
-    .optional(),
-
-  postType: z
-    .enum(['DISCUSSION', 'QUESTION', 'SHOWCASE', 'TUTORIAL', 'NEWS'], {
-      message: '올바른 게시글 타입을 선택해주세요',
-    })
     .optional(),
 
   tags: z

@@ -57,7 +57,7 @@ export function ProfileTabs({ userPosts, userComments }: ProfileTabsProps) {
                   {/* 게시글 링크 */}
                   {comment.post && (
                     <Link
-                      href={`/${comment.post.postType.toLowerCase()}/${comment.post.id}`}
+                      href={`/community/${comment.post.category.slug}/${comment.post.id}`}
                       className="block mb-3 text-sm font-medium hover:text-primary transition-colors"
                     >
                       📝 {comment.post.title}

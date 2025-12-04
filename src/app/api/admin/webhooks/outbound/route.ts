@@ -40,6 +40,7 @@ export async function GET() {
  * Body:
  * - url: string (필수) - 웹훅을 받을 URL
  * - events: WebhookEvent[] (필수) - 구독할 이벤트 목록
+ * - type: 'GENERIC' | 'DISCORD' | 'SLACK' (선택, 기본: GENERIC)
  * - description: string (선택)
  */
 export async function POST(request: NextRequest) {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     await requireAdmin();
 
     const body = await request.json();
-    const { url, events, description } = body;
+    const { url, events, type = 'GENERIC', description } = body;
 
     // 필수 필드 검증
     if (!url || !events || !Array.isArray(events) || events.length === 0) {
@@ -71,7 +72,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 시크릿 키 생성 (32바이트 랜덤)
+    // 웹훅 타입 검증
+    const validTypes = ['GENERIC', 'DISCORD', 'SLACK'];
+    if (!validTypes.includes(type)) {
+      return validationErrorResponse(
+        `유효하지 않은 타입: ${type}. 가능한 값: ${validTypes.join(', ')}`
+      );
+    }
+
+    // 시크릿 키 생성 (32바이트 랜덤) - Discord/Slack은 사용하지 않지만 일관성을 위해 생성
     const secret = crypto.randomBytes(32).toString('hex');
 
     // 웹훅 구독 생성
@@ -80,6 +89,7 @@ export async function POST(request: NextRequest) {
         url,
         secret,
         events,
+        type,
         description,
         isActive: true,
       },

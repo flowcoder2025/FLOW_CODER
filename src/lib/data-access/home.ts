@@ -163,7 +163,7 @@ async function fetchNewsItems(): Promise<NewsItem[]> {
   const posts = await prisma.post.findMany({
     where: {
       isFeatured: true,
-      postType: 'NEWS',
+      category: { route: '/news' },
       deletedAt: null,
     },
     orderBy: {
@@ -205,8 +205,8 @@ async function fetchProjects(): Promise<Project[]> {
     where: {
       isFeatured: true,
       deletedAt: null,
-      postType: {
-        in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+      category: {
+        adminOnly: false,
       },
     },
     orderBy: {

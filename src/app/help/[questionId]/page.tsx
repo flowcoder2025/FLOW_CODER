@@ -33,8 +33,8 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
   // 질문 게시글 조회
   const question = getPostById(questionId);
 
-  // 존재하지 않거나 QUESTION 타입이 아니면 404
-  if (!question || question.postType !== 'QUESTION') {
+  // 존재하지 않거나 Q&A 카테고리가 아니면 404
+  if (!question || !question.category.hasAnswers) {
     notFound();
   }
 

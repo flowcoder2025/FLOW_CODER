@@ -13,7 +13,6 @@ import {
  * Query Parameters:
  * - q: 검색어 (필수, 최소 2자)
  * - category: 카테고리 slug (optional)
- * - postType: 게시글 타입 (optional)
  * - page: 페이지 번호 (default: 1)
  * - limit: 페이지당 항목 수 (default: 20)
  *
@@ -56,7 +55,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const category = searchParams.get('category');
-    const postType = searchParams.get('postType');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
@@ -79,12 +77,6 @@ export async function GET(request: NextRequest) {
       paramIndex++;
     }
 
-    if (postType) {
-      whereConditions.push(`p."postType" = $${paramIndex}`);
-      queryParams.push(postType);
-      paramIndex++;
-    }
-
     // Full-Text Search 쿼리 (PostgreSQL)
     // Note: 한글 검색을 위해 'simple' configuration 사용
     // 실제 프로덕션에서는 pg_trgm extension 또는 ElasticSearch 고려
@@ -93,7 +85,6 @@ export async function GET(request: NextRequest) {
         p.id,
         p.title,
         p.content,
-        p."postType",
         p.upvotes,
         p."viewCount",
         p.tags,

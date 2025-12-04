@@ -15,13 +15,13 @@ function stripHtml(html: string): string {
  * Client Component로 전달 (모든 게시물 타입 지원)
  */
 export async function FeaturedProjectsServer() {
-  // isFeatured=true인 게시물 조회 (최신순, 최대 3개, NEWS 제외)
+  // isFeatured=true인 게시물 조회 (최신순, 최대 3개, showcase 카테고리)
   const posts = await prisma.post.findMany({
     where: {
       isFeatured: true,
       deletedAt: null,
-      postType: {
-        in: ['DISCUSSION', 'QUESTION', 'SHOWCASE'],
+      category: {
+        slug: 'showcase',
       },
     },
     orderBy: {
@@ -31,7 +31,11 @@ export async function FeaturedProjectsServer() {
     include: {
       category: {
         select: {
+          id: true,
+          name: true,
           slug: true,
+          route: true,
+          hasAnswers: true,
         },
       },
       images: {

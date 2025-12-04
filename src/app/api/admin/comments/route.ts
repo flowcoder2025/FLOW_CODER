@@ -75,7 +75,15 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               title: true,
-              postType: true,
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  route: true,
+                  hasAnswers: true,
+                },
+              },
             },
           },
           parent: {

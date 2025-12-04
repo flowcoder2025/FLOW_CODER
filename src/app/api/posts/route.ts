@@ -18,7 +18,6 @@ import {
  *
  * Query Parameters:
  * - category: 카테고리 slug (optional)
- * - postType: 게시글 타입 (optional)
  * - sort: popular | recent | comments (default: popular)
  * - page: 페이지 번호 (default: 1)
  * - limit: 페이지당 항목 수 (default: 20)
@@ -27,7 +26,6 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const postType = searchParams.get('postType');
     const sort = searchParams.get('sort') || 'popular';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -37,9 +35,6 @@ export async function GET(request: NextRequest) {
     const where: Prisma.PostWhereInput = {};
     if (category) {
       where.category = { slug: category };
-    }
-    if (postType) {
-      where.postType = postType as Prisma.PostWhereInput['postType'];
     }
 
     // 정렬 조건 구성
@@ -121,7 +116,6 @@ export async function GET(request: NextRequest) {
  * Body:
  * - title: string (필수)
  * - content: string (필수)
- * - postType: PostType (default: DISCUSSION)
  * - categoryId: string (필수)
  * - tags: string[]
  * - coverImageUrl: string (optional)
@@ -136,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     // 요청 본문 파싱
     const body = await request.json();
-    const { title, content, postType, categoryId, tags, coverImageUrl } = body;
+    const { title, content, categoryId, tags, coverImageUrl } = body;
 
     // 필수 필드 검증
     if (!title || !content || !categoryId) {
@@ -180,7 +174,6 @@ export async function POST(request: NextRequest) {
         data: {
           title,
           content,
-          postType: postType || 'DISCUSSION',
           authorId: session.user.id,
           categoryId,
           tags: tags || [],
@@ -240,7 +233,6 @@ export async function POST(request: NextRequest) {
       content: post.content,
       authorId: post.authorId,
       categoryId: post.categoryId,
-      postType: post.postType,
       tags: post.tags,
     }).catch((err) => console.error('Webhook trigger failed:', err));
 

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { PostSortOption, PostType, PostFilterOptions } from '@/lib/types';
+import type { PostSortOption, PostFilterOptions } from '@/lib/types';
 
 /**
  * 필터 바 컴포넌트
@@ -49,14 +49,6 @@ const SORT_LABELS: Record<PostSortOption, string> = {
   views: '조회수순',
 };
 
-// 게시글 타입 레이블 매핑
-const POST_TYPE_LABELS: Record<PostType, string> = {
-  DISCUSSION: '토론',
-  QUESTION: '질문',
-  SHOWCASE: '작품 공유',
-  NEWS: '뉴스',
-};
-
 export function FilterBar({
   filters,
   sortBy,
@@ -68,7 +60,6 @@ export function FilterBar({
 }: FilterBarProps) {
   const hasActiveFilters =
     filters.categoryId ||
-    filters.postType ||
     selectedTags.length > 0 ||
     sortBy !== 'recent';
 
@@ -100,28 +91,6 @@ export function FilterBar({
             </SelectContent>
           </Select>
         </div>
-
-        {/* 게시글 타입 필터 */}
-        <Select
-          value={filters.postType || 'all'}
-          onValueChange={(value) =>
-            onFilterChange({
-              ...filters,
-              postType: value === 'all' ? undefined : (value as PostType),
-            })
-          }
-        >
-          <SelectTrigger className="w-[130px]">
-            <SelectValue placeholder="타입" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">전체 타입</SelectItem>
-            <SelectItem value="DISCUSSION">{POST_TYPE_LABELS.DISCUSSION}</SelectItem>
-            <SelectItem value="QUESTION">{POST_TYPE_LABELS.QUESTION}</SelectItem>
-            <SelectItem value="SHOWCASE">{POST_TYPE_LABELS.SHOWCASE}</SelectItem>
-            <SelectItem value="NEWS">{POST_TYPE_LABELS.NEWS}</SelectItem>
-          </SelectContent>
-        </Select>
 
         {/* 정렬 옵션 */}
         <div className="flex items-center gap-2">

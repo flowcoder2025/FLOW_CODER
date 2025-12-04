@@ -102,11 +102,6 @@ export function filterPosts(
     );
   }
 
-  // 게시글 타입 필터
-  if (filters.postType) {
-    filtered = filtered.filter((post) => post.postType === filters.postType);
-  }
-
   // 작성자 필터
   if (filters.authorId) {
     filtered = filtered.filter((post) => post.authorId === filters.authorId);
@@ -302,7 +297,7 @@ export function getSearchSnippet(
 /**
  * Q&A 질문 필터링
  *
- * @param posts - Q&A 질문 목록 (postType === 'QUESTION')
+ * @param posts - Q&A 질문 목록 (category.hasAnswers === true)
  * @param filter - 필터 타입
  * @returns 필터링된 질문
  */
@@ -310,7 +305,8 @@ export function filterQuestions(
   posts: PostWithAuthor[],
   filter: 'all' | 'unanswered' | 'accepted'
 ): PostWithAuthor[] {
-  const questions = posts.filter((post) => post.postType === 'QUESTION');
+  // Q&A 카테고리는 category.hasAnswers로 판별
+  const questions = posts;
 
   switch (filter) {
     case 'unanswered':

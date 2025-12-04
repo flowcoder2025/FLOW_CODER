@@ -38,7 +38,6 @@ function mapPostToCardData(post: DalPost): PostCardData {
     id: post.id,
     title: post.title,
     content: post.content,
-    postType: post.postType,
     authorId: post.authorId,
     categoryId: post.categoryId,
     upvotes: post.upvotes,

@@ -88,7 +88,7 @@ model ExternalTerms {
 
 // ===== 커뮤니티 플랫폼 모델 =====
 
-// 카테고리 (게시판 분류)
+// 카테고리 (게시판 분류 - 페이지별 통합 관리)
 model Category {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -97,28 +97,26 @@ model Category {
   icon        String?
   color       String?
   postCount   Int      @default(0)
+
+  // 카테고리 동작 설정
+  route       String   @default("/community")  // 라우팅 경로: /community, /help, /news
+  hasAnswers  Boolean  @default(false)         // Q&A 답변 시스템 활성화
+  adminOnly   Boolean  @default(false)         // 관리자 전용 작성 권한
+
   createdAt   DateTime @default(now())
 
   // Relations
   posts       Post[]
 
   @@index([slug])
+  @@index([route])
 }
 
-// 게시글 타입 enum
-enum PostType {
-  DISCUSSION
-  QUESTION
-  SHOWCASE
-  NEWS
-}
-
-// 게시글 (커뮤니티, Q&A, 뉴스 통합)
+// 게시글 (커뮤니티, Q&A, 뉴스 통합 - Category로 분류)
 model Post {
   id            String   @id @default(cuid())
   title         String
   content       String   @db.Text
-  postType      PostType @default(DISCUSSION)
   authorId      String
   categoryId    String
   upvotes       Int      @default(0)
@@ -144,7 +142,6 @@ model Post {
   @@index([categoryId])
   @@index([authorId])
   @@index([createdAt(sort: Desc)])
-  @@index([postType])
   @@index([deletedAt])
   @@index([isFeatured])  // 홈 캐러셀 조회 최적화
 }
@@ -317,11 +314,18 @@ enum WebhookEvent {
   POST_DELETED
 }
 
+enum WebhookType {
+  GENERIC   // 일반 웹훅 (기본값)
+  DISCORD   // Discord 웹훅
+  SLACK     // Slack 웹훅
+}
+
 model WebhookSubscription {
   id          String        @id @default(cuid())
   url         String        // 웹훅을 전송할 외부 URL
   secret      String        // HMAC 서명용 시크릿 키
   events      WebhookEvent[] // 구독할 이벤트 목록
+  type        WebhookType   @default(GENERIC) // 웹훅 타입
   isActive    Boolean       @default(true)
   description String?       // 웹훅 설명
 

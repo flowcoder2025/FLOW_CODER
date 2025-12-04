@@ -2,6 +2,7 @@ import { prisma } from './prisma';
 import crypto from 'crypto';
 
 export type WebhookEvent = 'POST_CREATED' | 'POST_UPDATED' | 'POST_DELETED';
+export type WebhookType = 'GENERIC' | 'DISCORD' | 'SLACK';
 
 export interface WebhookPayload {
   event: WebhookEvent;
@@ -16,6 +17,165 @@ export interface WebhookPayload {
   };
 }
 
+// Discord 웹훅 페이로드 형식
+interface DiscordWebhookPayload {
+  content?: string;
+  embeds?: Array<{
+    title?: string;
+    description?: string;
+    color?: number;
+    fields?: Array<{
+      name: string;
+      value: string;
+      inline?: boolean;
+    }>;
+    footer?: {
+      text: string;
+    };
+    timestamp?: string;
+  }>;
+}
+
+// Slack 웹훅 페이로드 형식
+interface SlackWebhookPayload {
+  text?: string;
+  blocks?: Array<{
+    type: string;
+    text?: {
+      type: string;
+      text: string;
+    };
+    fields?: Array<{
+      type: string;
+      text: string;
+    }>;
+  }>;
+}
+
+/**
+ * 이벤트 타입에 따른 색상 (Discord embed용)
+ */
+function getEventColor(event: WebhookEvent): number {
+  switch (event) {
+    case 'POST_CREATED':
+      return 0x22c55e; // green
+    case 'POST_UPDATED':
+      return 0x3b82f6; // blue
+    case 'POST_DELETED':
+      return 0xef4444; // red
+    default:
+      return 0x6b7280; // gray
+  }
+}
+
+/**
+ * 이벤트 타입에 따른 한글 레이블
+ */
+function getEventLabel(event: WebhookEvent): string {
+  switch (event) {
+    case 'POST_CREATED':
+      return '새 게시글 작성';
+    case 'POST_UPDATED':
+      return '게시글 수정';
+    case 'POST_DELETED':
+      return '게시글 삭제';
+    default:
+      return event;
+  }
+}
+
+/**
+ * Discord 웹훅 페이로드로 변환
+ */
+function toDiscordPayload(payload: WebhookPayload): DiscordWebhookPayload {
+  const { event, timestamp, data } = payload;
+
+  return {
+    embeds: [
+      {
+        title: `📢 ${getEventLabel(event)}`,
+        description: data.title ? `**${data.title}**` : undefined,
+        color: getEventColor(event),
+        fields: [
+          ...(data.content
+            ? [
+                {
+                  name: '내용 미리보기',
+                  value: data.content.length > 200
+                    ? data.content.substring(0, 200) + '...'
+                    : data.content,
+                  inline: false,
+                },
+              ]
+            : []),
+          {
+            name: '게시글 ID',
+            value: `\`${data.postId}\``,
+            inline: true,
+          },
+        ],
+        footer: {
+          text: 'Flow Coder Webhook',
+        },
+        timestamp,
+      },
+    ],
+  };
+}
+
+/**
+ * Slack 웹훅 페이로드로 변환
+ */
+function toSlackPayload(payload: WebhookPayload): SlackWebhookPayload {
+  const { event, data } = payload;
+
+  return {
+    blocks: [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: `📢 ${getEventLabel(event)}`,
+        },
+      },
+      ...(data.title
+        ? [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*${data.title}*`,
+              },
+            },
+          ]
+        : []),
+      ...(data.content
+        ? [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text:
+                  data.content.length > 200
+                    ? data.content.substring(0, 200) + '...'
+                    : data.content,
+              },
+            },
+          ]
+        : []),
+      {
+        type: 'context',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: `*게시글 ID:* \`${data.postId}\``,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 /**
  * HMAC 서명 생성
  */
@@ -27,30 +187,58 @@ function generateSignature(payload: string, secret: string): string {
 }
 
 /**
+ * 웹훅 타입에 따라 페이로드 변환
+ */
+function transformPayload(
+  payload: WebhookPayload,
+  type: WebhookType
+): DiscordWebhookPayload | SlackWebhookPayload | WebhookPayload {
+  switch (type) {
+    case 'DISCORD':
+      return toDiscordPayload(payload);
+    case 'SLACK':
+      return toSlackPayload(payload);
+    default:
+      return payload;
+  }
+}
+
+/**
  * 단일 웹훅 전송
  */
 async function sendWebhookRequest(
   url: string,
   payload: WebhookPayload,
-  secret: string
+  secret: string,
+  type: WebhookType = 'GENERIC'
 ): Promise<boolean> {
   try {
-    const payloadString = JSON.stringify(payload);
-    const signature = generateSignature(payloadString, secret);
+    // 타입에 따라 페이로드 변환
+    const transformedPayload = transformPayload(payload, type);
+    const payloadString = JSON.stringify(transformedPayload);
+
+    // Discord/Slack은 서명이 필요 없음
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Generic 타입만 서명 헤더 추가
+    if (type === 'GENERIC') {
+      const signature = generateSignature(payloadString, secret);
+      headers['X-Webhook-Signature'] = signature;
+      headers['X-Webhook-Event'] = payload.event;
+    }
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Webhook-Signature': signature,
-        'X-Webhook-Event': payload.event,
-      },
+      headers,
       body: payloadString,
       signal: AbortSignal.timeout(10000), // 10초 타임아웃
     });
 
     if (!response.ok) {
-      console.error(`Webhook failed: ${url} returned ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      console.error(`Webhook failed: ${url} returned ${response.status}`, errorText);
       return false;
     }
 
@@ -89,10 +277,10 @@ export async function triggerWebhooks(
       data,
     };
 
-    // 모든 웹훅 병렬 전송
+    // 모든 웹훅 병렬 전송 (타입에 맞게 페이로드 변환)
     const results = await Promise.allSettled(
       subscriptions.map((sub) =>
-        sendWebhookRequest(sub.url, payload, sub.secret)
+        sendWebhookRequest(sub.url, payload, sub.secret, sub.type as WebhookType)
       )
     );
 

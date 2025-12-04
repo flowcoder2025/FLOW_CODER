@@ -13,6 +13,7 @@ import {
   Shield,
   Activity,
   Newspaper,
+  Webhook,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -111,6 +112,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <Activity className="h-4 w-4" />
                 성능 모니터링
+              </Button>
+            </Link>
+
+            <Link href="/admin/webhooks">
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <Webhook className="h-4 w-4" />
+                웹훅 관리
               </Button>
             </Link>
           </nav>

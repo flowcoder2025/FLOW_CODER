@@ -7,7 +7,6 @@
 export {
   getPostsByCategory,
   getPostById,
-  getPostsByType,
   getNewsPosts,
   getQuestionPosts,
   getRecentPosts,
