@@ -170,49 +170,47 @@ export interface VoteSummary {
 }
 
 /**
- * 카테고리별 게시글 조회
+ * 내부 카테고리별 게시글 조회 함수 (캐싱 없음)
  */
-export async function getPostsByCategory(
-  categorySlug: string
-): Promise<PostWithAuthor[]> {
+async function fetchPostsByCategory(categorySlug: string): Promise<PostWithAuthor[]> {
   try {
     const posts = await prisma.post.findMany({
-    where: {
-      category: { slug: categorySlug },
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          username: true,
-          displayName: true,
-          image: true,
-          reputation: true,
+      where: {
+        category: { slug: categorySlug },
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            image: true,
+            reputation: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true,
+            color: true,
+            route: true,
+            hasAnswers: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+            votes: true,
+          },
         },
       },
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          icon: true,
-          color: true,
-          route: true,
-          hasAnswers: true,
-        },
-      },
-      _count: {
-        select: {
-          comments: true,
-          votes: true,
-        },
-      },
-    },
-    orderBy: [
-      { isPinned: 'desc' },
-      { createdAt: 'desc' },
-    ],
-  });
+      orderBy: [
+        { isPinned: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
 
     return posts || [];
   } catch (error) {
@@ -220,6 +218,20 @@ export async function getPostsByCategory(
     throw new Error(`카테고리별 게시글 조회 중 오류가 발생했습니다: ${categorySlug}`);
   }
 }
+
+/**
+ * 카테고리별 게시글 조회 (1분 캐싱)
+ * 게시글은 자주 변경될 수 있으므로 짧은 캐싱 적용
+ */
+export const getPostsByCategory = (categorySlug: string) =>
+  unstable_cache(
+    () => fetchPostsByCategory(categorySlug),
+    [`posts-category-${categorySlug}`],
+    {
+      revalidate: 60, // 1분마다 재검증
+      tags: ['posts', `posts-category-${categorySlug}`],
+    }
+  )();
 
 /**
  * 게시글 ID로 단일 게시글 조회

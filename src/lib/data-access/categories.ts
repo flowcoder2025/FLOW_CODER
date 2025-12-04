@@ -57,11 +57,9 @@ export const getAllCategories = unstable_cache(
 );
 
 /**
- * slug로 카테고리 조회
+ * 내부 slug로 카테고리 조회 함수 (캐싱 없음)
  */
-export async function getCategoryBySlug(
-  slug: string
-): Promise<Category | null> {
+async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
   try {
     const category = await prisma.category.findUnique({
       where: { slug },
@@ -73,6 +71,20 @@ export async function getCategoryBySlug(
     throw new Error(`카테고리 조회 중 오류가 발생했습니다: ${slug}`);
   }
 }
+
+/**
+ * slug로 카테고리 조회 (5분 캐싱)
+ * 카테고리는 자주 변경되지 않으므로 캐싱으로 성능 최적화
+ */
+export const getCategoryBySlug = (slug: string) =>
+  unstable_cache(
+    () => fetchCategoryBySlug(slug),
+    [`category-slug-${slug}`],
+    {
+      revalidate: 300, // 5분마다 재검증
+      tags: ['categories', `category-${slug}`],
+    }
+  )();
 
 /**
  * 카테고리 ID로 조회

@@ -10,7 +10,9 @@ import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
  *
  * 동적 라우트: /community/[category]
  * URL search params로 정렬, 페이지네이션 처리
+ * ISR: 60초마다 재검증
  */
+export const revalidate = 60;
 
 // 카테고리 slug에 따른 아이콘 매핑
 const getCategoryIcon = (slug: string) => {
@@ -143,8 +145,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
               key={post.id}
               post={{
                 ...post,
-                createdAt: post.createdAt.toISOString(),
-                updatedAt: post.updatedAt.toISOString(),
+                // unstable_cache로 인해 Date가 문자열로 직렬화될 수 있음
+                createdAt: typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString(),
+                updatedAt: typeof post.updatedAt === 'string' ? post.updatedAt : post.updatedAt.toISOString(),
                 coverImageUrl: post.coverImageUrl || undefined,
                 author: {
                   id: post.author.id,
