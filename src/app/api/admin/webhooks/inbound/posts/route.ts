@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       finalAuthorId = systemUser.id;
     }
 
-    // 트랜잭션: 게시글 생성 + Zanzibar 권한 부여 + postCount 증가
+    // 트랜잭션: 게시글 생성 + postCount 증가
     const post = await prisma.$transaction(async (tx) => {
       // 1. 게시글 생성
       const newPost = await tx.post.create({
@@ -131,10 +131,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // 2. Zanzibar 권한 부여: 게시글 작성자에게 owner 권한 자동 부여
-      await grantPostOwnership(newPost.id, finalAuthorId);
-
-      // 3. 카테고리 게시글 수 증가
+      // 2. 카테고리 게시글 수 증가
       await tx.category.update({
         where: { id: categoryId },
         data: {
@@ -146,6 +143,9 @@ export async function POST(request: NextRequest) {
 
       return newPost;
     });
+
+    // Zanzibar 권한 부여: 게시글 작성자에게 owner 권한 자동 부여 (트랜잭션 외부)
+    await grantPostOwnership(post.id, finalAuthorId);
 
     // 웹훅 트리거 (비동기, 실패해도 메인 로직에 영향 없음)
     triggerWebhooks('POST_CREATED', {
