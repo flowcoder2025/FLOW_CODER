@@ -170,7 +170,19 @@ export async function POST(request: NextRequest) {
       source: 'inbound_webhook',
     }).catch((err) => console.error('Webhook trigger failed:', err));
 
-    return successResponse({ post }, 201);
+    // 게시글 URL 생성
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flowcoder.co.kr';
+    let postUrl: string;
+
+    if (post.category.slug === 'news') {
+      postUrl = `${baseUrl}/news/${post.id}`;
+    } else if (post.category.slug === 'qna') {
+      postUrl = `${baseUrl}/help/${post.id}`;
+    } else {
+      postUrl = `${baseUrl}/community/${post.category.slug}/${post.id}`;
+    }
+
+    return successResponse({ post, postUrl }, 201);
   } catch (error) {
     console.error('POST /api/admin/webhooks/inbound/posts error:', error);
     return serverErrorResponse('게시글 생성 중 오류가 발생했습니다', error);
