@@ -99,21 +99,23 @@ export function Header({ categories }: HeaderProps) {
             커뮤니티
           </Link>
 
-          {/* 카테고리별 개별 버튼 */}
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/community/${category.slug}`}
-              className={`flex items-center gap-2 transition-colors pb-1 ${
-                pathname.startsWith(`/community/${category.slug}`)
-                  ? "text-foreground font-bold border-b-2 border-current"
-                  : "hover:text-primary"
-              }`}
-            >
-              {getCategoryIcon(category.slug)}
-              {category.name}
-            </Link>
-          ))}
+          {/* 카테고리별 개별 버튼 (news는 /news 페이지 사용) */}
+          {categories
+            .filter((category) => category.slug !== 'news')
+            .map((category) => (
+              <Link
+                key={category.id}
+                href={`/community/${category.slug}`}
+                className={`flex items-center gap-2 transition-colors pb-1 ${
+                  pathname.startsWith(`/community/${category.slug}`)
+                    ? "text-foreground font-bold border-b-2 border-current"
+                    : "hover:text-primary"
+                }`}
+              >
+                {getCategoryIcon(category.slug)}
+                {category.name}
+              </Link>
+            ))}
 
           <Link
             href="/help"
@@ -228,22 +230,24 @@ export function Header({ categories }: HeaderProps) {
               커뮤니티
             </Link>
 
-            {/* 카테고리별 개별 링크 */}
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/community/${category.slug}`}
-                className={`flex items-center gap-2 transition-colors pl-3 ${
-                  pathname.startsWith(`/community/${category.slug}`)
-                    ? "text-foreground font-bold border-l-2 border-current"
-                    : "hover:text-primary"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {getCategoryIcon(category.slug)}
-                {category.name}
-              </Link>
-            ))}
+            {/* 카테고리별 개별 링크 (news는 /news 페이지 사용) */}
+            {categories
+              .filter((category) => category.slug !== 'news')
+              .map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/community/${category.slug}`}
+                  className={`flex items-center gap-2 transition-colors pl-3 ${
+                    pathname.startsWith(`/community/${category.slug}`)
+                      ? "text-foreground font-bold border-l-2 border-current"
+                      : "hover:text-primary"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {getCategoryIcon(category.slug)}
+                  {category.name}
+                </Link>
+              ))}
             <Link
               href="/help"
               className={`flex items-center gap-2 transition-colors pl-3 ${

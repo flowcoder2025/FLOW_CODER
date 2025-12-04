@@ -108,9 +108,11 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
         </Button>
       </div>
 
-      {/* 카테고리 그리드 */}
+      {/* 카테고리 그리드 (news는 /news 페이지 사용) */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
-        {categories.map((category) => {
+        {categories
+          .filter((category) => category.slug !== 'news')
+          .map((category) => {
           return (
             <Link
               key={category.id}
