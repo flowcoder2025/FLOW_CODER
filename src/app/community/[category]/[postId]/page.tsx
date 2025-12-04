@@ -204,7 +204,20 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               {/* 본문 */}
               <SafeHtml
                 html={post.content}
-                className="prose prose-neutral dark:prose-invert max-w-none mb-6"
+                className="prose prose-lg prose-neutral dark:prose-invert max-w-none mb-6
+                  prose-headings:font-bold prose-headings:text-foreground
+                  prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+                  prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
+                  prose-p:text-base prose-p:leading-relaxed prose-p:mb-4
+                  prose-ul:my-4 prose-ul:pl-6 prose-li:my-1
+                  prose-ol:my-4 prose-ol:pl-6
+                  prose-img:rounded-lg prose-img:my-6
+                  prose-figure:my-6
+                  prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic
+                  prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                  prose-strong:text-foreground
+                  prose-table:border-collapse prose-th:border prose-th:p-2 prose-td:border prose-td:p-2"
+                skipFirstImage={!!post.coverImageUrl}
               />
 
               {/* 태그 */}

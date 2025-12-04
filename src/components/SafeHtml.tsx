@@ -24,6 +24,8 @@ interface SafeHtmlProps {
   html: string;
   /** 추가 CSS 클래스 */
   className?: string;
+  /** 첫 번째 이미지/figure 제거 (커버 이미지와 중복 방지) */
+  skipFirstImage?: boolean;
 }
 
 /**
@@ -51,7 +53,7 @@ const ALLOWED_ATTR = [
   'colspan', 'rowspan',  // 테이블
 ];
 
-export function SafeHtml({ html, className = '' }: SafeHtmlProps) {
+export function SafeHtml({ html, className = '', skipFirstImage = false }: SafeHtmlProps) {
   const [sanitizedHtml, setSanitizedHtml] = useState('');
 
   useEffect(() => {
@@ -73,9 +75,24 @@ export function SafeHtml({ html, className = '' }: SafeHtmlProps) {
         link.setAttribute('rel', 'noopener noreferrer');
       });
 
+      // 첫 번째 이미지/figure 제거 (커버 이미지와 중복 방지)
+      if (skipFirstImage) {
+        // figure 태그 먼저 확인 (figure > img 구조)
+        const firstFigure = tempDiv.querySelector('figure');
+        if (firstFigure) {
+          firstFigure.remove();
+        } else {
+          // figure가 없으면 첫 번째 img 태그 제거
+          const firstImg = tempDiv.querySelector('img');
+          if (firstImg) {
+            firstImg.remove();
+          }
+        }
+      }
+
       setSanitizedHtml(tempDiv.innerHTML);
     }
-  }, [html]);
+  }, [html, skipFirstImage]);
 
   // SSR 시 빈 상태 반환
   if (!sanitizedHtml) {
