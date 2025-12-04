@@ -33,6 +33,11 @@ interface PostDetailPageProps {
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const { category: categorySlug, postId } = await params;
 
+  // news 카테고리는 /news/[id] 페이지에서 처리 (중복 방지)
+  if (categorySlug === 'news') {
+    notFound();
+  }
+
   const sessionPromise = auth();
   const post = await getPostById(postId);
 

@@ -41,6 +41,11 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const currentPage = parseInt(pageStr, 10) || 1;
   const postsPerPage = 20;
 
+  // news 카테고리는 /news 페이지에서 처리 (중복 방지)
+  if (categorySlug === 'news') {
+    notFound();
+  }
+
   // 카테고리 정보 조회
   const category = await getCategoryBySlug(categorySlug);
 

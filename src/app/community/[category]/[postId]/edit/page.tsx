@@ -30,6 +30,13 @@ export default function EditPostPage() {
   const postId = params.postId as string;
   const categorySlug = params.category as string;
 
+  // news 카테고리는 /news에서 처리 (중복 방지)
+  useEffect(() => {
+    if (categorySlug === 'news') {
+      router.replace('/news');
+    }
+  }, [categorySlug, router]);
+
   // 폼 상태
   const [isLoading, setIsLoading] = useState(true);
   const [title, setTitle] = useState('');
