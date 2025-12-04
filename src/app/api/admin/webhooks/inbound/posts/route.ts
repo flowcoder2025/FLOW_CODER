@@ -57,13 +57,25 @@ export async function POST(request: NextRequest) {
       return validationErrorResponse('내용은 최대 10,000자까지 입력 가능합니다.');
     }
 
-    // tags 검증
-    if (tags && Array.isArray(tags)) {
-      if (tags.length > 5) {
+    // tags 처리: 문자열이면 배열로 변환
+    let processedTags: string[] = [];
+    if (tags) {
+      if (typeof tags === 'string') {
+        // 쉼표로 구분된 문자열을 배열로 변환
+        processedTags = tags
+          .split(',')
+          .map((tag: string) => tag.trim())
+          .filter((tag: string) => tag.length > 0);
+      } else if (Array.isArray(tags)) {
+        processedTags = tags;
+      }
+
+      // 태그 검증
+      if (processedTags.length > 5) {
         return validationErrorResponse('태그는 최대 5개까지 추가 가능합니다.');
       }
 
-      for (const tag of tags) {
+      for (const tag of processedTags) {
         if (typeof tag !== 'string' || tag.length > 20) {
           return validationErrorResponse('각 태그는 최대 20자까지 입력 가능합니다.');
         }
@@ -107,7 +119,7 @@ export async function POST(request: NextRequest) {
           content,
           authorId: finalAuthorId,
           categoryId,
-          tags: tags || [],
+          tags: processedTags,
           coverImageUrl,
         },
         include: {
