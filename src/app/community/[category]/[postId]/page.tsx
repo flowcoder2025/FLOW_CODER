@@ -187,6 +187,20 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 </div>
               </div>
 
+              {/* 커버 이미지 */}
+              {post.coverImageUrl && (
+                <div className="mb-6 rounded-lg overflow-hidden">
+                  <Image
+                    src={post.coverImageUrl}
+                    alt={post.title}
+                    width={800}
+                    height={400}
+                    className="w-full h-auto object-cover"
+                    priority
+                  />
+                </div>
+              )}
+
               {/* 본문 */}
               <SafeHtml
                 html={post.content}

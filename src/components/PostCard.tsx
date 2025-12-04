@@ -48,6 +48,7 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
     tags,
     isPinned,
     createdAt,
+    coverImageUrl,
   } = post;
 
   // 성능 최적화: 계산된 값 메모이제이션
@@ -95,21 +96,36 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
                 </div>
               )}
 
-              {/* 제목 (클릭 시 상세 페이지) */}
+              {/* 제목 & 썸네일 */}
               <Link href={postUrl} className="block group">
-                <h3 className={`font-semibold group-hover:text-primary transition-colors mb-2 line-clamp-2 ${
-                  variant === 'compact' ? 'text-base' : 'text-lg'
-                }`}>
-                  {title}
-                </h3>
+                <div className={coverImageUrl && variant === 'default' ? 'flex gap-4' : ''}>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-semibold group-hover:text-primary transition-colors mb-2 line-clamp-2 ${
+                      variant === 'compact' ? 'text-base' : 'text-lg'
+                    }`}>
+                      {title}
+                    </h3>
+                    {/* 본문 미리보기 */}
+                    {variant === 'default' && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                        {stripHtml(content)}
+                      </p>
+                    )}
+                  </div>
+                  {/* 썸네일 */}
+                  {coverImageUrl && variant === 'default' && (
+                    <div className="flex-shrink-0">
+                      <Image
+                        src={coverImageUrl}
+                        alt={title}
+                        width={120}
+                        height={80}
+                        className="rounded-md object-cover w-[120px] h-[80px]"
+                      />
+                    </div>
+                  )}
+                </div>
               </Link>
-
-              {/* 본문 미리보기 */}
-              {variant === 'default' && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                  {stripHtml(content)}
-                </p>
-              )}
 
               {/* 태그 */}
               {tags.length > 0 && (

@@ -37,7 +37,7 @@ const ALLOWED_TAGS = [
   // 리스트
   'ul', 'ol', 'li',
   // 링크 & 이미지
-  'a', 'img',
+  'a', 'img', 'figure', 'figcaption',
   // 테이블
   'table', 'thead', 'tbody', 'tr', 'th', 'td',
   // 구조

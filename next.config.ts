@@ -29,6 +29,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'hybcfzamnhvmkvgkepzo.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+      },
     ],
     // SVG 이미지 허용 (아바타 생성 서비스용)
     dangerouslyAllowSVG: true,
