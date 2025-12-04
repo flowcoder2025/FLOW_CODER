@@ -12,7 +12,7 @@ import {
  * 크롤러가 사이트 구조를 이해하도록 changeFrequency와 priority 설정
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vibecoding.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flow-coder.com';
 
   // 정적 페이지
   const staticPages: MetadataRoute.Sitemap = [
