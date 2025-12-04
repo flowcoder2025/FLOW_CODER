@@ -47,8 +47,9 @@ function mapPostToCardData(post: DalPost): PostCardData {
     isLocked: post.isLocked,
     tags: post.tags,
     coverImageUrl: post.coverImageUrl ?? undefined,
-    createdAt: post.createdAt.toISOString(),
-    updatedAt: post.updatedAt.toISOString(),
+    // unstable_cache로 인해 Date가 문자열로 직렬화될 수 있음
+    createdAt: typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString(),
+    updatedAt: typeof post.updatedAt === 'string' ? post.updatedAt : post.updatedAt.toISOString(),
     author: {
       id: post.author.id,
       username: post.author.username || 'unknown',

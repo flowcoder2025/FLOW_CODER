@@ -10,6 +10,9 @@ import { getPostById, getNewsPosts } from '@/lib/data-access';
 import { prisma } from '@/lib/prisma';
 import { getNewsCategory } from '@/lib/news-categories';
 
+// ISR: 3분마다 재검증 (SSG와 함께 사용)
+export const revalidate = 180;
+
 /**
  * 뉴스 상세 페이지
  *
@@ -154,7 +157,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
       {/* 커버 이미지 배너 */}
       {news.coverImageUrl && (
-        <div className="relative w-full aspect-[21/9] md:aspect-[3/1] overflow-hidden bg-muted">
+        <div className="relative w-full aspect-21/9 md:aspect-3/1 overflow-hidden bg-muted">
           <Image
             src={news.coverImageUrl}
             alt={news.title}
@@ -164,7 +167,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             sizes="100vw"
           />
           {/* 그라디언트 오버레이 (향후 텍스트 추가 대비) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-background/60 to-transparent" />
         </div>
       )}
 
@@ -216,11 +219,11 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
             <span>•</span>
 
-            {/* 작성일 */}
+            {/* 작성일 - unstable_cache로 인해 Date가 문자열로 직렬화될 수 있음 */}
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
-              <time dateTime={news.createdAt.toISOString()}>
-                {news.createdAt.toLocaleDateString('ko-KR', {
+              <time dateTime={typeof news.createdAt === 'string' ? news.createdAt : news.createdAt.toISOString()}>
+                {(typeof news.createdAt === 'string' ? new Date(news.createdAt) : news.createdAt).toLocaleDateString('ko-KR', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',

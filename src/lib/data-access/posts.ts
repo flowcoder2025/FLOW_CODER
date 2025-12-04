@@ -234,9 +234,9 @@ export const getPostsByCategory = (categorySlug: string) =>
   )();
 
 /**
- * 게시글 ID로 단일 게시글 조회
+ * 내부 함수: 게시글 ID로 단일 게시글 조회 (캐싱 없음)
  */
-export async function getPostById(
+async function fetchPostById(
   postId: string
 ): Promise<PostWithDetails | null> {
   try {
@@ -333,6 +333,19 @@ export async function getPostById(
   }
 }
 
+/**
+ * 게시글 ID로 단일 게시글 조회 (30초 캐싱)
+ * 게시글 상세 페이지에서 사용
+ */
+export const getPostById = (postId: string) =>
+  unstable_cache(
+    () => fetchPostById(postId),
+    [`post-detail-${postId}`],
+    {
+      revalidate: 30, // 30초마다 재검증 (댓글 반영을 위해 짧게 설정)
+      tags: ['posts', `post-${postId}`],
+    }
+  )();
 
 /**
  * 내부 함수: 뉴스 게시글 목록 조회
@@ -592,9 +605,9 @@ export async function getPostsByUser(
 }
 
 /**
- * 최신 게시글 페이지네이션 조회
+ * 내부 최신 게시글 페이지네이션 조회 함수 (캐싱 없음)
  */
-export async function getRecentPostsPaginated(
+async function fetchRecentPostsPaginated(
   page: number = 1,
   limit: number = 20
 ): Promise<PaginatedPostsResult> {
@@ -675,6 +688,20 @@ export async function getRecentPostsPaginated(
     throw new Error('최신 게시글 페이지네이션 조회 중 오류가 발생했습니다');
   }
 }
+
+/**
+ * 최신 게시글 페이지네이션 조회 (1분 캐싱)
+ * 커뮤니티 메인 페이지에서 사용
+ */
+export const getRecentPostsPaginated = (page: number = 1, limit: number = 20) =>
+  unstable_cache(
+    () => fetchRecentPostsPaginated(page, limit),
+    [`recent-posts-page-${page}-limit-${limit}`],
+    {
+      revalidate: 60, // 1분마다 재검증
+      tags: ['posts', 'recent-posts'],
+    }
+  )();
 
 /**
  * 게시글 투표 요약 정보 (up/down 카운트)

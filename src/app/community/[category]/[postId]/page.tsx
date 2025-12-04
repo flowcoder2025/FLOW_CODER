@@ -16,6 +16,9 @@ import {
 } from '@/lib/data-access/posts';
 import { auth } from '@/lib/auth';
 
+// ISR: 60초마다 재검증
+export const revalidate = 60;
+
 /**
  * 게시글 상세 페이지
  *
@@ -164,9 +167,9 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
                 <span className="text-muted-foreground/50">•</span>
 
-                {/* 작성 시간 */}
-                <time dateTime={post.createdAt.toISOString()}>
-                  {post.createdAt.toLocaleDateString('ko-KR', {
+                {/* 작성 시간 - unstable_cache로 인해 Date가 문자열로 직렬화될 수 있음 */}
+                <time dateTime={typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString()}>
+                  {(typeof post.createdAt === 'string' ? new Date(post.createdAt) : post.createdAt).toLocaleDateString('ko-KR', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
