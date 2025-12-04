@@ -28,7 +28,7 @@ const getCategoryIcon = (slug: string) => {
     'tips': <Lightbulb className="h-8 w-8" />,
     'showcase': <Palette className="h-8 w-8" />,
     'free-board': <MessageSquare className="h-8 w-8" />,
-    'vibe-coding': <Code className="h-8 w-8" />,
+    'flowcoder-feed': <Code className="h-8 w-8" />,
   };
   return iconMap[slug];
 };

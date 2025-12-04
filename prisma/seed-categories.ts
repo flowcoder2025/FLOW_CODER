@@ -43,6 +43,16 @@ async function main() {
       hasAnswers: false,
       adminOnly: false,
     },
+    {
+      name: 'FlowCoder Feed',
+      slug: 'flowcoder-feed',
+      description: 'FlowCoder 공식 블로그, 컬럼, 소식을 전하는 공간입니다',
+      icon: '🚀',
+      color: '#6366f1',
+      route: '/community',
+      hasAnswers: false,
+      adminOnly: true, // FlowCoder 팀만 작성 가능
+    },
     // /help 페이지 카테고리 (Q&A)
     {
       name: 'Q&A',

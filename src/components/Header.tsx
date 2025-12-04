@@ -46,7 +46,7 @@ export function Header({ categories }: HeaderProps) {
       'tips': <Lightbulb className="h-4 w-4" />,
       'showcase': <Palette className="h-4 w-4" />,
       'free-board': <MessageSquare className="h-4 w-4" />,
-      'vibe-coding': <Code className="h-4 w-4" />,
+      'flowcoder-feed': <Code className="h-4 w-4" />,
     };
     return iconMap[slug];
   };
