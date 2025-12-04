@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -180,4 +181,22 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 테이블 스타일 (prose 내부) */
+.prose table {
+  @apply w-full border-collapse;
+}
+
+.prose th {
+  @apply bg-muted text-center font-semibold;
+}
+
+.prose td {
+  @apply text-center;
+}
+
+.prose th,
+.prose td {
+  @apply border border-border px-4 py-2;
 }
