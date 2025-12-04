@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
     }).catch((err) => console.error('Webhook trigger failed:', err));
 
     // 게시글 URL 생성
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flowcoder.co.kr';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.flow-coder.com';
     let postUrl: string;
 
     if (post.category.slug === 'news') {
