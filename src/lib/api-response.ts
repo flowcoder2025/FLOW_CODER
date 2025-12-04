@@ -190,21 +190,28 @@ export function serverErrorResponse(
   message: string = '서버 오류가 발생했습니다',
   error?: unknown
 ) {
-  const isDev = process.env.NODE_ENV === 'development';
-
   const response: {
     success: false;
     error: string;
     code: string;
-    details?: string;
+    details?: unknown;
   } = {
     success: false,
     error: message,
     code: 'SERVER_ERROR',
   };
 
-  if (isDev && error) {
-    response.details = String(error);
+  // 디버깅을 위해 에러 상세 정보 포함
+  if (error) {
+    if (error instanceof Error) {
+      response.details = {
+        message: error.message,
+        name: error.name,
+        stack: error.stack?.split('\n').slice(0, 5),
+      };
+    } else {
+      response.details = error;
+    }
   }
 
   return NextResponse.json(response, { status: 500 });
