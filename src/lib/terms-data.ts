@@ -4,6 +4,7 @@ import {
   HelpCircle,
   Newspaper,
   Shield,
+  Cookie,
 } from "lucide-react";
 import { TermsItem, TermsContent } from "@/types/terms";
 
@@ -45,6 +46,13 @@ export const termsItems: TermsItem[] = [
     description: "개인정보 수집 및 이용에 관한 방침",
     lastUpdated: "2025-01-15",
     icon: Shield,
+  },
+  {
+    id: "cookies",
+    title: "쿠키 정책",
+    description: "쿠키 사용 및 관리에 관한 정책",
+    lastUpdated: "2025-01-15",
+    icon: Cookie,
   },
 ];
 
@@ -233,6 +241,84 @@ export const privacyPolicy: TermsContent = {
 };
 
 /**
+ * 쿠키 정책
+ */
+export const cookiePolicy: TermsContent = {
+  metadata: termsItems[5],
+  sections: [
+    {
+      id: "article-1",
+      title: "제1조 (쿠키란?)",
+      content: `쿠키(Cookie)는 웹사이트가 사용자의 컴퓨터 또는 모바일 기기에 저장하는 작은 텍스트 파일입니다. 쿠키는 웹사이트가 사용자의 선호도를 기억하고, 방문 기록을 추적하며, 맞춤형 서비스를 제공하는 데 사용됩니다.`,
+    },
+    {
+      id: "article-2",
+      title: "제2조 (쿠키의 사용 목적)",
+      content: `회사는 다음의 목적으로 쿠키를 사용합니다.`,
+      subsections: [
+        {
+          id: "article-2-1",
+          title: "1. 필수 쿠키",
+          content: `웹사이트의 기본적인 기능 수행에 필요한 쿠키입니다. 로그인 상태 유지, 보안 설정 등에 사용됩니다.`,
+        },
+        {
+          id: "article-2-2",
+          title: "2. 기능 쿠키",
+          content: `사용자의 선호도(언어, 테마 등)를 기억하여 맞춤형 서비스를 제공하는 데 사용됩니다.`,
+        },
+        {
+          id: "article-2-3",
+          title: "3. 분석 쿠키",
+          content: `웹사이트 이용 통계를 수집하여 서비스 개선에 활용합니다. 방문자 수, 페이지 뷰, 이용 패턴 등을 분석합니다.`,
+        },
+        {
+          id: "article-2-4",
+          title: "4. 마케팅 쿠키",
+          content: `사용자의 관심사에 맞는 광고를 제공하고, 광고 효과를 측정하는 데 사용됩니다.`,
+        },
+      ],
+    },
+    {
+      id: "article-3",
+      title: "제3조 (쿠키의 보유 기간)",
+      content: `1. 세션 쿠키: 브라우저를 닫으면 자동으로 삭제됩니다.\n2. 영구 쿠키: 설정된 기간 동안 또는 사용자가 직접 삭제할 때까지 유지됩니다. 대부분의 영구 쿠키는 최대 1년간 보관됩니다.`,
+    },
+    {
+      id: "article-4",
+      title: "제4조 (쿠키 관리 방법)",
+      content: `사용자는 웹 브라우저 설정을 통해 쿠키를 관리할 수 있습니다.`,
+      subsections: [
+        {
+          id: "article-4-1",
+          title: "1. 쿠키 허용/차단",
+          content: `브라우저 설정에서 모든 쿠키를 허용하거나 차단할 수 있습니다. 단, 쿠키를 차단하면 일부 서비스 이용에 제한이 있을 수 있습니다.`,
+        },
+        {
+          id: "article-4-2",
+          title: "2. 쿠키 삭제",
+          content: `브라우저 설정에서 저장된 쿠키를 삭제할 수 있습니다. 삭제 후에는 로그인 상태 및 개인 설정이 초기화됩니다.`,
+        },
+        {
+          id: "article-4-3",
+          title: "3. 브라우저별 설정 방법",
+          content: `- Chrome: 설정 > 개인정보 및 보안 > 쿠키 및 기타 사이트 데이터\n- Firefox: 설정 > 개인 정보 및 보안 > 쿠키 및 사이트 데이터\n- Safari: 환경설정 > 개인정보 보호 > 쿠키 및 웹사이트 데이터\n- Edge: 설정 > 쿠키 및 사이트 권한 > 쿠키 및 사이트 데이터`,
+        },
+      ],
+    },
+    {
+      id: "article-5",
+      title: "제5조 (제3자 쿠키)",
+      content: `회사는 서비스 제공을 위해 다음과 같은 제3자 서비스의 쿠키를 사용할 수 있습니다:\n- Google Analytics: 웹사이트 이용 통계 분석\n- 소셜 미디어 플러그인: 콘텐츠 공유 기능 제공\n\n제3자 쿠키의 사용에 대해서는 해당 서비스의 개인정보처리방침을 참고하시기 바랍니다.`,
+    },
+    {
+      id: "article-6",
+      title: "제6조 (정책 변경)",
+      content: `본 쿠키 정책은 법률 또는 서비스 변경에 따라 수정될 수 있습니다. 중요한 변경 사항이 있는 경우 웹사이트 공지사항을 통해 안내드립니다.`,
+    },
+  ],
+};
+
+/**
  * 모든 약관 컨텐츠 맵
  */
 export const termsContentMap: Record<string, TermsContent> = {
@@ -241,4 +327,5 @@ export const termsContentMap: Record<string, TermsContent> = {
   help: helpTerms,
   news: newsTerms,
   privacy: privacyPolicy,
+  cookies: cookiePolicy,
 };

@@ -8,7 +8,8 @@ export type ServiceType =
   | "community"   // 커뮤니티 서비스 약관
   | "help"        // Help me 서비스 약관
   | "news"        // 뉴스 서비스 약관
-  | "privacy";    // 개인정보처리방침
+  | "privacy"     // 개인정보처리방침
+  | "cookies";    // 쿠키 정책
 
 /**
  * 약관 항목 메타데이터
