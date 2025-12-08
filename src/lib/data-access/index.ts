@@ -7,8 +7,6 @@
 export {
   getPostsByCategory,
   getPostById,
-  getNewsPosts,
-  getQuestionPosts,
   getRecentPosts,
   getPostsByUser,
 } from './posts';
@@ -34,13 +32,6 @@ export {
   getCommentsByPostId,
   getCommentsByUser,
 } from './comments';
-
-// Answers
-export {
-  getAnswersByQuestionId,
-  getAnswersByUser,
-  getAnswerById,
-} from './answers';
 
 // Home Page (병렬 페칭 + 캐싱)
 export {

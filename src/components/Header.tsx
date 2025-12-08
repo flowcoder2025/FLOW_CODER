@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Menu, X, LogOut, User, Settings, Home, Users, HelpCircle, Newspaper, Lightbulb, Palette, MessageSquare, Code } from "lucide-react";
+import { Menu, X, LogOut, User, Settings, Home, Users, Lightbulb, Palette, MessageSquare, Code, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
@@ -87,57 +87,57 @@ export function Header({ categories }: HeaderProps) {
             <Home className="h-4 w-4" />
             홈
           </Link>
-          <Link
-            href="/community"
-            className={`flex items-center gap-2 transition-colors pb-1 ${
-              pathname === "/community"
-                ? "text-foreground font-bold border-b-2 border-current"
-                : "hover:text-primary"
-            }`}
-          >
-            <Users className="h-4 w-4" />
-            커뮤니티
-          </Link>
 
-          {/* 카테고리별 개별 버튼 (news는 /news 페이지 사용) */}
-          {categories
-            .filter((category) => category.slug !== 'news')
-            .map((category) => (
-              <Link
-                key={category.id}
-                href={`/community/${category.slug}`}
+          {/* 커뮤니티 드롭다운 메뉴 (flowcoder-feed 제외) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
                 className={`flex items-center gap-2 transition-colors pb-1 ${
-                  pathname.startsWith(`/community/${category.slug}`)
+                  pathname.startsWith("/community") && !pathname.startsWith("/community/flowcoder-feed")
                     ? "text-foreground font-bold border-b-2 border-current"
                     : "hover:text-primary"
                 }`}
               >
-                {getCategoryIcon(category.slug)}
-                {category.name}
-              </Link>
-            ))}
+                <Users className="h-4 w-4" />
+                커뮤니티
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/community" className="cursor-pointer flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  전체 게시글
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {categories
+                .filter((category) => category.slug !== 'flowcoder-feed')
+                .map((category) => (
+                  <DropdownMenuItem key={category.id} asChild>
+                    <Link
+                      href={`/community/${category.slug}`}
+                      className="cursor-pointer flex items-center gap-2"
+                    >
+                      {getCategoryIcon(category.slug)}
+                      {category.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
+          {/* FlowCoder Feed 별도 링크 */}
           <Link
-            href="/help"
+            href="/community/flowcoder-feed"
             className={`flex items-center gap-2 transition-colors pb-1 ${
-              pathname.startsWith("/help")
+              pathname.startsWith("/community/flowcoder-feed")
                 ? "text-foreground font-bold border-b-2 border-current"
                 : "hover:text-primary"
             }`}
           >
-            <HelpCircle className="h-4 w-4" />
-            Help me
-          </Link>
-          <Link
-            href="/news"
-            className={`flex items-center gap-2 transition-colors pb-1 ${
-              pathname.startsWith("/news")
-                ? "text-foreground font-bold border-b-2 border-current"
-                : "hover:text-primary"
-            }`}
-          >
-            <Newspaper className="h-4 w-4" />
-            뉴스
+            <Code className="h-4 w-4" />
+            Feed
           </Link>
         </nav>
 
@@ -204,7 +204,7 @@ export function Header({ categories }: HeaderProps) {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden bg-background border-b">
-          <nav className="container mx-auto px-4 py-4 flex flex-col gap-6">
+          <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
             <Link
               href="/"
               className={`flex items-center gap-2 transition-colors pl-3 ${
@@ -217,61 +217,58 @@ export function Header({ categories }: HeaderProps) {
               <Home className="h-4 w-4" />
               홈
             </Link>
+
+            {/* 커뮤니티 섹션 (flowcoder-feed 제외) */}
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/community"
+                className={`flex items-center gap-2 transition-colors pl-3 ${
+                  pathname === "/community"
+                    ? "text-foreground font-bold border-l-2 border-current"
+                    : "hover:text-primary"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Users className="h-4 w-4" />
+                커뮤니티
+              </Link>
+
+              {/* 카테고리별 하위 링크 (flowcoder-feed 제외) */}
+              <div className="flex flex-col gap-2 pl-6">
+                {categories
+                  .filter((category) => category.slug !== 'flowcoder-feed')
+                  .map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/community/${category.slug}`}
+                    className={`flex items-center gap-2 transition-colors pl-3 text-sm ${
+                      pathname.startsWith(`/community/${category.slug}`)
+                        ? "text-foreground font-bold border-l-2 border-current"
+                        : "text-muted-foreground hover:text-primary"
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {getCategoryIcon(category.slug)}
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* FlowCoder Feed 별도 링크 */}
             <Link
-              href="/community"
+              href="/community/flowcoder-feed"
               className={`flex items-center gap-2 transition-colors pl-3 ${
-                pathname === "/community"
+                pathname.startsWith("/community/flowcoder-feed")
                   ? "text-foreground font-bold border-l-2 border-current"
                   : "hover:text-primary"
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
-              <Users className="h-4 w-4" />
-              커뮤니티
+              <Code className="h-4 w-4" />
+              Feed
             </Link>
 
-            {/* 카테고리별 개별 링크 (news는 /news 페이지 사용) */}
-            {categories
-              .filter((category) => category.slug !== 'news')
-              .map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/community/${category.slug}`}
-                  className={`flex items-center gap-2 transition-colors pl-3 ${
-                    pathname.startsWith(`/community/${category.slug}`)
-                      ? "text-foreground font-bold border-l-2 border-current"
-                      : "hover:text-primary"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {getCategoryIcon(category.slug)}
-                  {category.name}
-                </Link>
-              ))}
-            <Link
-              href="/help"
-              className={`flex items-center gap-2 transition-colors pl-3 ${
-                pathname.startsWith("/help")
-                  ? "text-foreground font-bold border-l-2 border-current"
-                  : "hover:text-primary"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <HelpCircle className="h-4 w-4" />
-              Help me
-            </Link>
-            <Link
-              href="/news"
-              className={`flex items-center gap-2 transition-colors pl-3 ${
-                pathname.startsWith("/news")
-                  ? "text-foreground font-bold border-l-2 border-current"
-                  : "hover:text-primary"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Newspaper className="h-4 w-4" />
-              뉴스
-            </Link>
             <div className="flex flex-col gap-2 mt-4">
               {status === "authenticated" && session?.user ? (
                 <>

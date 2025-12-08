@@ -13,7 +13,8 @@ interface JsonLdProps {
   type?: "website" | "organization" | "article";
 }
 
-export function JsonLd({ type = "website" }: JsonLdProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function JsonLd({ type: _type = "website" }: JsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flow-coder.com";
 
   // Organization Schema

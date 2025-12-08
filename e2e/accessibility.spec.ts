@@ -36,30 +36,6 @@ test.describe('접근성 (Accessibility) 검증', () => {
     expect(criticalViolations).toHaveLength(0);
   });
 
-  test('Q&A 페이지 접근성 검사', async ({ page }) => {
-    await page.goto('/help');
-
-    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
-
-    const criticalViolations = accessibilityScanResults.violations.filter(
-      (v) => v.impact === 'critical' || v.impact === 'serious'
-    );
-
-    expect(criticalViolations).toHaveLength(0);
-  });
-
-  test('뉴스 페이지 접근성 검사', async ({ page }) => {
-    await page.goto('/news');
-
-    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
-
-    const criticalViolations = accessibilityScanResults.violations.filter(
-      (v) => v.impact === 'critical' || v.impact === 'serious'
-    );
-
-    expect(criticalViolations).toHaveLength(0);
-  });
-
   test('키보드 네비게이션 - Tab 키 순회', async ({ page }) => {
     await page.goto('/');
 

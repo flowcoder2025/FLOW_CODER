@@ -157,13 +157,13 @@ async function fetchFeaturedPosts(): Promise<FeaturedPost[]> {
 }
 
 /**
- * 내부 함수: 뉴스 가져오기
+ * 내부 함수: FlowCoder Feed 가져오기
  */
 async function fetchNewsItems(): Promise<NewsItem[]> {
   const posts = await prisma.post.findMany({
     where: {
       isFeatured: true,
-      category: { route: '/news' },
+      category: { slug: 'flowcoder-feed' },
       deletedAt: null,
     },
     orderBy: {

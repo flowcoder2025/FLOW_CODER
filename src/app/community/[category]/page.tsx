@@ -20,7 +20,7 @@ export const revalidate = 60;
  */
 export async function generateStaticParams() {
   // 주요 카테고리 slug 목록 (DB 조회 없이 하드코딩으로 빌드 안정성 확보)
-  const categorySlugs = ['tips', 'showcase', 'free-board', 'flowcoder-feed', 'vibe-coding'];
+  const categorySlugs = ['tips', 'showcase', 'free-board', 'flowcoder-feed'];
 
   return categorySlugs.map((category) => ({
     category,
@@ -55,11 +55,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const { sort: sortOption = 'popular', page: pageStr = '1' } = await searchParams;
   const currentPage = parseInt(pageStr, 10) || 1;
   const postsPerPage = 20;
-
-  // news 카테고리는 /news 페이지에서 처리 (중복 방지)
-  if (categorySlug === 'news') {
-    notFound();
-  }
 
   // 카테고리 정보 조회
   const category = await getCategoryBySlug(categorySlug);

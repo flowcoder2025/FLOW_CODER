@@ -53,28 +53,6 @@ async function main() {
       hasAnswers: false,
       adminOnly: true, // FlowCoder 팀만 작성 가능
     },
-    // /help 페이지 카테고리 (Q&A)
-    {
-      name: 'Q&A',
-      slug: 'qna',
-      description: '개발 관련 질문과 답변을 나누는 공간입니다',
-      icon: '❓',
-      color: '#8b5cf6',
-      route: '/help',
-      hasAnswers: true,
-      adminOnly: false,
-    },
-    // /news 페이지 카테고리 (관리자 전용)
-    {
-      name: '뉴스',
-      slug: 'news',
-      description: '공식 뉴스와 공지사항을 전달하는 공간입니다',
-      icon: '📰',
-      color: '#ef4444',
-      route: '/news',
-      hasAnswers: false,
-      adminOnly: true,
-    },
   ];
 
   for (const category of categories) {

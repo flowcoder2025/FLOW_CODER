@@ -29,18 +29,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/help`,
-      lastModified: new Date(),
-      changeFrequency: 'hourly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/news`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/search`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
@@ -105,38 +93,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-  // 게시글 페이지 (커뮤니티 카테고리, Q&A 제외)
+  // 게시글 페이지 (커뮤니티 카테고리)
   const postPages: MetadataRoute.Sitemap = allPosts
-    .filter(
-      (post) =>
-        post.category.route === '/community' &&
-        !post.category.hasAnswers
-    )
+    .filter((post) => post.category.route === '/community')
     .map((post) => ({
       url: `${baseUrl}/community/${post.category.slug}/${post.id}`,
       lastModified: post.updatedAt,
       changeFrequency: 'daily' as const,
       priority: 0.7,
-    }));
-
-  // 질문 페이지 (Q&A 카테고리)
-  const questionPages: MetadataRoute.Sitemap = allPosts
-    .filter((post) => post.category.hasAnswers === true)
-    .map((question) => ({
-      url: `${baseUrl}/help/${question.id}`,
-      lastModified: question.updatedAt,
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    }));
-
-  // 뉴스 페이지 (뉴스 카테고리)
-  const newsPages: MetadataRoute.Sitemap = allPosts
-    .filter((post) => post.category.route === '/news')
-    .map((news) => ({
-      url: `${baseUrl}/news/${news.id}`,
-      lastModified: news.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
     }));
 
   // 사용자 프로필 페이지 (TOP 100 사용자)
@@ -153,8 +117,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...categoryPages,
     ...postPages,
-    ...questionPages,
-    ...newsPages,
     ...profilePages,
   ];
 }

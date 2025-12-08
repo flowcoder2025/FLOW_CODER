@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Shield,
   Activity,
-  Newspaper,
   Webhook,
 } from 'lucide-react';
 
@@ -85,13 +84,6 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <MessageSquare className="h-4 w-4" />
                 게시글 관리
-              </Button>
-            </Link>
-
-            <Link href="/admin/news">
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <Newspaper className="h-4 w-4" />
-                뉴스 관리
               </Button>
             </Link>
 

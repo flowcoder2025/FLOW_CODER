@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * 웹 성능 측정 E2E 테스트
@@ -24,7 +24,7 @@ interface PerformanceMetrics {
 }
 
 // Core Web Vitals 측정 헬퍼 함수
-async function getCoreWebVitals(page: any): Promise<PerformanceMetrics> {
+async function getCoreWebVitals(page: Page): Promise<PerformanceMetrics> {
   return await page.evaluate(() => {
     return new Promise<PerformanceMetrics>((resolve) => {
       const metrics: PerformanceMetrics = {};
@@ -34,6 +34,7 @@ async function getCoreWebVitals(page: any): Promise<PerformanceMetrics> {
         try {
           const lcpObserver = new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const lastEntry = entries[entries.length - 1] as any;
             metrics.lcp = lastEntry.renderTime || lastEntry.loadTime;
           });
@@ -43,7 +44,9 @@ async function getCoreWebVitals(page: any): Promise<PerformanceMetrics> {
           let clsScore = 0;
           const clsObserver = new PerformanceObserver((entryList) => {
             for (const entry of entryList.getEntries()) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               if (!(entry as any).hadRecentInput) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 clsScore += (entry as any).value;
               }
             }
@@ -257,8 +260,6 @@ test.describe('성능 회귀 방지', () => {
     const pages = [
       { path: '/', name: '홈페이지' },
       { path: '/community', name: '커뮤니티' },
-      { path: '/help', name: 'Q&A' },
-      { path: '/news', name: '뉴스' },
     ];
 
     const results = [];

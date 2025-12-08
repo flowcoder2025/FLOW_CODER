@@ -86,65 +86,14 @@ test.describe('커뮤니티 기본 플로우', () => {
     const firstPost = page.locator('article').first();
     await firstPost.waitFor({ state: 'visible' });
 
-    const voteScore = await firstPost.locator('button').first().textContent();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _voteScore = await firstPost.locator('button').first().textContent();
 
     // 추천 버튼 클릭
     await firstPost.getByLabel(/추천/i).first().click();
 
     // 점수가 변경되었는지 확인 (localStorage 기반이므로 클라이언트 상태 변경)
     await expect(firstPost.locator('button').first()).toBeVisible();
-  });
-});
-
-test.describe('Q&A 페이지 플로우', () => {
-  test('Q&A 페이지 접근 및 질문 목록 확인', async ({ page }) => {
-    await page.goto('/help');
-
-    // 페이지 타이틀 확인
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Q&A|질문/i);
-
-    // 질문 카드 확인
-    const questionCards = page.locator('article');
-    await expect(questionCards.first()).toBeVisible();
-  });
-
-  test('질문 상세 페이지 및 답변 작성 폼', async ({ page }) => {
-    await page.goto('/help');
-
-    // 첫 번째 질문 클릭
-    const firstQuestion = page.locator('article').first();
-    await firstQuestion.locator('a').first().click();
-
-    // 답변 작성 폼 확인
-    await expect(page.getByText(/답변 작성/i)).toBeVisible();
-    await expect(page.locator('textarea')).toBeVisible();
-
-    // 답변 목록 확인
-    await expect(page.getByText(/답변|Answer/i)).toBeVisible();
-  });
-});
-
-test.describe('뉴스 페이지 플로우', () => {
-  test('뉴스 페이지 접근 및 기사 목록', async ({ page }) => {
-    await page.goto('/news');
-
-    // 페이지 타이틀 확인
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/뉴스|News/i);
-
-    // 뉴스 카드 확인
-    const newsCards = page.locator('article');
-    await expect(newsCards.first()).toBeVisible();
-  });
-
-  test('뉴스 상세 페이지', async ({ page }) => {
-    await page.goto('/news');
-
-    // 첫 번째 뉴스 클릭
-    await page.locator('article').first().locator('a').first().click();
-
-    // 상세 내용 확인
-    await expect(page.locator('article')).toBeVisible();
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 });
 
