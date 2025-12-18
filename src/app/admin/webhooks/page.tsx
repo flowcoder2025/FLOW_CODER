@@ -438,7 +438,7 @@ export default function AdminWebhooksPage() {
               <Label className="text-sm font-medium">필드 설명</Label>
               <div className="mt-2 text-sm space-y-1">
                 <p><code className="bg-gray-100 px-1 rounded">title</code> - 게시글 제목 (필수, 최대 200자)</p>
-                <p><code className="bg-gray-100 px-1 rounded">content</code> - 게시글 내용 (필수, 최대 10,000자)</p>
+                <p><code className="bg-gray-100 px-1 rounded">content</code> - 게시글 내용 (필수, 최대 50,000자)</p>
                 <p><code className="bg-gray-100 px-1 rounded">categoryId</code> - 카테고리 ID (필수)</p>
                 <p><code className="bg-gray-100 px-1 rounded">tags</code> - 태그 배열 (선택, 최대 5개, 각 20자)</p>
                 <p><code className="bg-gray-100 px-1 rounded">coverImageUrl</code> - 썸네일 이미지 URL (선택)</p>

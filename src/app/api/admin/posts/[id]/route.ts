@@ -79,8 +79,8 @@ export async function PATCH(
       return validationErrorResponse('제목은 최대 200자까지 입력 가능합니다.');
     }
 
-    if (content !== undefined && content.length > 10000) {
-      return validationErrorResponse('내용은 최대 10,000자까지 입력 가능합니다.');
+    if (content !== undefined && content.length > 50000) {
+      return validationErrorResponse('내용은 최대 50,000자까지 입력 가능합니다.');
     }
 
     if (tags && Array.isArray(tags)) {
