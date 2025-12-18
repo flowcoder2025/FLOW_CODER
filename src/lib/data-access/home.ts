@@ -178,7 +178,6 @@ async function fetchNewsItems(): Promise<NewsItem[]> {
         },
       },
       images: {
-        where: { isFeatured: true },
         take: 1,
         orderBy: { order: 'asc' },
       },
