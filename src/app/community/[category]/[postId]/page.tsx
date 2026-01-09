@@ -15,9 +15,105 @@ import {
   getUserVoteForPost,
 } from '@/lib/data-access/posts';
 import { auth } from '@/lib/auth';
+import type { Metadata } from 'next';
 
 // ISR: 60초마다 재검증
 export const revalidate = 60;
+
+/**
+ * HTML 태그를 제거하고 텍스트만 추출
+ */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
+ * HTML 콘텐츠에서 첫 번째 이미지 URL 추출
+ */
+function extractFirstImageUrl(html: string): string | null {
+  const imgMatch = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return imgMatch ? imgMatch[1] : null;
+}
+
+/**
+ * 동적 메타데이터 생성
+ * 각 게시글의 제목, 내용, 썸네일을 OG 태그에 반영
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string; postId: string }>;
+}): Promise<Metadata> {
+  const { category: categorySlug, postId } = await params;
+
+  // news 카테고리는 별도 페이지에서 처리
+  if (categorySlug === 'news') {
+    return {
+      title: '게시글을 찾을 수 없습니다',
+    };
+  }
+
+  const post = await getPostById(postId);
+
+  if (!post) {
+    return {
+      title: '게시글을 찾을 수 없습니다',
+      description: '요청하신 게시글이 존재하지 않습니다.',
+    };
+  }
+
+  // 본문에서 description 생성 (HTML 제거 후 160자 제한)
+  const plainText = stripHtml(post.content);
+  const description = plainText.length > 160
+    ? plainText.substring(0, 160) + '...'
+    : plainText;
+
+  // OG 이미지 우선순위: coverImageUrl > 본문 첫 이미지 > 기본 이미지
+  const ogImage = post.coverImageUrl
+    || extractFirstImageUrl(post.content)
+    || '/og-image.jpg';
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flow-coder.com';
+  const postUrl = `${baseUrl}/community/${categorySlug}/${postId}`;
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      title: post.title,
+      description,
+      url: postUrl,
+      siteName: 'FlowCoder',
+      type: 'article',
+      locale: 'ko_KR',
+      images: [
+        {
+          url: ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      publishedTime: typeof post.createdAt === 'string'
+        ? post.createdAt
+        : post.createdAt.toISOString(),
+      modifiedTime: typeof post.updatedAt === 'string'
+        ? post.updatedAt
+        : post.updatedAt.toISOString(),
+      authors: [post.author.displayName || post.author.username || 'FlowCoder'],
+      tags: post.tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`],
+    },
+    alternates: {
+      canonical: postUrl,
+    },
+  };
+}
 
 /**
  * 게시글 상세 페이지
