@@ -30,10 +30,10 @@ export async function generateStaticParams() {
 // 카테고리 slug에 따른 아이콘 매핑
 const getCategoryIcon = (slug: string) => {
   const iconMap: Record<string, React.ReactNode> = {
-    'tips': <Lightbulb className="h-8 w-8" />,
-    'showcase': <Palette className="h-8 w-8" />,
-    'free-board': <MessageSquare className="h-8 w-8" />,
-    'flowcoder-feed': <Code className="h-8 w-8" />,
+    'tips': <Lightbulb className="h-6 w-6 md:h-7 md:w-7" />,
+    'showcase': <Palette className="h-6 w-6 md:h-7 md:w-7" />,
+    'free-board': <MessageSquare className="h-6 w-6 md:h-7 md:w-7" />,
+    'flowcoder-feed': <Code className="h-6 w-6 md:h-7 md:w-7" />,
   };
   return iconMap[slug];
 };
@@ -99,7 +99,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     <div className="container mx-auto px-4 py-8">
       {/* 카테고리 헤더 */}
       <div className="mb-8">
-        <h1 className="flex items-center gap-3 text-4xl font-bold mb-2">
+        <h1 className="flex items-center gap-3 text-2xl md:text-3xl font-bold mb-2">
           {getCategoryIcon(categorySlug)}
           {category.name}
         </h1>
