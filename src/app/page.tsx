@@ -22,12 +22,12 @@ const CommunityPreviewClient = dynamic(
  */
 function CommunityPreviewSkeleton() {
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-8 md:py-10 bg-muted/30">
       <div className="container mx-auto px-4">
-        <Skeleton className="h-8 w-32 mb-6" />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Skeleton className="h-6 w-24 mb-4" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-[480px] rounded-lg" />
+            <Skeleton key={i} className="h-[320px] md:h-[360px] rounded-lg" />
           ))}
         </div>
       </div>

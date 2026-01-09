@@ -19,26 +19,26 @@ function DiscordIcon({ className }: { className?: string }) {
 export function Footer() {
   return (
     <footer className="bg-background border-t">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-8 md:py-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {/* Brand */}
-          <div className="space-y-4">
+          <div className="col-span-2 md:col-span-1 space-y-3">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Image
                 src="/FlowCoder.png"
                 alt="FlowCoder"
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 style={{ height: 'auto' }}
-                className="w-[40px]"
+                className="w-[32px]"
               />
-              <span className="text-lg font-semibold">FlowCoder</span>
+              <span className="text-base font-semibold">FlowCoder</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               개발자들을 위한 영감이 넘치는 공간. 함께 코딩하고, 배우고, 성장하는 커뮤니티.
             </p>
             {/* 소셜 아이콘 */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <a
                 href="https://discord.gg/4VzBTDjQUc"
                 target="_blank"
@@ -46,7 +46,7 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="Discord"
               >
-                <DiscordIcon className="w-5 h-5" />
+                <DiscordIcon className="w-4 h-4" />
               </a>
               <a
                 href="https://flowcoder.thekadang.kr"
@@ -55,7 +55,7 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="블로그"
               >
-                <Newspaper className="w-5 h-5" />
+                <Newspaper className="w-4 h-4" />
               </a>
               <a
                 href="http://www.youtube.com/@FlowCoder25"
@@ -64,7 +64,7 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="YouTube"
               >
-                <Youtube className="w-5 h-5" />
+                <Youtube className="w-4 h-4" />
               </a>
               <a
                 href="https://about.flow-coder.com/"
@@ -73,15 +73,15 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="팀 소개"
               >
-                <Users className="w-5 h-5" />
+                <Users className="w-4 h-4" />
               </a>
             </div>
           </div>
 
           {/* Community */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold">커뮤니티</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold">커뮤니티</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
                 <Link href="/community" className="hover:text-primary transition-colors">
                   포럼
@@ -113,9 +113,9 @@ export function Footer() {
           </div>
 
           {/* Legal */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold">법률 및 정책</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold">법률 및 정책</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
                 <Link href="/terms" className="hover:text-primary transition-colors">
                   이용약관
@@ -140,25 +140,25 @@ export function Footer() {
           </div>
 
           {/* FlowCoder에 문의하기 */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold">문의하기</h4>
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold">문의하기</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
               FlowCoder 팀에 궁금한 점이 있으신가요? 언제든지 연락주세요.
             </p>
             <a
               href="https://about.flow-coder.com/#contact"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
             >
               FlowCoder에 문의하기
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         </div>
 
-        <div className="border-t mt-12 pt-8 flex justify-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="border-t mt-6 pt-4 flex justify-center">
+          <p className="text-xs text-muted-foreground">
             © 2025 FlowCoder. All rights reserved.
           </p>
         </div>
