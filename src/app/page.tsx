@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { getHomePageData } from "@/lib/data-access";
-import { LatestNewsClient } from "@/components/LatestNewsClient";
 import { FeaturedProjectsClient } from "@/components/FeaturedProjectsClient";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -43,7 +42,7 @@ function CommunityPreviewSkeleton() {
  */
 export default async function HomePage() {
   // 모든 홈페이지 데이터를 병렬로 가져옴 (핵심 최적화!)
-  const { featuredPosts, newsItems, projects } = await getHomePageData();
+  const { featuredPosts, projects } = await getHomePageData();
 
   // 광고 카드 추가
   const adCard = {
@@ -61,7 +60,6 @@ export default async function HomePage() {
       <Suspense fallback={<CommunityPreviewSkeleton />}>
         <CommunityPreviewClient items={communityItems} />
       </Suspense>
-      <LatestNewsClient items={newsItems} />
       <FeaturedProjectsClient projects={projects} />
     </>
   );

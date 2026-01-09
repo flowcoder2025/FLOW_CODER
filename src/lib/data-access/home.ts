@@ -93,18 +93,49 @@ export interface Project {
 }
 
 /**
- * 내부 함수: 주목할 만한 포스트 가져오기
+ * 인기도 점수 계산 (조회수 + 좋아요*3 + 댓글*2)
+ * 최신 게시글에 가중치 부여 (7일 이내 1.5배, 3일 이내 2배)
+ */
+function calculateEngagementScore(
+  viewCount: number,
+  upvotes: number,
+  commentsCount: number,
+  createdAt: Date
+): number {
+  const baseScore = viewCount + (upvotes * 3) + (commentsCount * 2);
+
+  const now = new Date();
+  const daysSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+
+  // 시간 가중치: 최신일수록 높은 점수
+  let timeMultiplier = 1;
+  if (daysSinceCreated <= 1) timeMultiplier = 3;      // 1일 이내: 3배
+  else if (daysSinceCreated <= 3) timeMultiplier = 2; // 3일 이내: 2배
+  else if (daysSinceCreated <= 7) timeMultiplier = 1.5; // 7일 이내: 1.5배
+
+  return baseScore * timeMultiplier;
+}
+
+/**
+ * 내부 함수: 오늘의 토픽 (인기글 + 최신글)
+ * - 조회수, 좋아요, 댓글 기반 인기도 점수 계산
+ * - 최신 게시글 가중치 적용
+ * - adminOnly 카테고리 제외
  */
 async function fetchFeaturedPosts(): Promise<FeaturedPost[]> {
+  // 더 많은 게시글을 가져와서 앱 레벨에서 정렬
   const posts = await prisma.post.findMany({
     where: {
-      isFeatured: true,
       deletedAt: null,
+      category: {
+        adminOnly: false, // 관리자 전용 카테고리 제외
+      },
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 6,
+    orderBy: [
+      { isFeatured: 'desc' }, // featured 게시글 우선
+      { createdAt: 'desc' },
+    ],
+    take: 30, // 충분한 후보군
     include: {
       author: {
         select: {
@@ -133,7 +164,22 @@ async function fetchFeaturedPosts(): Promise<FeaturedPost[]> {
     },
   });
 
-  return posts.map((post) => {
+  // 인기도 점수 기반 정렬
+  const scoredPosts = posts.map((post) => ({
+    post,
+    score: calculateEngagementScore(
+      post.viewCount,
+      post.upvotes,
+      post._count.comments,
+      post.createdAt
+    ),
+  }));
+
+  // 점수 내림차순 정렬 후 상위 8개 선택
+  scoredPosts.sort((a, b) => b.score - a.score);
+  const topPosts = scoredPosts.slice(0, 8);
+
+  return topPosts.map(({ post }) => {
     const plainText = stripHtml(post.content);
     return {
       type: 'post' as const,
@@ -150,7 +196,7 @@ async function fetchFeaturedPosts(): Promise<FeaturedPost[]> {
       likes: post.upvotes,
       comments: post._count.comments,
       timeAgo: getTimeAgo(post.createdAt),
-      trending: post.upvotes > 50,
+      trending: post.viewCount > 100 || post.upvotes > 10, // 조회수 100 또는 좋아요 10 이상
       thumbnail: post.images[0]?.url || post.coverImageUrl || DEFAULT_THUMBNAILS.community,
     };
   });
@@ -197,21 +243,23 @@ async function fetchNewsItems(): Promise<NewsItem[]> {
 }
 
 /**
- * 내부 함수: 프로젝트 가져오기
+ * 내부 함수: 주목할만한 프로젝트 가져오기
+ * - showcase 카테고리에서 인기순으로 조회
+ * - 조회수, 좋아요, 댓글 기반 정렬
  */
 async function fetchProjects(): Promise<Project[]> {
   const posts = await prisma.post.findMany({
     where: {
-      isFeatured: true,
       deletedAt: null,
       category: {
-        adminOnly: false,
+        slug: 'showcase', // 작품공유 카테고리
       },
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 3,
+    orderBy: [
+      { isFeatured: 'desc' }, // featured 우선
+      { createdAt: 'desc' },
+    ],
+    take: 15, // 후보군
     include: {
       category: {
         select: { slug: true },
@@ -222,12 +270,25 @@ async function fetchProjects(): Promise<Project[]> {
         take: 1,
       },
       _count: {
-        select: { votes: true },
+        select: {
+          votes: true,
+          comments: true,
+        },
       },
     },
   });
 
-  return posts.map((post, index) => {
+  // 인기도 점수 기반 정렬 (프로젝트는 시간 가중치 없이)
+  const scoredPosts = posts.map((post) => ({
+    post,
+    score: post.viewCount + (post.upvotes * 2) + (post._count.comments * 1),
+  }));
+
+  // 점수 내림차순 정렬 후 상위 3개 선택
+  scoredPosts.sort((a, b) => b.score - a.score);
+  const topPosts = scoredPosts.slice(0, 3);
+
+  return topPosts.map(({ post }, index) => {
     const plainText = stripHtml(post.content);
     return {
       id: post.id,
@@ -237,8 +298,8 @@ async function fetchProjects(): Promise<Project[]> {
       image: post.images[0]?.url || post.coverImageUrl || DEFAULT_THUMBNAILS.project,
       techs: post.tags,
       stars: post.upvotes,
-      forks: Math.floor(post.upvotes * 0.2),
-      featured: index === 0,
+      forks: post.viewCount, // viewCount를 forks 대신 표시
+      featured: index === 0 || post.isFeatured,
     };
   });
 }
