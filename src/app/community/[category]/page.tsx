@@ -147,7 +147,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
       {/* 게시글 목록 */}
       {currentPosts.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-2 md:space-y-4">
           {currentPosts.map((post) => (
             <PostCard
               key={post.id}

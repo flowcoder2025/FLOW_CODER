@@ -70,8 +70,8 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
 
   return (
     <article>
-      <Card className="hover:shadow-md transition-shadow">
-        <CardContent className={variant === 'compact' ? 'p-2.5' : 'p-3 md:p-4'}>
+      <Card className="hover:shadow-md transition-shadow py-0">
+        <CardContent className={variant === 'compact' ? 'p-2' : 'p-2.5 md:p-4'}>
           <div className="flex flex-col md:flex-row md:items-start md:gap-4">
             {/* 좌측: 투표 섹션 (데스크톱만) */}
             <div className="hidden md:block flex-shrink-0">
