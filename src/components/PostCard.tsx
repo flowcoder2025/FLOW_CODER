@@ -108,7 +108,7 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
                   {/* 제목 + 본문 */}
                   <div className="flex-1 min-w-0">
                     <h3 className={`font-semibold group-hover:text-primary transition-colors line-clamp-2 ${
-                      variant === 'compact' ? 'text-base mb-1' : 'text-base md:text-lg mb-2.5'
+                      variant === 'compact' ? 'text-base mb-1' : 'text-base md:text-lg mt-1 mb-2.5'
                     }`}>
                       {title}
                     </h3>
