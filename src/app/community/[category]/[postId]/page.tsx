@@ -87,20 +87,23 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
       {/* 게시글 카드 */}
       <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-6">
-            {/* 좌측: 투표 섹션 */}
-            <VoteButtons
-              upvotes={upvotes}
-              downvotes={downvotes}
-              orientation="vertical"
-              size="lg"
-              targetType="post"
-              targetId={post.id}
-              initialVote={initialVote}
-            />
+        <CardContent className="p-4 md:p-6">
+          {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
+          <div className="flex flex-col md:flex-row md:items-start md:gap-6">
+            {/* 좌측: 투표 섹션 (데스크톱만 표시) */}
+            <div className="hidden md:block">
+              <VoteButtons
+                upvotes={upvotes}
+                downvotes={downvotes}
+                orientation="vertical"
+                size="lg"
+                targetType="post"
+                targetId={post.id}
+                initialVote={initialVote}
+              />
+            </div>
 
-            {/* 우측: 콘텐츠 섹션 */}
+            {/* 콘텐츠 섹션 */}
             <div className="flex-1 min-w-0">
               {/* 카테고리 & 고정 배지 */}
               <div className="flex items-center gap-2 mb-3">
@@ -120,26 +123,24 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               </div>
 
               {/* 제목 */}
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <h1 className="text-3xl font-bold flex-1">{post.title}</h1>
+              <h1 className="text-xl md:text-3xl font-bold mb-3">{post.title}</h1>
 
-                {/* 수정/삭제 버튼 (작성자만 표시) */}
-                {session?.user?.id === post.author.id && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/community/${categorySlug}/${postId}/edit`}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        수정
-                      </Link>
-                    </Button>
-                    <DeletePostButton
-                      postId={postId}
-                      postTitle={post.title}
-                      categorySlug={categorySlug}
-                    />
-                  </div>
-                )}
-              </div>
+              {/* 수정/삭제 버튼 (작성자만 표시) - 제목 아래 배치 */}
+              {session?.user?.id === post.author.id && (
+                <div className="flex gap-2 mb-4">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/community/${categorySlug}/${postId}/edit`}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      수정
+                    </Link>
+                  </Button>
+                  <DeletePostButton
+                    postId={postId}
+                    postTitle={post.title}
+                    categorySlug={categorySlug}
+                  />
+                </div>
+              )}
 
               {/* 작성자 & 메타 정보 */}
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6 pb-6 border-b">
@@ -238,6 +239,19 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                   ))}
                 </div>
               )}
+
+              {/* 모바일: 투표 버튼 (하단에 가로 배치) */}
+              <div className="md:hidden mt-6 pt-4 border-t">
+                <VoteButtons
+                  upvotes={upvotes}
+                  downvotes={downvotes}
+                  orientation="horizontal"
+                  size="sm"
+                  targetType="post"
+                  targetId={post.id}
+                  initialVote={initialVote}
+                />
+              </div>
             </div>
           </div>
         </CardContent>
