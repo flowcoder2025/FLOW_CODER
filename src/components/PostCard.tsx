@@ -17,9 +17,9 @@ function stripHtml(html: string): string {
 /**
  * 게시글 카드 컴포넌트 (성능 최적화됨)
  *
- * 레딧 스타일의 게시글 카드 UI
- * - 좌측: 투표 시스템
- * - 우측: 콘텐츠 (제목, 본문, 메타 정보)
+ * 모바일 최적화된 레이아웃:
+ * - 모바일: 투표 버튼 하단, 제목 전체 너비
+ * - 데스크톱: 투표 버튼 좌측, 썸네일 우측
  *
  * 최적화:
  * - React.memo로 불필요한 리렌더링 방지
@@ -62,29 +62,35 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
     [createdAt]
   );
 
+  // 본문 미리보기 (100자 제한)
+  const excerpt = useMemo(() => {
+    const plain = stripHtml(content);
+    return plain.length > 100 ? plain.substring(0, 100) + '...' : plain;
+  }, [content]);
+
   return (
     <article>
       <Card className="hover:shadow-md transition-shadow">
-        <CardContent className={variant === 'compact' ? 'p-4' : 'p-6'}>
-          <div className="flex items-start gap-4">
-            {/* 좌측: 투표 섹션 */}
-            <VoteButtons
-              targetType="post"
-              targetId={id}
-              upvotes={upvotes}
-              downvotes={downvotes}
-            />
+        <CardContent className={variant === 'compact' ? 'p-3' : 'p-4'}>
+          <div className="flex flex-col md:flex-row md:items-start md:gap-4">
+            {/* 좌측: 투표 섹션 (데스크톱만) */}
+            <div className="hidden md:block flex-shrink-0">
+              <VoteButtons
+                targetType="post"
+                targetId={id}
+                upvotes={upvotes}
+                downvotes={downvotes}
+                size="sm"
+              />
+            </div>
 
-            {/* 우측: 콘텐츠 섹션 */}
+            {/* 콘텐츠 섹션 */}
             <div className="flex-1 min-w-0">
               {/* 카테고리 & 고정 배지 */}
               {(showCategory || isPinned) && (
                 <div className="flex items-center gap-2 mb-2">
                   {showCategory && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs"
-                    >
+                    <Badge variant="outline" className="text-xs">
                       {category.icon} {category.name}
                     </Badge>
                   )}
@@ -96,54 +102,59 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
                 </div>
               )}
 
-              {/* 제목 & 썸네일 */}
+              {/* 제목 & 썸네일 영역 */}
               <Link href={postUrl} className="block group">
-                <div className={coverImageUrl && variant === 'default' ? 'flex gap-4' : ''}>
+                <div className="flex gap-3">
+                  {/* 제목 + 본문 */}
                   <div className="flex-1 min-w-0">
-                    <h3 className={`font-semibold group-hover:text-primary transition-colors mb-2 line-clamp-2 ${
-                      variant === 'compact' ? 'text-base' : 'text-lg'
+                    <h3 className={`font-semibold group-hover:text-primary transition-colors line-clamp-2 ${
+                      variant === 'compact' ? 'text-base mb-1' : 'text-base md:text-lg mb-1.5'
                     }`}>
                       {title}
                     </h3>
                     {/* 본문 미리보기 */}
                     {variant === 'default' && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {stripHtml(content)}
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        {excerpt}
                       </p>
                     )}
                   </div>
-                  {/* 썸네일 */}
+
+                  {/* 썸네일 (우측 상단) */}
                   {coverImageUrl && variant === 'default' && (
                     <div className="flex-shrink-0">
                       <Image
                         src={coverImageUrl}
                         alt={title}
-                        width={120}
+                        width={80}
                         height={80}
-                        className="rounded-md object-cover w-[120px] h-[80px]"
+                        className="rounded-md object-cover w-16 h-16 md:w-20 md:h-20"
                       />
                     </div>
                   )}
                 </div>
               </Link>
 
-              {/* 태그 */}
+              {/* 태그 (최대 3개) */}
               {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {tags.slice(0, 5).map((tag) => (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {tags.slice(0, 3).map((tag) => (
                     <Badge
                       key={tag}
                       variant="secondary"
-                      className="text-xs hover:bg-secondary/80 cursor-pointer"
+                      className="text-xs px-2 py-0.5"
                     >
                       #{tag}
                     </Badge>
                   ))}
+                  {tags.length > 3 && (
+                    <span className="text-xs text-muted-foreground">+{tags.length - 3}</span>
+                  )}
                 </div>
               )}
 
-              {/* 메타 정보 */}
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              {/* 메타 정보 (간소화) */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 {/* 작성자 */}
                 <Link
                   href={`/profile/${author.username}`}
@@ -152,42 +163,55 @@ function PostCardComponent({ post, showCategory = true, variant = 'default' }: P
                   <Image
                     src={author.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                     alt={author.displayName || author.username}
-                    width={20}
-                    height={20}
+                    width={18}
+                    height={18}
                     className="rounded-full"
                   />
-                  <span className="font-medium">
+                  <span className="font-medium truncate max-w-[80px]">
                     {author.displayName || author.username}
                   </span>
-                  {author.reputation > 100 && (
-                    <span className="text-xs text-muted-foreground">
-                      ({author.reputation})
-                    </span>
-                  )}
                 </Link>
 
-                <span className="text-muted-foreground/50">•</span>
+                <span className="text-muted-foreground/40">•</span>
 
                 {/* 댓글 수 */}
-                <div className="flex items-center gap-1">
-                  <MessageSquare className="h-4 w-4" />
+                <div className="flex items-center gap-0.5">
+                  <MessageSquare className="h-3.5 w-3.5" />
                   <span>{commentCount}</span>
                 </div>
 
-                <span className="text-muted-foreground/50">•</span>
+                <span className="text-muted-foreground/40">•</span>
 
                 {/* 조회수 */}
-                <div className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
+                <div className="flex items-center gap-0.5">
+                  <Eye className="h-3.5 w-3.5" />
                   <span>{viewCount}</span>
                 </div>
 
-                <span className="text-muted-foreground/50">•</span>
+                <span className="text-muted-foreground/40">•</span>
 
                 {/* 작성 시간 */}
-                <time dateTime={createdAt}>
+                <time dateTime={createdAt} className="hidden sm:inline">
                   {formattedDate}
                 </time>
+                <time dateTime={createdAt} className="sm:hidden">
+                  {new Date(createdAt).toLocaleDateString('ko-KR', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </time>
+              </div>
+
+              {/* 모바일: 투표 버튼 (하단) */}
+              <div className="md:hidden mt-3 pt-2 border-t flex items-center gap-3">
+                <VoteButtons
+                  targetType="post"
+                  targetId={id}
+                  upvotes={upvotes}
+                  downvotes={downvotes}
+                  orientation="horizontal"
+                  size="sm"
+                />
               </div>
             </div>
           </div>
