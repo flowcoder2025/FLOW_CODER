@@ -41,21 +41,21 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     notFound();
   }
 
-  const sessionPromise = auth();
-  const post = await getPostById(postId);
+  // 모든 데이터를 병렬로 가져오기 (성능 최적화)
+  const [post, session, voteSummary] = await Promise.all([
+    getPostById(postId),
+    auth(),
+    getPostVoteSummary(postId),
+  ]);
 
   if (!post) {
     notFound();
   }
 
-  const session = await sessionPromise;
-
-  const [voteSummary, userVoteType] = await Promise.all([
-    getPostVoteSummary(postId),
-    session?.user?.id
-      ? getUserVoteForPost(postId, session.user.id)
-      : Promise.resolve(null),
-  ]);
+  // 사용자 투표 상태는 세션에 의존하므로 별도 처리
+  const userVoteType = session?.user?.id
+    ? await getUserVoteForPost(postId, session.user.id)
+    : null;
 
   // getPostById가 이미 댓글을 포함하므로 별도 조회 불필요
   const allComments = post.comments || [];
