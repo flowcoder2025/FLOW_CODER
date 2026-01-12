@@ -153,9 +153,15 @@ export function SafeHtml({ html, className = '', skipFirstImage = false }: SafeH
     }
   }, [html, skipFirstImage]);
 
-  // SSR 시 빈 상태 반환
+  // SSR/로딩 시 스켈레톤 UI 반환 (CLS 방지)
   if (!sanitizedHtml) {
-    return <div className={className} />;
+    return (
+      <div
+        className={`${className} min-h-[100px] animate-pulse bg-muted/30 rounded-md`}
+        aria-busy="true"
+        aria-label="콘텐츠 로딩 중"
+      />
+    );
   }
 
   return (

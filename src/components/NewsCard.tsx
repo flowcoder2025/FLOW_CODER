@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Eye, MessageSquare, Calendar } from 'lucide-react';
@@ -26,6 +26,16 @@ export interface NewsCardProps {
 
 export function NewsCard({ news }: NewsCardProps) {
   const [imageError, setImageError] = useState(false);
+
+  // 날짜 포맷팅 메모이제이션 (하이드레이션 안정성)
+  const formattedDate = useMemo(() =>
+    new Date(news.createdAt).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
+    [news.createdAt]
+  );
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -114,11 +124,7 @@ export function NewsCard({ news }: NewsCardProps) {
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
                   <time dateTime={news.createdAt}>
-                    {new Date(news.createdAt).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {formattedDate}
                   </time>
                 </div>
               </div>

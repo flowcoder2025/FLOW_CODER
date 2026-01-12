@@ -60,17 +60,16 @@ export function Header({ categories }: HeaderProps) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          {mounted && (
-            <Image
-              src="/FlowCoder.png"
-              alt="FlowCoder"
-              width={40}
-              height={40}
-              style={{ height: 'auto' }}
-              className="w-[40px]"
-              priority
-            />
-          )}
+          {/* CLS 방지: opacity로 전환하여 레이아웃 이동 없음 */}
+          <Image
+            src="/FlowCoder.png"
+            alt="FlowCoder"
+            width={40}
+            height={40}
+            style={{ height: 'auto' }}
+            className={`w-[40px] transition-opacity duration-200 ${mounted ? 'opacity-100' : 'opacity-0'}`}
+            priority
+          />
           <span className="text-xl font-semibold">FlowCoder</span>
         </Link>
 
