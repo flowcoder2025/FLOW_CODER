@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import { getHomePageData } from "@/lib/data-access";
-import { FeaturedProjectsClient } from "@/components/FeaturedProjectsClient";
+import { getBlogHomePageData } from "@/lib/data-access";
+import { BlogFeedSection } from "@/components/BlogFeedSection";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // 3분마다 재검증 (홈페이지 데이터와 동기화)
@@ -35,32 +35,25 @@ function CommunityPreviewSkeleton() {
 }
 
 /**
- * 홈페이지
+ * 홈페이지 (블로그형)
+ * - 캐러셀: 최신 2개(New) + 베스트 3개(Best)
+ * - 블로그 피드: flowcoder-feed 카테고리 게시글
  * - 병렬 데이터 페칭으로 성능 최적화
  * - 3분 캐싱 적용
- * - 캐러셀 동적 로드로 초기 번들 최적화
  */
 export default async function HomePage() {
   // 모든 홈페이지 데이터를 병렬로 가져옴 (핵심 최적화!)
-  const { featuredPosts, projects } = await getHomePageData();
-
-  // 광고 카드 추가
-  const adCard = {
-    type: 'ad' as const,
-    title: 'FlowCoder와 함께 성장하세요',
-    description: '비개발자들을 위한 커뮤니티',
-    action: '지금 참여하기',
-    gradient: 'from-blue-500 to-purple-600',
-  };
-
-  const communityItems = [...featuredPosts, adCard];
+  const { carouselPosts, blogFeedPosts } = await getBlogHomePageData();
 
   return (
     <>
+      {/* 캐러셀 (최상단): 최신 2개 + 베스트 3개 */}
       <Suspense fallback={<CommunityPreviewSkeleton />}>
-        <CommunityPreviewClient items={communityItems} />
+        <CommunityPreviewClient items={carouselPosts} />
       </Suspense>
-      <FeaturedProjectsClient projects={projects} />
+
+      {/* 블로그 피드: flowcoder-feed 카테고리 */}
+      <BlogFeedSection posts={blogFeedPosts} />
     </>
   );
 }

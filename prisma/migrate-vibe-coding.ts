@@ -46,7 +46,6 @@ async function main() {
           color: '#6366f1',
           route: '/community',
           hasAnswers: false,
-          adminOnly: true,
         },
       });
       console.log('✅ flowcoder-feed 카테고리 생성 완료');
@@ -67,14 +66,12 @@ async function main() {
       description: 'FlowCoder 공식 블로그, 컬럼, 소식을 전하는 공간입니다',
       icon: '🚀',
       color: '#6366f1',
-      adminOnly: true, // FlowCoder 팀만 작성 가능
     },
   });
 
   console.log('✅ 카테고리 업데이트 완료:');
   console.log('   - 이름: 바이브코딩 → FlowCoder Feed');
   console.log('   - slug: vibe-coding → flowcoder-feed');
-  console.log('   - adminOnly: true (FlowCoder 팀만 작성 가능)');
   console.log(`   - ${vibeCoding._count.posts}개 게시글 자동 마이그레이션됨`);
 
   console.log('\n🎉 마이그레이션 완료!');

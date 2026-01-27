@@ -619,9 +619,7 @@ async function fetchRecentPostsPaginated(
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where: {
-          category: {
-            adminOnly: false,
-          },
+          deletedAt: null,
         },
         include: {
           author: {
@@ -659,9 +657,7 @@ async function fetchRecentPostsPaginated(
       }),
       prisma.post.count({
         where: {
-          category: {
-            adminOnly: false,
-          },
+          deletedAt: null,
         },
       }),
     ]);

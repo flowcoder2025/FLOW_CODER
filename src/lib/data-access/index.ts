@@ -36,8 +36,11 @@ export {
 // Home Page (병렬 페칭 + 캐싱)
 export {
   getHomePageData,
+  getBlogHomePageData,
   type HomePageData,
+  type BlogHomePageData,
   type FeaturedPost,
+  type BlogFeedPost,
   type NewsItem,
   type Project,
 } from './home';

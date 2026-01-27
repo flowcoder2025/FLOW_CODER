@@ -21,7 +21,6 @@ async function main() {
       color: '#3b82f6',
       route: '/community',
       hasAnswers: false,
-      adminOnly: false,
     },
     {
       name: '팁 & 노하우',
@@ -31,7 +30,6 @@ async function main() {
       color: '#10b981',
       route: '/community',
       hasAnswers: false,
-      adminOnly: false,
     },
     {
       name: '작품공유',
@@ -41,7 +39,6 @@ async function main() {
       color: '#f59e0b',
       route: '/community',
       hasAnswers: false,
-      adminOnly: false,
     },
     {
       name: 'FlowCoder Feed',
@@ -51,7 +48,6 @@ async function main() {
       color: '#6366f1',
       route: '/community',
       hasAnswers: false,
-      adminOnly: true, // FlowCoder 팀만 작성 가능
     },
   ];
 
@@ -67,7 +63,6 @@ async function main() {
         data: {
           route: category.route,
           hasAnswers: category.hasAnswers,
-          adminOnly: category.adminOnly,
         },
       });
       console.log(`✓ Category "${category.name}" updated (${category.slug})`);

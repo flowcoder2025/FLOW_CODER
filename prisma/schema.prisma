@@ -76,7 +76,6 @@ model Category {
   createdAt   DateTime @default(now())
   route       String   @default("/community")
   hasAnswers  Boolean  @default(false)
-  adminOnly   Boolean  @default(false)
   posts       Post[]
 
   @@index([slug])

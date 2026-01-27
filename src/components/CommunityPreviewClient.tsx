@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
-import { Heart, MessageSquare, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
+import { Heart, MessageSquare, ChevronLeft, ChevronRight, TrendingUp, Sparkles, Flame } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "./ui/button";
@@ -27,6 +27,8 @@ type PostItem = {
   timeAgo: string;
   trending: boolean;
   thumbnail: string;
+  /** 캐러셀 배지: 'new' = 최신 게시글, 'best' = 베스트 게시글 */
+  badge?: 'new' | 'best';
 };
 
 type AdItem = {
@@ -114,7 +116,19 @@ export function CommunityPreviewClient({ items }: CommunityPreviewClientProps) {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                               <span className="text-xs font-medium text-white">{item.author.name}</span>
-                              {item.trending && (
+                              {item.badge === 'new' && (
+                                <Badge variant="secondary" className="text-[10px] gap-0.5 bg-green-500/90 text-white border-0 px-1.5 py-0.5">
+                                  <Sparkles className="w-2.5 h-2.5" />
+                                  New
+                                </Badge>
+                              )}
+                              {item.badge === 'best' && (
+                                <Badge variant="secondary" className="text-[10px] gap-0.5 bg-orange-500/90 text-white border-0 px-1.5 py-0.5">
+                                  <Flame className="w-2.5 h-2.5" />
+                                  Best
+                                </Badge>
+                              )}
+                              {!item.badge && item.trending && (
                                 <Badge variant="secondary" className="text-[10px] gap-0.5 bg-orange-500/90 text-white border-0 px-1.5 py-0.5">
                                   <TrendingUp className="w-2.5 h-2.5" />
                                   인기

@@ -14,42 +14,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Menu, X, LogOut, User, Settings, Home, Users, Lightbulb, Palette, MessageSquare, Code, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, User, Settings, Home, Code } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string | null;
-  description: string | null;
-  postCount: number;
-}
-
-interface HeaderProps {
-  categories: Category[];
-}
-
-export function Header({ categories }: HeaderProps) {
+export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
   useTheme(); // 테마 훅 초기화
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-
-  // 카테고리 slug에 따른 아이콘 매핑
-  const getCategoryIcon = (slug: string) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      'tips': <Lightbulb className="h-4 w-4" />,
-      'showcase': <Palette className="h-4 w-4" />,
-      'free-board': <MessageSquare className="h-4 w-4" />,
-      'flowcoder-feed': <Code className="h-4 w-4" />,
-    };
-    return iconMap[slug];
-  };
 
   // 클라이언트에서만 테마 이미지 렌더링
   useEffect(() => {
@@ -87,46 +63,7 @@ export function Header({ categories }: HeaderProps) {
             홈
           </Link>
 
-          {/* 커뮤니티 드롭다운 메뉴 (flowcoder-feed 제외) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className={`flex items-center gap-2 transition-colors pb-1 ${
-                  pathname.startsWith("/community") && !pathname.startsWith("/community/flowcoder-feed")
-                    ? "text-foreground font-bold border-b-2 border-current"
-                    : "hover:text-primary"
-                }`}
-              >
-                <Users className="h-4 w-4" />
-                커뮤니티
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/community" className="cursor-pointer flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  전체 게시글
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {categories
-                .filter((category) => category.slug !== 'flowcoder-feed')
-                .map((category) => (
-                  <DropdownMenuItem key={category.id} asChild>
-                    <Link
-                      href={`/community/${category.slug}`}
-                      className="cursor-pointer flex items-center gap-2"
-                    >
-                      {getCategoryIcon(category.slug)}
-                      {category.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* FlowCoder Feed 별도 링크 */}
+          {/* FlowCoder Feed 링크 */}
           <Link
             href="/community/flowcoder-feed"
             className={`flex items-center gap-2 transition-colors pb-1 ${
@@ -217,44 +154,7 @@ export function Header({ categories }: HeaderProps) {
               홈
             </Link>
 
-            {/* 커뮤니티 섹션 (flowcoder-feed 제외) */}
-            <div className="flex flex-col gap-2">
-              <Link
-                href="/community"
-                className={`flex items-center gap-2 transition-colors pl-3 ${
-                  pathname === "/community"
-                    ? "text-foreground font-bold border-l-2 border-current"
-                    : "hover:text-primary"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Users className="h-4 w-4" />
-                커뮤니티
-              </Link>
-
-              {/* 카테고리별 하위 링크 (flowcoder-feed 제외) */}
-              <div className="flex flex-col gap-2 pl-6">
-                {categories
-                  .filter((category) => category.slug !== 'flowcoder-feed')
-                  .map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/community/${category.slug}`}
-                    className={`flex items-center gap-2 transition-colors pl-3 text-sm ${
-                      pathname.startsWith(`/community/${category.slug}`)
-                        ? "text-foreground font-bold border-l-2 border-current"
-                        : "text-muted-foreground hover:text-primary"
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {getCategoryIcon(category.slug)}
-                    {category.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* FlowCoder Feed 별도 링크 */}
+            {/* FlowCoder Feed 링크 */}
             <Link
               href="/community/flowcoder-feed"
               className={`flex items-center gap-2 transition-colors pl-3 ${
