@@ -2,6 +2,16 @@ import Link from "next/link";
 import { Youtube, Newspaper, Users, ExternalLink } from "lucide-react";
 import Image from "next/image";
 
+// FlowCoder 브랜드 킷 정보
+const BRAND = {
+  companyName: "플로우코더(FlowCoder)",
+  companyNameEn: "FlowCoder",
+  businessNumber: "374-16-02889",
+  representatives: "조용현, 박현일",
+  address: "경기도 남양주시 홍유릉로248번길 26, 지하1층(금곡동)",
+  email: "admin@flow-coder.com",
+};
+
 // 디스코드 아이콘 (lucide-react에 없음)
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -17,6 +27,8 @@ function DiscordIcon({ className }: { className?: string }) {
 }
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-background border-t">
       <div className="container mx-auto px-4 py-8 md:py-10">
@@ -35,7 +47,7 @@ export function Footer() {
               <span className="text-base font-semibold">FlowCoder</span>
             </Link>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              개발자들을 위한 영감이 넘치는 공간. 함께 코딩하고, 배우고, 성장하는 커뮤니티.
+              AI와 함께하는 바이브 코딩 커뮤니티. 함께 코딩하고, 배우고, 성장하세요.
             </p>
             {/* 소셜 아이콘 */}
             <div className="flex items-center gap-3">
@@ -83,8 +95,13 @@ export function Footer() {
             <h4 className="text-xs font-semibold">커뮤니티</h4>
             <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
-                <Link href="/community" className="hover:text-primary transition-colors">
-                  포럼
+                <Link href="/" className="hover:text-primary transition-colors">
+                  홈
+                </Link>
+              </li>
+              <li>
+                <Link href="/community/flowcoder-feed" className="hover:text-primary transition-colors">
+                  Feed
                 </Link>
               </li>
               <li>
@@ -131,15 +148,10 @@ export function Footer() {
                   커뮤니티 가이드라인
                 </Link>
               </li>
-              <li>
-                <Link href="/terms/cookies" className="hover:text-primary transition-colors">
-                  쿠키 정책
-                </Link>
-              </li>
             </ul>
           </div>
 
-          {/* FlowCoder에 문의하기 */}
+          {/* Contact */}
           <div className="space-y-2">
             <h4 className="text-xs font-semibold">문의하기</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -157,9 +169,27 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-6 pt-4 flex justify-center">
-          <p className="text-xs text-muted-foreground">
-            © 2025 FlowCoder. All rights reserved.
+        {/* 기업 정보 */}
+        <div className="border-t mt-6 pt-4 space-y-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span>{BRAND.companyName}</span>
+            <span className="text-border">|</span>
+            <span>사업자등록번호: {BRAND.businessNumber}</span>
+            <span className="text-border">|</span>
+            <span>대표: {BRAND.representatives}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span>{BRAND.address}</span>
+            <span className="text-border">|</span>
+            <a
+              href={`mailto:${BRAND.email}`}
+              className="hover:text-foreground transition-colors"
+            >
+              {BRAND.email}
+            </a>
+          </div>
+          <p className="text-xs text-muted-foreground/70 pt-2">
+            © {currentYear} {BRAND.companyNameEn}. All rights reserved.
           </p>
         </div>
       </div>

@@ -44,11 +44,11 @@ export const metadata: Metadata = {
     siteName: "FlowCoder",
     images: [
       {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
+        url: "/opengraph-image.png",
+        width: 2048,
+        height: 2048,
         alt: "FlowCoder - AI 바이브 코딩 커뮤니티",
-        type: "image/jpeg",
+        type: "image/png",
       },
     ],
   },
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "FlowCoder - AI와 함께하는 바이브 코딩 커뮤니티",
     description: "FlowCoder는 AI 도구를 활용한 바이브 코딩 커뮤니티입니다. Claude, Cursor, Windsurf 등 AI 코딩 도구를 배우고 프로젝트를 공유하세요.",
-    images: ["/og-image.jpg"],
+    images: ["/opengraph-image.png"],
   },
   robots: {
     index: true,
@@ -69,23 +69,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    // Google Search Console 인증 코드 (발급 후 추가)
-    // google: "구글서치콘솔인증코드",
-    // 네이버 웹마스터 도구 인증 코드 (발급 후 추가)
-    // other: {
-    //   "naver-site-verification": "네이버웹마스터도구인증코드",
-    // },
-  },
   icons: {
-    icon: "/FlowCoder.png",
+    icon: "/favicon.ico",
     apple: "/FlowCoder.png",
   },
   manifest: "/manifest.json",
-  other: {
-    // 네이버 SEO 추가 메타 태그
-    "naver-site-verification": "네이버웹마스터도구인증코드",
-  },
 };
 
 export default function RootLayout({
