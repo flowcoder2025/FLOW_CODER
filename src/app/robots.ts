@@ -8,7 +8,7 @@ import { MetadataRoute } from 'next';
  * sitemap.xml 위치 제공
  */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flow-coder.com';
+  const baseUrl = 'https://www.flow-coder.com';
 
   return {
     rules: [
