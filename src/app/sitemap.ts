@@ -77,9 +77,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return staticPages;
   }
 
-  // 커뮤니티 카테고리 페이지 (flowcoder-feed만 포함)
+  // 커뮤니티 카테고리 페이지 (모든 카테고리 포함)
   const categoryPages: MetadataRoute.Sitemap = categories
-    .filter((cat) => cat.slug === 'flowcoder-feed')
     .map((category) => ({
       url: `${baseUrl}/community/${category.slug}`,
       lastModified: new Date(),
@@ -87,9 +86,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-  // 게시글 페이지 (flowcoder-feed 카테고리만)
+  // 게시글 페이지 (모든 카테고리)
   const postPages: MetadataRoute.Sitemap = allPosts
-    .filter((post) => post.category.slug === 'flowcoder-feed')
     .map((post) => ({
       url: `${baseUrl}/community/${post.category.slug}/${post.id}`,
       lastModified: post.updatedAt,

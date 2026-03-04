@@ -85,6 +85,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <head>
         <JsonLd />
+        <link rel="alternate" type="application/rss+xml" title="FlowCoder Blog" href="/feed.xml" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <SessionProvider>

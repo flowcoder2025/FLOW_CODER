@@ -9,6 +9,7 @@ import { CommentList } from '@/components/CommentList';
 import { VoteButtons } from '@/components/VoteButtons';
 import { DeletePostButton } from '@/components/DeletePostButton';
 import { SafeHtml } from '@/components/SafeHtml';
+import { ArticleJsonLd } from '@/components/JsonLd';
 import {
   getPostById,
   getPostVoteSummary,
@@ -159,8 +160,61 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const initialVote =
     userVoteType === 'UP' ? 'up' : userVoteType === 'DOWN' ? 'down' : null;
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flow-coder.com';
+  const postUrl = `${baseUrl}/community/${categorySlug}/${postId}`;
+  const ogImage = post.coverImageUrl
+    || extractFirstImageUrl(post.content)
+    || `${baseUrl}/og-image.jpg`;
+
+  // 동적 BreadcrumbList Schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "홈",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "커뮤니티",
+        item: `${baseUrl}/community`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.category.name,
+        item: `${baseUrl}/community/${categorySlug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: post.title,
+        item: postUrl,
+      },
+    ],
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* BlogPosting JSON-LD */}
+      <ArticleJsonLd
+        title={post.title}
+        description={stripHtml(post.content).substring(0, 160)}
+        url={postUrl}
+        imageUrl={ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`}
+        authorName={post.author.displayName || post.author.username || 'FlowCoder'}
+        datePublished={typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString()}
+        dateModified={typeof post.updatedAt === 'string' ? post.updatedAt : post.updatedAt.toISOString()}
+      />
+      {/* 동적 BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link href="/" className="hover:text-foreground transition-colors">

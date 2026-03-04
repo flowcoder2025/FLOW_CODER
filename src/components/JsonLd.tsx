@@ -1,7 +1,5 @@
-"use client";
-
 /**
- * JSON-LD Structured Data 컴포넌트
+ * JSON-LD Structured Data 컴포넌트 (Server Component)
  *
  * 구글 검색 결과에서 풍부한 스니펫을 표시하기 위한 구조화된 데이터
  * - Organization: 조직 정보
@@ -28,10 +26,21 @@ export function JsonLd({ type: _type = "website" }: JsonLdProps) {
     description: "AI와 함께하는 바이브 코딩 커뮤니티",
     sameAs: [
       "https://github.com/flowcoder2025",
+      "http://www.youtube.com/@FlowCoder25",
+      "https://discord.gg/4VzBTDjQUc",
     ],
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "홍유릉로248번길 26, 지하1층(금곡동)",
+      addressLocality: "남양주시",
+      addressRegion: "경기도",
+      addressCountry: "KR",
+    },
+    email: "admin@flow-coder.com",
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
+      email: "admin@flow-coder.com",
       availableLanguage: ["Korean", "English"],
     },
   };
@@ -127,7 +136,7 @@ export function ArticleJsonLd({
 
   const articleSchema = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: title,
     description: description,
     url: url,

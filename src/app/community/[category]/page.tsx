@@ -4,6 +4,7 @@ import { TrendingUp, Clock, MessageSquare, PenSquare, Lightbulb, Palette, Code }
 import { Button } from '@/components/ui/button';
 import { PostCard } from '@/components/PostCard';
 import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
+import type { Metadata } from 'next';
 
 /**
  * 카테고리별 게시글 목록 페이지 (Server Component)
@@ -13,6 +14,78 @@ import { getCategoryBySlug, getPostsByCategory } from '@/lib/data-access';
  * ISR: 60초마다 재검증
  */
 export const revalidate = 60;
+
+/**
+ * 카테고리별 동적 메타데이터 생성
+ */
+const CATEGORY_META: Record<string, { title: string; description: string }> = {
+  'tips': {
+    title: '바이브 코딩 팁',
+    description: 'AI 코딩 도구 활용 팁과 노하우를 공유합니다. Cursor, Claude, Windsurf 등 최신 도구의 실전 팁을 확인하세요.',
+  },
+  'showcase': {
+    title: '프로젝트 쇼케이스',
+    description: 'FlowCoder 커뮤니티 멤버들의 바이브 코딩 프로젝트를 구경하세요. 영감을 얻고 피드백을 나눠보세요.',
+  },
+  'free-board': {
+    title: '자유게시판',
+    description: 'AI 코딩, 개발 관련 자유로운 이야기를 나누는 공간입니다. 질문, 토론, 잡담 모두 환영합니다.',
+  },
+  'flowcoder-feed': {
+    title: 'FlowCoder 피드',
+    description: 'FlowCoder 팀의 공식 소식과 업데이트를 확인하세요. 새로운 기능, 이벤트, 공지사항을 전달합니다.',
+  },
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
+  const { category: categorySlug } = await params;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://flow-coder.com';
+
+  const meta = CATEGORY_META[categorySlug];
+  if (meta) {
+    return {
+      title: meta.title,
+      description: meta.description,
+      openGraph: {
+        title: `${meta.title} | FlowCoder`,
+        description: meta.description,
+        url: `${baseUrl}/community/${categorySlug}`,
+        siteName: 'FlowCoder',
+        type: 'website',
+        locale: 'ko_KR',
+      },
+      alternates: {
+        canonical: `${baseUrl}/community/${categorySlug}`,
+      },
+    };
+  }
+
+  // DB에서 카테고리 정보 조회 (알려지지 않은 카테고리)
+  const category = await getCategoryBySlug(categorySlug);
+  if (!category) {
+    return { title: '카테고리를 찾을 수 없습니다' };
+  }
+
+  return {
+    title: category.name,
+    description: category.description || `FlowCoder ${category.name} 카테고리 게시글 목록`,
+    openGraph: {
+      title: `${category.name} | FlowCoder`,
+      description: category.description || `FlowCoder ${category.name} 카테고리`,
+      url: `${baseUrl}/community/${categorySlug}`,
+      siteName: 'FlowCoder',
+      type: 'website',
+      locale: 'ko_KR',
+    },
+    alternates: {
+      canonical: `${baseUrl}/community/${categorySlug}`,
+    },
+  };
+}
 
 /**
  * 빌드 시 주요 카테고리 페이지 사전 생성 (SSG)
